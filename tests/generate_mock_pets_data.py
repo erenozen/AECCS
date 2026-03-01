@@ -19,6 +19,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import random
@@ -95,7 +96,7 @@ def _baseline_trackers(domain: str) -> tuple[int, int, int, int]:
     return td, tc, tot_c, req
 
 
-def generate_mock_pets_effectiveness() -> None:
+def generate_mock_pets_effectiveness(run_id: str | None = None) -> str:
     """Generate pets_effectiveness.csv with realistic per-PET results."""
     random.seed(42)
     sites = _get_sites()
@@ -105,7 +106,7 @@ def generate_mock_pets_effectiveness() -> None:
             raw_docs.append(json.loads(path.read_text(encoding="utf-8")))
         except Exception:
             continue
-    run_id = infer_common_field(raw_docs, "run_id") or generate_run_id("mock-pets")
+    effective_run_id = run_id or infer_common_field(raw_docs, "run_id") or generate_run_id("mock-pets")
     site_list_source = infer_common_field(raw_docs, "site_list_source") or "tests/generate_mock_data.py"
 
     if not sites:
@@ -211,7 +212,7 @@ def generate_mock_pets_effectiveness() -> None:
             rows.append({
                 "domain": domain,
                 "source_mode": "mock",
-                "run_id": run_id,
+                "run_id": effective_run_id,
                 "category": category,
                 "pet_name": pet,
                 "measurement_mode": "simulated" if pet == "brave_shields" else "real",
@@ -244,7 +245,7 @@ def generate_mock_pets_effectiveness() -> None:
             {
                 **build_provenance(
                     source_mode="mock",
-                    run_id=run_id,
+                    run_id=effective_run_id,
                     site_list_source=site_list_source,
                 ),
                 "results": rows,
@@ -259,6 +260,7 @@ def generate_mock_pets_effectiveness() -> None:
 
     # Print summary statistics
     _print_summary(rows, [site["domain"] for site in sites])
+    return effective_run_id
 
 
 def _print_summary(rows: list[dict], domains: list[str]) -> None:
@@ -283,4 +285,12 @@ def _print_summary(rows: list[dict], domains: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    generate_mock_pets_effectiveness()
+    parser = argparse.ArgumentParser(description="Generate AECCS mock PET outputs")
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional shared run identifier for the generated mock PET artifacts",
+    )
+    args = parser.parse_args()
+    generate_mock_pets_effectiveness(run_id=args.run_id)

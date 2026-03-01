@@ -74,6 +74,10 @@ AECCS/
 │   ├── cmp_analysis.py                # CMP effectiveness analysis
 │   └── comparison.py                  # Unified PETs comparison & synthesis
 │
+├── scripts/
+│   ├── __init__.py
+│   └── run_pipeline.py                # Unified mock/real pipeline runner
+│
 ├── reporting/
 │   ├── __init__.py
 │   ├── visualize.py                   # 11 report-ready figures
@@ -97,7 +101,7 @@ AECCS/
     └── tracker_lists/                 # Downloaded filter lists (auto-fetched)
 ```
 
-Course deliverables are stored under `docs/`. The current report and presentation files are structured submission templates, but they still need to be updated with real-study results before final submission.
+Course deliverables are stored under `docs/`. The current report and presentation files are structured submission templates, but they still need to be updated with real-study results before final submission. A living project-status summary is maintained in `docs/project_status.md`.
 
 ## Prerequisites
 
@@ -118,6 +122,10 @@ playwright install chromium firefox
 ## Quick Start
 
 ```bash
+# Unified end-to-end runner (recommended)
+python -m scripts.run_pipeline --source-mode mock
+python -m scripts.run_pipeline --source-mode real --run-id real-study-001
+
 # 1. Generate the synthetic demo dataset
 python -m tests.generate_mock_data
 python -m analysis.classifier --source-mode mock
@@ -164,6 +172,30 @@ python -m reporting.visualize --source-mode real
 # 12. Generate HTML report (opens in browser with --open)
 python -m reporting.report_generator --source-mode real --open
 ```
+
+## Pipeline Runner
+
+Use the unified pipeline runner when you want one shared `run_id`, a persisted
+manifest, and resumable execution:
+
+```bash
+# Full mock/demo run
+python -m scripts.run_pipeline --source-mode mock
+
+# Full real run
+python -m scripts.run_pipeline --source-mode real --run-id real-study-001
+
+# Resume an interrupted real run
+python -m scripts.run_pipeline --source-mode real --resume --run-id real-study-001
+
+# Run only the downstream reporting stages
+python -m scripts.run_pipeline --source-mode real --from-step metrics --run-id real-study-001
+
+# Preview commands without executing them
+python -m scripts.run_pipeline --source-mode real --dry-run
+```
+
+The default manifest path is `data/{source_mode}/processed/run_manifest.json`.
 
 ## Module Documentation
 

@@ -16,6 +16,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import json
 import random
 import string
@@ -736,18 +737,18 @@ def generate_site(profile: dict, run_id: str) -> dict:
     }
 
 
-def generate_all() -> None:
+def generate_all(run_id: str | None = None) -> str:
     """Generate all 20 mock sites and save to data/mock/raw/."""
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     BANNERS_DIR.mkdir(parents=True, exist_ok=True)
     LAYOUT.screenshots_dir.mkdir(parents=True, exist_ok=True)
 
     random.seed(42)  # Reproducible output
-    run_id = generate_run_id("mock")
+    effective_run_id = run_id or generate_run_id("mock")
 
     for profile in SITE_PROFILES:
         domain = profile["domain"]
-        site_data = generate_site(profile, run_id)
+        site_data = generate_site(profile, effective_run_id)
 
         # Write JSON
         out_path = RAW_DIR / f"{domain}.json"
@@ -763,7 +764,20 @@ def generate_all() -> None:
 
     print(f"\nGenerated {len(SITE_PROFILES)} mock sites in {RAW_DIR}")
     print(f"Banner files in {BANNERS_DIR}")
+    return effective_run_id
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate AECCS mock crawl data")
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional shared run identifier for the generated mock crawl artifacts",
+    )
+    args = parser.parse_args()
+    generate_all(run_id=args.run_id)
 
 
 if __name__ == "__main__":
-    generate_all()
+    main()
