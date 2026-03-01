@@ -53,30 +53,32 @@
         <tr><td>Software pipeline</td><td>Implemented</td></tr>
         <tr><td>Mock/demo dataset</td><td>Reproducible</td></tr>
         <tr><td>Real study list</td><td>Prepared with 100 domains</td></tr>
-        <tr><td>Real crawl outputs</td><td>Not yet executed</td></tr>
-        <tr><td>Final empirical results</td><td>Pending real study</td></tr>
+        <tr><td>Real crawl outputs</td><td>Completed (97/100 sites, 1 March 2026)</td></tr>
+        <tr><td>Final empirical results</td><td>Completed (100-site study with 7 PETs)</td></tr>
       </tbody>
     </table>
   </section>
 
   <section>
-    <h2>Current Demo Findings</h2>
+    <h2>Real-Study Findings (100 Sites, 1 March 2026)</h2>
     <ul>
-      <li>84.2% pre-consent tracker violations in the mock dataset.</li>
-      <li>75.0% of mock sites show at least one dark pattern.</li>
-      <li>Average mock compliance score is 50.8 / 100.</li>
-      <li>Brave Shields is the strongest browser PET in the mock comparison.</li>
-      <li>Didomi is the strongest CMP in the mock comparison.</li>
+      <li>89.7% of sites set pre-consent trackers before any user interaction.</li>
+      <li>82.0% of sites exhibit at least one dark pattern (most common: missing reject button at 69%).</li>
+      <li>Average compliance score is 33.1 / 100 (median 24.0); 67% of sites received grade F.</li>
+      <li>Brave Shields is the strongest browser PET (14.7% average tracker reduction).</li>
+      <li>OneTrust is the strongest CMP as a privacy tool (PET score 33.4).</li>
+      <li>Best combination: Brave Shields + OneTrust (estimated 43.2% effectiveness).</li>
+      <li>Recommended DP epsilon: 1.0 for balanced privacy/utility when publishing aggregate statistics.</li>
     </ul>
-    <p class="warning">These values are demonstration outputs from <code>data/mock/</code>, not final real-study claims.</p>
+    <p class="warning">Based on real crawl data from <code>data/real/</code>, run ID <code>real-study-20260301-final</code>.</p>
   </section>
 
   <section>
-    <h2>Final Actions Before Submission</h2>
+    <h2>Completed Actions</h2>
     <ul>
-      <li>Run the real crawl and PET evaluation under <code>data/real/</code>.</li>
-      <li>Regenerate every figure and report from real processed data only.</li>
-      <li>Replace the demo findings in the report and slides with real results and citations.</li>
+      <li>Real crawl and PET evaluation completed under <code>data/real/</code> (1 March 2026).</li>
+      <li>All 11 figures and HTML compliance report regenerated from real processed data.</li>
+      <li>Demo findings replaced with real-study results across all documents.</li>
     </ul>
   </section>
 </body>

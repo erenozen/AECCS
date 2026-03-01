@@ -6,7 +6,7 @@
 
 This project provides an automated pipeline for assessing how well popular websites comply with GDPR cookie consent requirements. It crawls websites, captures cookies and network requests across three consent states (no interaction, accept all, reject all), classifies trackers, detects dark patterns in consent banners, computes per-site compliance scores, and evaluates multiple privacy-enhancing technologies (PETs) as countermeasures.
 
-The analysis covers browser-level PETs (uBlock Origin, Privacy Badger, Firefox ETP, Brave Shields, Consent-O-Matic), differential privacy mechanisms for publishing aggregate statistics, and consent management platform (CMP) effectiveness. The repository currently contains a reproducible synthetic demo dataset plus the full real-study pipeline; final empirical claims remain pending until the real crawl and PET experiments are completed under `data/real/`.
+The analysis covers browser-level PETs (uBlock Origin, Privacy Badger, Firefox ETP, Brave Shields, Consent-O-Matic), differential privacy mechanisms for publishing aggregate statistics, and consent management platform (CMP) effectiveness. The repository contains the completed 100-site real study (run ID `real-study-20260301-final`, 1 March 2026) with all findings, figures, and reports generated from real crawl data under `data/real/`. A reproducible synthetic demo dataset remains available under `data/mock/` for pipeline validation.
 
 Built as a course project for **CS475 — Privacy-Enhancing Technologies**.
 

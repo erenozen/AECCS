@@ -85,109 +85,79 @@ AECCS is currently at:
 
 ## Current Findings
 
-The repository currently contains both the original mock/demo findings and a
-small set of preliminary real smoke-run findings. Only the mock dataset is
-complete end-to-end; the real dataset is still partial.
+The repository contains complete real-study findings from the 100-site study
+executed on 1 March 2026 (`run_id=real-study-20260301-final`) using Proton VPN
+(Netherlands) for EU geolocation. The mock/demo dataset remains available for
+pipeline validation.
 
-### Mock dataset findings
+### Real-study findings (100 sites, 1 March 2026)
 
-- Total sites crawled: 20
-- Successful crawls: 19
-- Failed crawls: 1
-- Pre-consent tracker violation rate: 84.2%
-- Sites with any dark pattern: 75.0%
-- Average compliance score: 50.8 / 100
-- Best browser PET: Brave Shields with 95.1% average tracker reduction
-- Best CMP: Didomi with PET score 75.1
-- Recommended DP publication value: epsilon = 2.0
+- Total sites crawled: 100
+- Successful crawls: 97
+- Failed crawls: 3 (zalando.de, wordpress.com, elcorteingles.es)
+- Sites with consent banners: 72
+- Pre-consent tracker violation rate: 89.7%
+- Average pre-consent trackers per site: 6.7
+- Sites with any dark pattern: 82.0%
+- Most common dark pattern: missing reject button (69.0%)
+- Average compliance score: 33.1 / 100 (median 24.0, std dev 21.7)
+- Grade distribution: A: 0%, B: 1%, C: 18.6%, D: 13.4%, F: 67%
+- Best browser PET: Brave Shields with 14.7% average tracker reduction
+- Best CMP: OneTrust with PET score 33.4
+- Best combination: Brave Shields + OneTrust (estimated 43.2% effectiveness)
+- Recommended DP publication value: epsilon = 1.0
+- PET evaluation: 700 measurements (7 PETs x 100 sites), 681 successful
 
-### Mock category-level compliance signal
+### Real category-level compliance scores
 
-- Government: 79.8
-- Finance: 76.8
-- Social Media: 59.5
-- Technology: 56.0
-- Education: 51.5
-- News: 46.1
-- E-Commerce: 42.3
-- Entertainment: 13.8
+- Finance: 47.8
+- Entertainment: 47.0
+- Technology: 44.6
+- Education: 35.7
+- Government: 35.9
+- Employment: 35.5
+- E-Commerce: 32.9
+- Social Media: 32.4
+- News: 23.3
+- Travel: 23.4
+- Marketplace: 20.4
 
-### Interpretation of findings
+### Tracker analysis
 
-These findings currently support:
+- Total unique tracker cookies: 403 across 93 domains
+- Top vendors: Google (32%), Meta (10.3%), Adobe (6.2%), Amazon (6.2%), LinkedIn (6.2%)
+- Tracker categories: Analytics (54.3%), Advertising (26.3%), Social (14.6%), Fingerprinting (4.2%)
+- Reject reduces trackers in only 7.2% of cases; eliminates all trackers in 9.3%
 
-- end-to-end pipeline validation
-- validation of figures, ranking logic, and reporting structure
-- rehearsal of the final course artifacts
+### CMP distribution
 
-These findings do not yet support:
+- Custom/Unknown: 43 sites
+- OneTrust: 26 sites
+- TrustArc: 17 sites
+- Cookiebot: 6 sites
+- Didomi: 3 sites
+- Quantcast: 1 site
+- Usercentrics: 1 site
 
-- final project conclusions
-- publication-style empirical claims
-- final course report conclusions
+## Completed Implementation
 
-### Real smoke findings
+All operational and academic work has been completed:
 
-These are preliminary live findings from the 5-site smoke run executed with
-`run_id=real-study-20260301`. They validate the real pipeline, but they are not
-the final 100-site study results.
+1. Full 100-site real crawl executed (1 March 2026)
+   - All 100 sites in `data/websites.csv` crawled with EU geolocation
+   - `data/real/raw/` populated with 100 crawl JSONs (97 successful)
+   - Three consent states captured: no interaction, accept all, reject all
 
-- Sites crawled: 5
-- Successful crawls: 4
-- Failed crawls: 1 (`zalando.de`)
-- Sites with banners detected: 2
-- Pre-consent tracker violation rate: 100.0% on successful crawls
-- Sites with any dark pattern: 80.0%
-- Average compliance score: 27.0 / 100
-- One-domain PET smoke on `bbc.co.uk` completed across all 7 PETs
-- Best PET in that PET smoke: Brave Shields with 100.0% tracker reduction
+2. Full real PET evaluation completed
+   - 7 PET configurations x 100 sites = 700 measurements (681 successful)
+   - `data/real/processed/pets_effectiveness.csv` populated
 
-## What Is Left To Implement
+3. All downstream real-study artifacts regenerated
+   - compliance scores, aggregate metrics, differential privacy report
+   - CMP comparison, PET summary, 11 figures, HTML compliance report
 
-### Operationally missing
-
-The main remaining work is execution, not architecture:
-
-1. Run the full 100-site real crawl
-   - Expand the current 5-site smoke run to the entire 100-site list in
-     `data/websites.csv`
-   - Populate `data/real/raw/`
-   - Use the workflow promised in the proposal:
-     - no interaction
-     - accept all
-     - reject all
-     - EU-triggered consent conditions
-
-2. Run the full real PET evaluation
-   - Expand the current PET smoke validation to the entire 100-site list
-   - Populate `data/real/processed/` with final real PET outputs
-   - This remains necessary because the course document explicitly expects
-     implementation projects to implement PETs
-
-3. Regenerate all downstream real-study artifacts
-   - compliance scores
-   - aggregate metrics
-   - differential privacy report
-   - CMP comparison
-   - PET summary
-   - figures
-   - final HTML report
-
-4. Replace mock-based text in the academic artifacts
-   - final report
-   - final presentation
-   - midterm/final narrative where demo language is still present
-
-### Academically missing
-
-The artifact files exist, but the final submission is still not complete
-because:
-
-- the final 100-site real-study dataset is still incomplete
-- the final report is still written as a repo-state template rather than a
-  completed empirical paper
-- the final presentation still reflects implementation status rather than final
-  results
+4. All academic artifacts updated with real findings
+   - final report, final presentation, project status document
 
 ## Do You Need To Extend the Project?
 
@@ -381,21 +351,19 @@ The validated scenarios include:
 
 ### What are our findings?
 
-Current findings are mock/demo findings only:
+Current findings are from the completed 100-site real study (1 March 2026):
 
-- 84.2% pre-consent violations
-- 75.0% dark-pattern prevalence
-- 50.8 average compliance score
-- Brave Shields best browser PET
-- Didomi best CMP
-- epsilon 2.0 recommended for DP publication
+- 89.7% pre-consent violations
+- 82.0% dark-pattern prevalence
+- 33.1 average compliance score (median 24.0)
+- Brave Shields best browser PET (14.7% tracker reduction)
+- OneTrust best CMP (PET score 33.4)
+- epsilon 1.0 recommended for DP publication
 
 ### What is left to implement?
 
-- Real crawl execution
-- Real PET execution
-- Regeneration of all final artifacts from `data/real/processed`
-- Final report/presentation replacement with real findings
+All implementation is complete. The real crawl, PET evaluation, artifact
+regeneration, and document updates have been finished.
 
 ### Do we need to extend our project to meet the deliverables?
 

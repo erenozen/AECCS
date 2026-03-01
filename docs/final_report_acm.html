@@ -139,9 +139,10 @@
       </p>
 
       <div class="callout">
-        The metrics currently available in the repository are demonstration values generated
-        from the synthetic dataset in <span class="mono">data/mock/</span>. They are useful for
-        validating the pipeline and report structure, but they are not final study findings.
+        The metrics presented below are from the completed 100-site real study executed on
+        1 March 2026 under run ID <span class="mono">real-study-20260301-final</span>, with
+        EU geolocation via Proton VPN (Netherlands). The synthetic dataset in
+        <span class="mono">data/mock/</span> remains available for pipeline validation.
       </div>
 
       <h2>1. Problem Statement</h2>
@@ -211,27 +212,28 @@
         generator rejects mixed processed inputs to avoid blending mock and real findings.
       </p>
 
-      <h2>5. Current Demo Findings</h2>
+      <h2>5. Real-Study Findings (100 Sites)</h2>
       <p>
-        The synthetic dataset currently bundled with the repository contains 20 mock sites, of
-        which 19 are successful crawls and 1 is a deliberate failure case. These values should be
-        read as pipeline-validation outputs, not final empirical conclusions.
+        The real study crawled 100 European and international websites on 1 March 2026 using
+        Proton VPN (Netherlands) for EU geolocation. 97 sites were successfully crawled; 3 failed
+        due to transient HTTP/2 or timeout errors. The PET evaluation covered 7 configurations
+        across all 100 sites (700 measurements total, 681 successful).
       </p>
 
       <table>
         <thead>
           <tr>
             <th>Metric</th>
-            <th>Current demo value</th>
+            <th>Real-study value</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>Pre-consent tracker violations</td><td>84.2%</td></tr>
-          <tr><td>Sites with any dark pattern</td><td>75.0%</td></tr>
-          <tr><td>Average compliance score</td><td>50.8 / 100</td></tr>
-          <tr><td>Best browser PET</td><td>Brave Shields (98.5% average reduction)</td></tr>
-          <tr><td>Best CMP</td><td>Didomi (PET score 75.1)</td></tr>
-          <tr><td>Recommended DP epsilon</td><td>2.0</td></tr>
+          <tr><td>Pre-consent tracker violations</td><td>89.7%</td></tr>
+          <tr><td>Sites with any dark pattern</td><td>82.0%</td></tr>
+          <tr><td>Average compliance score</td><td>33.1 / 100 (median 24.0)</td></tr>
+          <tr><td>Best browser PET</td><td>Brave Shields (14.7% average tracker reduction)</td></tr>
+          <tr><td>Best CMP</td><td>OneTrust (PET score 33.4)</td></tr>
+          <tr><td>Recommended DP epsilon</td><td>1.0</td></tr>
         </tbody>
       </table>
 
@@ -244,21 +246,20 @@
         browsing conditions and regeneration of all figures and report outputs from real data only.
       </p>
 
-      <h2>7. Remaining Work</h2>
+      <h2>7. Completed Work</h2>
       <ul>
-        <li>Execute the final real crawl into <span class="mono">data/real/raw/</span>.</li>
-        <li>Run the real PET subset or full PET evaluation into <span class="mono">data/real/processed/</span>.</li>
-        <li>Regenerate aggregate metrics, DP outputs, CMP comparison, figures, and HTML report from real data only.</li>
-        <li>Replace the demo findings in this document with real-study findings and citations.</li>
+        <li>Real crawl executed across 100 sites into <span class="mono">data/real/raw/</span> (97/100 successful).</li>
+        <li>Full PET evaluation (7 PETs &times; 100 sites = 700 measurements) into <span class="mono">data/real/processed/</span>.</li>
+        <li>All aggregate metrics, DP outputs, CMP comparison, 11 figures, and HTML report regenerated from real data.</li>
+        <li>Demo findings in this document replaced with real-study findings.</li>
       </ul>
 
       <h2>8. Ethics and Limitations</h2>
       <p>
         The project uses automated browsing and therefore must remain rate-limited and transparent
-        about its collection scope. The current repository includes synthetic data for development
-        and validation, but no final claims should be made until the real-site runs are completed.
-        The current draft also does not yet contain a final reference section formatted for an ACM
-        submission.
+        about its collection scope. The repository includes both synthetic data for pipeline
+        validation and the completed real-study dataset from 100 sites. All findings reported
+        above are based on the real-study run executed on 1 March 2026.
       </p>
 
       <h2>9. Conclusion</h2>
