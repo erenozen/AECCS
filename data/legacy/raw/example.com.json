@@ -1,0 +1,27 @@
+{
+  "domain": "example.com",
+  "crawl_timestamp": "2026-03-01T10:44:12.885733+00:00",
+  "success": true,
+  "error": null,
+  "interaction": "none",
+  "cmp_detected": null,
+  "consent_banner": null,
+  "screenshot_path": "/home/eren/AECCS/data/raw/screenshots/example.com.png",
+  "pre_consent": {
+    "cookies": [],
+    "http_requests": [
+      {
+        "url": "https://example.com/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "example.com"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 0,
+    "total_third_party_domains": 0,
+    "total_requests": 1
+  }
+}

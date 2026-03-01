@@ -23,9 +23,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
-import tldextract
 
-from config import PROCESSED_DIR, RAW_DIR, TRACKER_LISTS_DIR
+from config import (
+    DEFAULT_SOURCE_MODE,
+    PROCESSED_DIR,
+    RAW_DIR,
+    TRACKER_LISTS_DIR,
+    build_provenance,
+    get_dataset_layout,
+    TLD_EXTRACT,
+)
 
 # ── Fallback tracker map (used when filter list downloads fail) ───────────────
 
@@ -115,7 +122,7 @@ _DISCONNECT_URLS = [
 def _extract_registered_domain(domain_str: str) -> str:
     """Return the registered domain from a cookie domain or URL."""
     cleaned = domain_str.lstrip(".")
-    ext = tldextract.extract(cleaned)
+    ext = TLD_EXTRACT(cleaned)
     return f"{ext.domain}.{ext.suffix}" if ext.suffix else ext.domain
 
 
@@ -420,11 +427,15 @@ def classify_site_cookies(
 
 
 def run_classification(
-    raw_dir: str | None = None, output_dir: str | None = None
+    raw_dir: str | None = None,
+    output_dir: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> None:
     """Batch-classify cookies for all crawled sites."""
-    src = Path(raw_dir) if raw_dir else RAW_DIR
-    dest = Path(output_dir) if output_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    src = Path(raw_dir) if raw_dir else layout.raw_dir
+    dest = Path(output_dir) if output_dir else layout.processed_dir
     dest.mkdir(parents=True, exist_ok=True)
 
     download_filter_lists()
@@ -442,14 +453,32 @@ def run_classification(
     for jf in json_files:
         domain = jf.stem
         try:
+            site_doc = json.loads(jf.read_text(encoding="utf-8"))
             classified = classify_site_cookies(str(jf), filter_data)
         except Exception as exc:
             print(f"[ERROR] {domain}: {exc}")
             continue
 
         out_path = dest / f"{domain}_classified.json"
+        provenance = build_provenance(
+            source_mode=site_doc.get("source_mode", source_mode),
+            run_id=site_doc.get("run_id", run_id),
+            proxy_used=site_doc.get("proxy_used"),
+            browser_name=site_doc.get("browser_name"),
+            browser_version=site_doc.get("browser_version"),
+            site_list_source=site_doc.get("site_list_source"),
+        )
         out_path.write_text(
-            json.dumps(classified, indent=2, default=str), encoding="utf-8"
+            json.dumps(
+                {
+                    "domain": site_doc.get("domain", domain),
+                    **provenance,
+                    "cookies": classified,
+                },
+                indent=2,
+                default=str,
+            ),
+            encoding="utf-8",
         )
 
         total_cookies += len(classified)
@@ -495,6 +524,18 @@ def main() -> None:
         "--domain", type=str, default=None,
         help="Classify a single domain only",
     )
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
     if args.download_lists:
@@ -502,8 +543,9 @@ def main() -> None:
         return
 
     if args.domain:
-        src = Path(args.raw_dir) if args.raw_dir else RAW_DIR
-        dest = Path(args.output_dir) if args.output_dir else PROCESSED_DIR
+        layout = get_dataset_layout(args.source_mode)
+        src = Path(args.raw_dir) if args.raw_dir else layout.raw_dir
+        dest = Path(args.output_dir) if args.output_dir else layout.processed_dir
         dest.mkdir(parents=True, exist_ok=True)
 
         download_filter_lists()
@@ -514,15 +556,38 @@ def main() -> None:
             print(f"[ERROR] {site_path} not found")
             return
 
+        site_doc = json.loads(site_path.read_text(encoding="utf-8"))
         classified = classify_site_cookies(str(site_path), filter_data)
         out_path = dest / f"{args.domain}_classified.json"
+        provenance = build_provenance(
+            source_mode=site_doc.get("source_mode", args.source_mode),
+            run_id=site_doc.get("run_id", args.run_id),
+            proxy_used=site_doc.get("proxy_used"),
+            browser_name=site_doc.get("browser_name"),
+            browser_version=site_doc.get("browser_version"),
+            site_list_source=site_doc.get("site_list_source"),
+        )
         out_path.write_text(
-            json.dumps(classified, indent=2, default=str), encoding="utf-8"
+            json.dumps(
+                {
+                    "domain": site_doc.get("domain", args.domain),
+                    **provenance,
+                    "cookies": classified,
+                },
+                indent=2,
+                default=str,
+            ),
+            encoding="utf-8",
         )
         print(f"[OK] {args.domain}: {len(classified)} cookies -> {out_path}")
         return
 
-    run_classification(raw_dir=args.raw_dir, output_dir=args.output_dir)
+    run_classification(
+        raw_dir=args.raw_dir,
+        output_dir=args.output_dir,
+        source_mode=args.source_mode,
+        run_id=args.run_id,
+    )
 
 
 if __name__ == "__main__":

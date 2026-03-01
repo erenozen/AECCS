@@ -1,0 +1,59 @@
+{
+  "domain": "socialnet.fr",
+  "banner_found": true,
+  "dark_patterns_detected": [
+    "asymmetric_buttons"
+  ],
+  "dark_pattern_count": 1,
+  "details": {
+    "asymmetric_buttons": {
+      "detected": true,
+      "accept_button": {
+        "text": "Accept All Cookies",
+        "width": 300.0,
+        "height": 60.0,
+        "font_size": 18.0,
+        "font_weight": 700,
+        "bg_color": "#22c55e"
+      },
+      "reject_button": {
+        "text": "Decline",
+        "width": 100.0,
+        "height": 30.0,
+        "font_size": 11.0,
+        "font_weight": 300,
+        "bg_color": "#e5e7eb"
+      },
+      "size_ratio": 0.167,
+      "font_size_ratio": 0.611,
+      "contrast_issue": true
+    },
+    "hidden_reject": {
+      "detected": false,
+      "description": null
+    },
+    "missing_reject": {
+      "detected": false,
+      "description": null
+    },
+    "preselected_checkboxes": {
+      "detected": false,
+      "checkbox_count": 0,
+      "preselected_count": 0
+    },
+    "forced_action": {
+      "detected": false,
+      "is_cookie_wall": false
+    },
+    "multi_layer_rejection": {
+      "detected": false,
+      "accept_clicks": 1,
+      "reject_clicks": 1,
+      "click_ratio": 1.0
+    },
+    "confusing_language": {
+      "detected": false,
+      "suspicious_phrases": []
+    }
+  }
+}

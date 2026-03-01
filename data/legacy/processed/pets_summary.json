@@ -1,0 +1,317 @@
+{
+  "browser_pets_ranking": [
+    {
+      "pet_name": "brave_shields",
+      "sites_tested": 22,
+      "avg_tracker_domains": 0.5,
+      "avg_tracker_cookies": 0.3,
+      "avg_tracker_reduction_pct": 95.1,
+      "rank": 1
+    },
+    {
+      "pet_name": "firefox_etp_strict",
+      "sites_tested": 22,
+      "avg_tracker_domains": 1.1,
+      "avg_tracker_cookies": 0.9,
+      "avg_tracker_reduction_pct": 87.9,
+      "rank": 2
+    },
+    {
+      "pet_name": "ublock_origin",
+      "sites_tested": 22,
+      "avg_tracker_domains": 0.6,
+      "avg_tracker_cookies": 0.6,
+      "avg_tracker_reduction_pct": 82.6,
+      "rank": 3
+    },
+    {
+      "pet_name": "privacy_badger",
+      "sites_tested": 22,
+      "avg_tracker_domains": 1.6,
+      "avg_tracker_cookies": 1.5,
+      "avg_tracker_reduction_pct": 80.8,
+      "rank": 4
+    },
+    {
+      "pet_name": "firefox_etp_standard",
+      "sites_tested": 22,
+      "avg_tracker_domains": 2.2,
+      "avg_tracker_cookies": 2.0,
+      "avg_tracker_reduction_pct": 72.9,
+      "rank": 5
+    },
+    {
+      "pet_name": "consent_o_matic",
+      "sites_tested": 22,
+      "avg_tracker_domains": 6.5,
+      "avg_tracker_cookies": 5.6,
+      "avg_tracker_reduction_pct": 0.0,
+      "rank": 6
+    }
+  ],
+  "cmp_as_pets_ranking": [
+    {
+      "cmp": "Didomi",
+      "pet_score": 75.1,
+      "breakdown": {
+        "avg_compliance_score": 64.2,
+        "reject_works_pct": 100.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 33.0
+      },
+      "rank": 1
+    },
+    {
+      "cmp": "OneTrust",
+      "pet_score": 67.2,
+      "breakdown": {
+        "avg_compliance_score": 58.6,
+        "reject_works_pct": 75.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 34.0
+      },
+      "rank": 2
+    },
+    {
+      "cmp": "Usercentrics",
+      "pet_score": 66.3,
+      "breakdown": {
+        "avg_compliance_score": 76.8,
+        "reject_works_pct": 50.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 33.0
+      },
+      "rank": 3
+    },
+    {
+      "cmp": "Quantcast",
+      "pet_score": 63.8,
+      "breakdown": {
+        "avg_compliance_score": 56.0,
+        "reject_works_pct": 100.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 0.0,
+        "avg_tracker_reduction_pct": 20.0
+      },
+      "rank": 4
+    },
+    {
+      "cmp": "Cookiebot",
+      "pet_score": 63.2,
+      "breakdown": {
+        "avg_compliance_score": 71.8,
+        "reject_works_pct": 50.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 17.0
+      },
+      "rank": 5
+    },
+    {
+      "cmp": "TrustArc",
+      "pet_score": 33.0,
+      "breakdown": {
+        "avg_compliance_score": 33.3,
+        "reject_works_pct": 66.7,
+        "reject_available_pct": 66.7,
+        "inverse_dark_pattern_pct": 0.0,
+        "avg_tracker_reduction_pct": -70.0
+      },
+      "rank": 6
+    },
+    {
+      "cmp": "No CMP Detected",
+      "pet_score": 20.7,
+      "breakdown": {
+        "avg_compliance_score": 25.4,
+        "reject_works_pct": 33.3,
+        "reject_available_pct": 22.2,
+        "inverse_dark_pattern_pct": 0.0,
+        "avg_tracker_reduction_pct": 3.0
+      },
+      "rank": 7
+    }
+  ],
+  "combination_analysis": [
+    {
+      "browser_pet": "brave_shields",
+      "cmp": "Didomi",
+      "browser_reduction_pct": 95.1,
+      "cmp_pet_score": 75.1,
+      "estimated_combined_effectiveness_pct": 98.8
+    },
+    {
+      "browser_pet": "brave_shields",
+      "cmp": "OneTrust",
+      "browser_reduction_pct": 95.1,
+      "cmp_pet_score": 67.2,
+      "estimated_combined_effectiveness_pct": 98.4
+    },
+    {
+      "browser_pet": "brave_shields",
+      "cmp": "Usercentrics",
+      "browser_reduction_pct": 95.1,
+      "cmp_pet_score": 66.3,
+      "estimated_combined_effectiveness_pct": 98.3
+    },
+    {
+      "browser_pet": "brave_shields",
+      "cmp": "Quantcast",
+      "browser_reduction_pct": 95.1,
+      "cmp_pet_score": 63.8,
+      "estimated_combined_effectiveness_pct": 98.2
+    },
+    {
+      "browser_pet": "brave_shields",
+      "cmp": "Cookiebot",
+      "browser_reduction_pct": 95.1,
+      "cmp_pet_score": 63.2,
+      "estimated_combined_effectiveness_pct": 98.2
+    },
+    {
+      "browser_pet": "firefox_etp_strict",
+      "cmp": "Didomi",
+      "browser_reduction_pct": 87.9,
+      "cmp_pet_score": 75.1,
+      "estimated_combined_effectiveness_pct": 97.0
+    },
+    {
+      "browser_pet": "brave_shields",
+      "cmp": "TrustArc",
+      "browser_reduction_pct": 95.1,
+      "cmp_pet_score": 33.0,
+      "estimated_combined_effectiveness_pct": 96.7
+    },
+    {
+      "browser_pet": "brave_shields",
+      "cmp": "No CMP Detected",
+      "browser_reduction_pct": 95.1,
+      "cmp_pet_score": 20.7,
+      "estimated_combined_effectiveness_pct": 96.1
+    },
+    {
+      "browser_pet": "firefox_etp_strict",
+      "cmp": "OneTrust",
+      "browser_reduction_pct": 87.9,
+      "cmp_pet_score": 67.2,
+      "estimated_combined_effectiveness_pct": 96.0
+    },
+    {
+      "browser_pet": "firefox_etp_strict",
+      "cmp": "Usercentrics",
+      "browser_reduction_pct": 87.9,
+      "cmp_pet_score": 66.3,
+      "estimated_combined_effectiveness_pct": 95.9
+    },
+    {
+      "browser_pet": "ublock_origin",
+      "cmp": "Didomi",
+      "browser_reduction_pct": 82.6,
+      "cmp_pet_score": 75.1,
+      "estimated_combined_effectiveness_pct": 95.7
+    },
+    {
+      "browser_pet": "firefox_etp_strict",
+      "cmp": "Quantcast",
+      "browser_reduction_pct": 87.9,
+      "cmp_pet_score": 63.8,
+      "estimated_combined_effectiveness_pct": 95.6
+    },
+    {
+      "browser_pet": "firefox_etp_strict",
+      "cmp": "Cookiebot",
+      "browser_reduction_pct": 87.9,
+      "cmp_pet_score": 63.2,
+      "estimated_combined_effectiveness_pct": 95.5
+    },
+    {
+      "browser_pet": "privacy_badger",
+      "cmp": "Didomi",
+      "browser_reduction_pct": 80.8,
+      "cmp_pet_score": 75.1,
+      "estimated_combined_effectiveness_pct": 95.2
+    },
+    {
+      "browser_pet": "ublock_origin",
+      "cmp": "OneTrust",
+      "browser_reduction_pct": 82.6,
+      "cmp_pet_score": 67.2,
+      "estimated_combined_effectiveness_pct": 94.3
+    },
+    {
+      "browser_pet": "ublock_origin",
+      "cmp": "Usercentrics",
+      "browser_reduction_pct": 82.6,
+      "cmp_pet_score": 66.3,
+      "estimated_combined_effectiveness_pct": 94.1
+    },
+    {
+      "browser_pet": "ublock_origin",
+      "cmp": "Quantcast",
+      "browser_reduction_pct": 82.6,
+      "cmp_pet_score": 63.8,
+      "estimated_combined_effectiveness_pct": 93.7
+    },
+    {
+      "browser_pet": "privacy_badger",
+      "cmp": "OneTrust",
+      "browser_reduction_pct": 80.8,
+      "cmp_pet_score": 67.2,
+      "estimated_combined_effectiveness_pct": 93.7
+    },
+    {
+      "browser_pet": "ublock_origin",
+      "cmp": "Cookiebot",
+      "browser_reduction_pct": 82.6,
+      "cmp_pet_score": 63.2,
+      "estimated_combined_effectiveness_pct": 93.6
+    },
+    {
+      "browser_pet": "privacy_badger",
+      "cmp": "Usercentrics",
+      "browser_reduction_pct": 80.8,
+      "cmp_pet_score": 66.3,
+      "estimated_combined_effectiveness_pct": 93.5
+    }
+  ],
+  "dp_privacy_cost": {
+    "mechanism": "Laplace + Gaussian + Randomized Response",
+    "epsilons_tested": [
+      0.1,
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0
+    ],
+    "trials_per_epsilon": 0,
+    "recommended_epsilon": null
+  },
+  "overall_findings": {
+    "best_browser_pet": {
+      "name": "brave_shields",
+      "avg_tracker_reduction_pct": 95.1
+    },
+    "best_cmp": {
+      "name": "Didomi",
+      "pet_score": 75.1
+    },
+    "best_combination": {
+      "browser_pet": "brave_shields",
+      "cmp": "Didomi",
+      "estimated_effectiveness_pct": 98.8
+    }
+  },
+  "user_recommendations": [
+    "Install brave_shields for the strongest browser-level tracker blocking (avg. 95.1% reduction).",
+    "firefox_etp_strict is a good alternative with 87.9% avg reduction.",
+    "When a site uses Didomi, the reject/decline mechanism is most effective (PET score: 75.1).",
+    "Be cautious with No CMP Detected-powered banners \u2014 they scored lowest as a privacy tool (PET score: 20.7).",
+    "For maximum protection, combine brave_shields with a site using Didomi (est. 98.8% effective).",
+    "Always click 'Reject All' when possible \u2014 some CMPs actually honour it.",
+    "Differential privacy with moderate epsilon (\u22481.0) can protect individual browsing data when publishing aggregate compliance statistics."
+  ]
+}

@@ -1,0 +1,615 @@
+{
+  "domain": "fintech.eu",
+  "category": "Finance",
+  "region": "EU",
+  "rank": 3319,
+  "crawl_timestamp": "2026-03-01T11:36:08.942413+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "Usercentrics",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-preferences\" role=\"dialog\">\n  <h3>Cookie Preferences \u2014 fintech.eu</h3>\n  <p>Choose which cookies you'd like to allow:</p>\n  <form>\n    <label><input type=\"checkbox\" checked disabled> Necessary cookies</label>\n    <label><input type=\"checkbox\" checked> Analytics cookies</label>\n    <label><input type=\"checkbox\" checked> Advertising cookies</label>\n    <label><input type=\"checkbox\" checked> Social media cookies</label>\n  </form>\n  <div class=\"actions\" style=\"display:flex; gap:10px;\">\n    <button id=\"save-prefs\" class=\"btn\"\n            style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                   background-color:#2563eb; color:#fff;\">\n      Accept Selected\n    </button>\n    <button id=\"reject-all\" class=\"btn\"\n            style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                   background-color:#dc2626; color:#fff;\">\n      Reject All\n    </button>\n  </div>\n</div>",
+    "text_content": "Cookie Preferences \u2014 fintech.eu \n   Choose which cookies you'd like to allow: \n   \n       Necessary cookies \n       Analytics cookies \n       Advertising cookies \n       Social media cookies \n   \n   \n     \n      Accept Selected\n     \n     \n      Reject All",
+    "buttons": [
+      {
+        "text": "Accept Selected",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#save-prefs",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Reject All",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#dc2626",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/fintech.eu.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "__cfduid",
+        "value": "e318a186a84d45f22c5190b63c1628007a",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1797795090,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "25f551fa13bf6c508",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1791564441,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "remember_me",
+        "value": "243949064b3a5fe9579bcea8",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1786955593,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "96613eb7a86f57cffbdc14dc120573d2bb3a3f642",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1791181565,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "cdee7992273e2bda03294f193c8434a",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1792657253,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "theme",
+        "value": "e0a551db26e76b93f10dcf32c",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1786880724,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_773f",
+        "value": "e8ff647e7353c559c24b07bb270a6c527290ed00b3",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1789426186,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_acfe",
+        "value": "fb475791efb97984fc4e80bed04ba26d",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1782320774,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://fintech.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "fintech.eu"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.net",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "scorecardresearch.com",
+        "referer": "https://fintech.eu/"
+      }
+    ],
+    "third_party_domains": [
+      "amazon-adsystem.com",
+      "facebook.net",
+      "scorecardresearch.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 8,
+    "total_third_party_domains": 3,
+    "total_requests": 4
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "csrf_token",
+        "value": "85401a6be2edfb472ea5bbb1882f388758",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1800816688,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "remember_me",
+        "value": "861bb4a67f9ff6c5674c6e8fdd73c08921606557",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1789366150,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "7ef5c571f460085c682a56552ed4c9742d38e",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1786656065,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "dddb7f609c4e862c509809db3a0cad",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1788328075,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "__cfduid",
+        "value": "24f815984e75cc7ff05af9ae9a82f0b42ddcf58f289d7d2",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1779997425,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "a7879f14864e8208bd5adbc492a3f6b58bc267e3d7b6",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1778468538,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "5f8ec78426554990622b3",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1788265221,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "f0227d0bcf54c8a0e47754a77591dd8adb719598489b6688",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1790840082,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_fp_0",
+        "value": "3020713611aa0db8c1ea8adc1cd0d06bd9d093c928",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1802348297,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_0b07",
+        "value": "868b3f5b07312ce3550d5a02179e34d44f8111efabcef",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1798986587,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3875",
+        "value": "dc9b97d98d2a4c46467c0c3cb6406f97c831977e9",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1795967427,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_a38f",
+        "value": "b2d55b42d346f58a4366fe4cdb6b5",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1793581327,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8ae7",
+        "value": "675fe1a68afe1c447b09d37",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1787459623,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_b2cd",
+        "value": "4a33ec6d5e0b9b283679666125632f0cd2b3981fb",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1786574733,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e790",
+        "value": "d95a464023d1465e2cd167239c5e695922a6ec403dcd5f",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1797297870,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://fintech.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "fintech.eu"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "adnxs.com",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "chartbeat.com",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "googlesyndication.com",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "hotjar.com",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "scorecardresearch.com",
+        "referer": "https://fintech.eu/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "segment.io",
+        "referer": "https://fintech.eu/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "googlesyndication.com",
+      "hotjar.com",
+      "scorecardresearch.com",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 15,
+    "total_third_party_domains": 7,
+    "total_requests": 8,
+    "new_cookies_after_interaction": [
+      {
+        "name": "csrf_token",
+        "value": "85401a6be2edfb472ea5bbb1882f388758",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1800816688,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "7ef5c571f460085c682a56552ed4c9742d38e",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1786656065,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_fp_0",
+        "value": "3020713611aa0db8c1ea8adc1cd0d06bd9d093c928",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1802348297,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_0b07",
+        "value": "868b3f5b07312ce3550d5a02179e34d44f8111efabcef",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1798986587,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3875",
+        "value": "dc9b97d98d2a4c46467c0c3cb6406f97c831977e9",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1795967427,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_a38f",
+        "value": "b2d55b42d346f58a4366fe4cdb6b5",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1793581327,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8ae7",
+        "value": "675fe1a68afe1c447b09d37",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1787459623,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_b2cd",
+        "value": "4a33ec6d5e0b9b283679666125632f0cd2b3981fb",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1786574733,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e790",
+        "value": "d95a464023d1465e2cd167239c5e695922a6ec403dcd5f",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1797297870,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adnxs.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "googlesyndication.com",
+      "hotjar.com",
+      "segment.io"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "session_id",
+        "value": "e4bb579351b987d32b4947a6808501b7",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1780529300,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "95f46821c788196862cd68d2693eb",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1784860471,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "0020f65afe05d2b1c06054b90f6e",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1779274293,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "csrf_token",
+        "value": "2d405d922520fbcd138393a58",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1776285837,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "b4d642484c9604864bb9567aad3a8a2",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1788202827,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "remember_me",
+        "value": "d1bff6d917ef53a0e617f369547f4c65339be2ac8",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1783746335,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://fintech.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "fintech.eu"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.net",
+        "referer": "https://fintech.eu/"
+      }
+    ],
+    "third_party_domains": [
+      "facebook.net"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 6,
+    "total_third_party_domains": 1,
+    "total_requests": 2,
+    "new_cookies_after_interaction": [
+      {
+        "name": "session_id",
+        "value": "e4bb579351b987d32b4947a6808501b7",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1780529300,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "2d405d922520fbcd138393a58",
+        "domain": ".fintech.eu",
+        "path": "/",
+        "expires": 1776285837,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

@@ -1,0 +1,1192 @@
+{
+  "domain": "tracker-heavy.de",
+  "category": "News",
+  "region": "DE",
+  "rank": 935,
+  "crawl_timestamp": "2026-03-01T11:36:08.940676+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "OneTrust",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div class=\"gdpr-banner\" role=\"dialog\">\n  <h3>Help us keep tracker-heavy.de free!</h3>\n  <p>Without cookies, we cannot provide you with the best experience.\n     Don't you not want to miss out on personalised content?</p>\n  <p>By declining, you may lose access to premium features and\n     the content you love will suffer.</p>\n  <div class=\"choices\">\n    <button id=\"accept\" class=\"btn-green\"\n            style=\"width:250px; height:48px; font-size:16px; font-weight:600;\n                   background-color:#16a34a; color:#fff;\">\n      Yes, I want the best experience\n    </button>\n    <button id=\"decline\" class=\"btn-gray\"\n            style=\"width:250px; height:48px; font-size:16px; font-weight:600;\n                   background-color:#6b7280; color:#fff;\">\n      No, I don't want personalisation\n    </button>\n  </div>\n</div>",
+    "text_content": "Help us keep tracker-heavy.de free! \n   Without cookies, we cannot provide you with the best experience.\n     Don't you not want to miss out on personalised content? \n   By declining, you may lose access to premium features and\n     the content you love will suffer. \n   \n     \n      Yes, I want the best experience\n     \n     \n      No, I don't want personalisation",
+    "buttons": [
+      {
+        "text": "Yes, I want the best experience",
+        "tag": "button",
+        "type": "unknown",
+        "selector": "button#accept",
+        "computed_styles": {
+          "width": "250px",
+          "height": "48px",
+          "background_color": "#16a34a",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "600",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "No, I don't want personalisation",
+        "tag": "button",
+        "type": "unknown",
+        "selector": "button#decline",
+        "computed_styles": {
+          "width": "250px",
+          "height": "48px",
+          "background_color": "#6b7280",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "600",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": false,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 2
+  },
+  "screenshot_path": "data/raw/screenshots/tracker-heavy.de.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "lang",
+        "value": "92391ffa76df9f8809e21d03e0b661",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1802904468,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "b18d3610be453f9cc4cc8256f5a10bf7ce0d45b6d5e06e",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1785452583,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "1e65dbbeff0756de49095",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1791216019,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "__cfduid",
+        "value": "84289929c8888a18aac10c65d9e092f2ec5da9d20f",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1790934101,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_f174",
+        "value": "a249c1ad8499f622f597c",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1801951545,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_b42d",
+        "value": "a5d068092d709f0a3b5402d4df8e9ee407ae82",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1781153707,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3266",
+        "value": "01cfac015027cfa56b05fd7d207c9a07edae94b",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1795827372,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_c297",
+        "value": "d624fc6bfc827cc1eb1405893274f",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1798664221,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_78e3",
+        "value": "60df6b793b448342c6fef4e85",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1774149401,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_eb67",
+        "value": "55632d985c17bba9e111cf1f054fa0b20b53d",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1803646920,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_fafe",
+        "value": "2ece5f0dcb055dee5ca97e57",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1773839120,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_cbd7",
+        "value": "eb9503c106f9fc0b905",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1803832145,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://tracker-heavy.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "tracker-heavy.de"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adsrvr.org",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "casalemedia.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "chartbeat.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "google-analytics.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "googlesyndication.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "mixpanel.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "openx.net",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "outbrain.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "segment.io",
+        "referer": "https://tracker-heavy.de/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "casalemedia.com",
+      "chartbeat.com",
+      "facebook.com",
+      "google-analytics.com",
+      "googlesyndication.com",
+      "mixpanel.com",
+      "openx.net",
+      "outbrain.com",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 12,
+    "total_third_party_domains": 10,
+    "total_requests": 11
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "__cfduid",
+        "value": "067f009fe81674cef8b2",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1802224074,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "949f53076d253ad1364e218202fb",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1777383332,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "510c9aed03af8640e167c90e5fe5e9c8592",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1778106104,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "463d6c20b7524feb2e1cd3c03b2a9a1e81970511168",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1783519234,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "csrf_token",
+        "value": "be97f2b68bcce7cbd1f92",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1802856623,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "c4f40182c20898ad3a2447432b8",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1776049698,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "9bbabb2af4b2d275eb153ec86e660f0b9e77699",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1779892980,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "af1adf14d0f9f3f03",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1797261730,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6ef6",
+        "value": "7ce6be186544c4a76fa93360a67222e142362d5ab",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1781312671,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_188e",
+        "value": "87ff9be234d19a4353",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1776864120,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_ff25",
+        "value": "533ff0b1b5a70f4dc6b",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1795022490,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_579e",
+        "value": "bfe53f69f46bc6c6e2240b05d9f8d262c",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1784824500,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6d2d",
+        "value": "0d43c9121d0a483c261ce3c76a71ee0",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1794031865,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_1fde",
+        "value": "e1b7e853dab2e874ae713fdea",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1795571490,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_ced3",
+        "value": "726a63040dea52780e58f0e7ab127d36939cc36cb720",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1776449563,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_952c",
+        "value": "e0a9a73259ddae22bd39e924dbd",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1798598480,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3368",
+        "value": "710f029c182d61721a",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1800004891,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e88f",
+        "value": "f7caec8463742ffff22b0",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1775929719,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_428a",
+        "value": "baad2f66d9f3ae3ec7c1a84a7",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1775876394,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_75df",
+        "value": "a50a3660ca3d751bc059cea",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1784726243,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f41c",
+        "value": "549a96f977c0cc02fa1d72a2133be97970f71",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1786674917,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3cf2",
+        "value": "aa0fbf8785defaeb411c53faca21011dc76f97e7b068",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1785644151,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8c74",
+        "value": "9ee1d65b0d065b70bf99f71aa2b33b9b2522634fd9e9",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1791145329,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_954a",
+        "value": "454eeb441e96e9c3bd473ee48aa8205",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1786465732,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://tracker-heavy.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "tracker-heavy.de"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adnxs.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "casalemedia.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "chartbeat.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "cloudflare.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "doubleclick.net",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "google-analytics.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "googlesyndication.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "hotjar.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "mixpanel.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "newrelic.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "pubmatic.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "quantserve.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "rubiconproject.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "scorecardresearch.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "segment.io",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "taboola.com",
+        "referer": "https://tracker-heavy.de/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "cloudflare.com",
+      "doubleclick.net",
+      "facebook.com",
+      "google-analytics.com",
+      "googlesyndication.com",
+      "hotjar.com",
+      "mixpanel.com",
+      "newrelic.com",
+      "pubmatic.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "scorecardresearch.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 24,
+    "total_third_party_domains": 18,
+    "total_requests": 19,
+    "new_cookies_after_interaction": [
+      {
+        "name": "consent_given",
+        "value": "510c9aed03af8640e167c90e5fe5e9c8592",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1778106104,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "c4f40182c20898ad3a2447432b8",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1776049698,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "9bbabb2af4b2d275eb153ec86e660f0b9e77699",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1779892980,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "af1adf14d0f9f3f03",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1797261730,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6ef6",
+        "value": "7ce6be186544c4a76fa93360a67222e142362d5ab",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1781312671,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_188e",
+        "value": "87ff9be234d19a4353",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1776864120,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_ff25",
+        "value": "533ff0b1b5a70f4dc6b",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1795022490,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_579e",
+        "value": "bfe53f69f46bc6c6e2240b05d9f8d262c",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1784824500,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6d2d",
+        "value": "0d43c9121d0a483c261ce3c76a71ee0",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1794031865,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_1fde",
+        "value": "e1b7e853dab2e874ae713fdea",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1795571490,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_ced3",
+        "value": "726a63040dea52780e58f0e7ab127d36939cc36cb720",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1776449563,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_952c",
+        "value": "e0a9a73259ddae22bd39e924dbd",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1798598480,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3368",
+        "value": "710f029c182d61721a",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1800004891,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e88f",
+        "value": "f7caec8463742ffff22b0",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1775929719,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_428a",
+        "value": "baad2f66d9f3ae3ec7c1a84a7",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1775876394,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_75df",
+        "value": "a50a3660ca3d751bc059cea",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1784726243,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f41c",
+        "value": "549a96f977c0cc02fa1d72a2133be97970f71",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1786674917,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3cf2",
+        "value": "aa0fbf8785defaeb411c53faca21011dc76f97e7b068",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1785644151,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8c74",
+        "value": "9ee1d65b0d065b70bf99f71aa2b33b9b2522634fd9e9",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1791145329,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_954a",
+        "value": "454eeb441e96e9c3bd473ee48aa8205",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1786465732,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adnxs.com",
+      "amazon-adsystem.com",
+      "cloudflare.com",
+      "doubleclick.net",
+      "hotjar.com",
+      "newrelic.com",
+      "pubmatic.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "scorecardresearch.com",
+      "taboola.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "lang",
+        "value": "49d61b300ed1c3d565",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1796090839,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "55a70ff1931b83b631e803e36eb0",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1780712247,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "44314ab6baac808ef5b2d690eaaf747303528c5028f65",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1787416243,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "32f93226f3e33471ba67e0d279",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1797564717,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_f239",
+        "value": "d204ec087fccce0722c4e0dbe4e7c1ea",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1795554137,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d69d",
+        "value": "e0588e2aa5d129c9b6c448bf7a7",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1798186051,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_11f1",
+        "value": "f0bf8cb0ef1dd7bce9599459be112efb3820d212aa4e6",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1778823019,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_bbd3",
+        "value": "47e088895402d96859d3a79e6a3f9532e7",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1799037308,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e901",
+        "value": "51c2a9e241efc325cb667b26dbaf06548a8131ac0",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1781515887,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d3d1",
+        "value": "22f21b8e1526676e19848",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1785436791,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_cda0",
+        "value": "2ee7a7d8cfa4dbc162429b621241498c1bfe9dd1",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1801316005,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://tracker-heavy.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "tracker-heavy.de"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adsrvr.org",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "casalemedia.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.net",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "hotjar.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "mixpanel.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "openx.net",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "outbrain.com",
+        "referer": "https://tracker-heavy.de/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "pubmatic.com",
+        "referer": "https://tracker-heavy.de/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "casalemedia.com",
+      "facebook.com",
+      "facebook.net",
+      "hotjar.com",
+      "mixpanel.com",
+      "openx.net",
+      "outbrain.com",
+      "pubmatic.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 11,
+    "total_third_party_domains": 9,
+    "total_requests": 10,
+    "new_cookies_after_interaction": [
+      {
+        "name": "session_id",
+        "value": "55a70ff1931b83b631e803e36eb0",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1780712247,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "32f93226f3e33471ba67e0d279",
+        "domain": ".tracker-heavy.de",
+        "path": "/",
+        "expires": 1797564717,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_f239",
+        "value": "d204ec087fccce0722c4e0dbe4e7c1ea",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1795554137,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d69d",
+        "value": "e0588e2aa5d129c9b6c448bf7a7",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1798186051,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_11f1",
+        "value": "f0bf8cb0ef1dd7bce9599459be112efb3820d212aa4e6",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1778823019,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_bbd3",
+        "value": "47e088895402d96859d3a79e6a3f9532e7",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1799037308,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e901",
+        "value": "51c2a9e241efc325cb667b26dbaf06548a8131ac0",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1781515887,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d3d1",
+        "value": "22f21b8e1526676e19848",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1785436791,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_cda0",
+        "value": "2ee7a7d8cfa4dbc162429b621241498c1bfe9dd1",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1801316005,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "facebook.net",
+      "hotjar.com",
+      "pubmatic.com"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

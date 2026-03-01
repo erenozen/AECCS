@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from config import PROCESSED_DIR
+from config import DEFAULT_SOURCE_MODE, PROCESSED_DIR, build_provenance, get_dataset_layout
 
 
 # ── Core DP mechanisms ────────────────────────────────────────────────────────
@@ -204,6 +204,37 @@ def _run_rr_trials(
     }
 
 
+def _recommend_epsilon(privacy_utility: dict, epsilons: list[float]) -> float:
+    """Choose a publication epsilon from the computed MAE curves."""
+    key_metrics = [
+        "pre_consent_tracker_percentage",
+        "sites_with_reject_button_percentage",
+        "sites_with_dark_patterns_percentage",
+        "avg_compliance_score",
+    ]
+    if "avg_pre_consent_trackers" in privacy_utility:
+        key_metrics.append("avg_pre_consent_trackers")
+
+    for eps in sorted(epsilons):
+        ok = 0
+        total_checked = 0
+        for metric_name in key_metrics:
+            if metric_name not in privacy_utility:
+                continue
+            data = privacy_utility[metric_name]
+            true_v = data.get("true_value", 0)
+            eps_data = data.get("by_epsilon", {}).get(str(eps), {})
+            mae = eps_data.get("mae", float("inf"))
+            total_checked += 1
+            if true_v > 0 and mae / true_v < 0.05:
+                ok += 1
+            elif true_v == 0 and mae < 1:
+                ok += 1
+        if total_checked > 0 and ok / total_checked >= 0.6:
+            return eps
+    return 1.0
+
+
 # ── DP Report Generator ──────────────────────────────────────────────────────
 
 
@@ -212,14 +243,17 @@ def generate_dp_report(
     epsilons: list[float] | None = None,
     output_path: str | None = None,
     trials: int = 100,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> dict:
     """Generate differentially private versions of aggregate metrics.
 
     Returns the full report dict and saves it to disk.
     """
-    m_path = Path(metrics_path) if metrics_path else PROCESSED_DIR / "aggregate_metrics.json"
-    s_path = PROCESSED_DIR / "compliance_scores.csv"
-    out = Path(output_path) if output_path else PROCESSED_DIR / "dp_aggregate_metrics.json"
+    layout = get_dataset_layout(source_mode)
+    m_path = Path(metrics_path) if metrics_path else layout.processed_dir / "aggregate_metrics.json"
+    s_path = layout.processed_dir / "compliance_scores.csv"
+    out = Path(output_path) if output_path else layout.processed_dir / "dp_aggregate_metrics.json"
 
     if epsilons is None:
         epsilons = [0.1, 0.5, 1.0, 2.0, 5.0, 10.0]
@@ -372,7 +406,7 @@ def generate_dp_report(
 
     # ── DP-protected report at recommended epsilon ────────────────────────
 
-    rec_eps = 1.0
+    rec_eps = _recommend_epsilon(privacy_utility, epsilons)
     dp_metrics: dict = {}
     for metric_name, data in privacy_utility.items():
         by_eps_data = data.get("by_epsilon", {})
@@ -385,7 +419,9 @@ def generate_dp_report(
         "metadata": {
             "epsilons_tested": epsilons,
             "num_trials": trials,
+            "trials_per_epsilon": trials,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "recommended_epsilon": rec_eps,
             "description": "Differentially private versions of aggregate compliance metrics",
         },
         "privacy_utility_tradeoff": privacy_utility,
@@ -395,6 +431,11 @@ def generate_dp_report(
             "description": f"Aggregate metrics protected with epsilon={rec_eps} (recommended balance)",
             "metrics": dp_metrics,
         },
+        **build_provenance(
+            source_mode=metrics.get("source_mode", source_mode),
+            run_id=metrics.get("run_id", run_id),
+            site_list_source=metrics.get("site_list_source"),
+        ),
     }
 
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -459,27 +500,7 @@ def _print_summary(report: dict, epsilons: list[float]) -> None:
             row += f" {eps_data.get('mae', 0):>10.2f}"
         print(row)
 
-    # Recommended epsilon
-    # Find epsilon where MAE < 5% of true value for most metrics
-    rec_eps = 1.0
-    for eps in sorted(epsilons):
-        ok = 0
-        total_checked = 0
-        for m in key_metrics:
-            if m not in pu:
-                continue
-            data = pu[m]
-            true_v = data["true_value"]
-            eps_data = data["by_epsilon"].get(str(eps), {})
-            mae = eps_data.get("mae", float("inf"))
-            total_checked += 1
-            if true_v > 0 and mae / true_v < 0.05:
-                ok += 1
-            elif true_v == 0 and mae < 1:
-                ok += 1
-        if total_checked > 0 and ok / total_checked >= 0.6:
-            rec_eps = eps
-            break
+    rec_eps = _recommend_epsilon(pu, epsilons)
 
     print(f"\nRecommended epsilon for publication: {rec_eps}")
     print(f"  At ε={rec_eps}, MAE < 5% of true value for most key metrics.")
@@ -507,6 +528,18 @@ def main() -> None:
     parser.add_argument("--output", type=str, default=None, help="Output DP report JSON path")
     parser.add_argument("--epsilons", nargs="+", type=float, default=None, help="Epsilon values")
     parser.add_argument("--trials", type=int, default=100, help="Number of trials per epsilon")
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
     generate_dp_report(
@@ -514,6 +547,8 @@ def main() -> None:
         epsilons=args.epsilons,
         output_path=args.output,
         trials=args.trials,
+        source_mode=args.source_mode,
+        run_id=args.run_id,
     )
 
 

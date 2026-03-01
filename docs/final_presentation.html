@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AECCS Final Presentation</title>
+  <style>
+    @page { size: 16:9; margin: 12mm; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; margin: 0; color: #111827; }
+    section { page-break-after: always; padding: 2.2rem 2.8rem; min-height: 92vh; }
+    h1, h2 { color: #0f4c81; margin-top: 0; }
+    ul { font-size: 1.02rem; line-height: 1.45; }
+    .lede { font-size: 1.15rem; max-width: 54rem; }
+    .warning { color: #9a3412; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.98rem; }
+    th, td { border: 1px solid #cbd5e1; padding: 0.5rem 0.65rem; text-align: left; }
+    th { background: #eff6ff; }
+  </style>
+</head>
+<body>
+  <section>
+    <h1>AECCS Final Presentation</h1>
+    <p class="lede">Automated GDPR compliance analysis and PET evaluation for cookie consent systems.</p>
+    <p>CS475 Privacy-Enhancing Technologies</p>
+  </section>
+
+  <section>
+    <h2>Research Question</h2>
+    <ul>
+      <li>Do cookie consent systems actually protect users from non-essential tracking?</li>
+      <li>How often do banners rely on dark patterns?</li>
+      <li>Which PETs reduce exposure most effectively when consent systems fail?</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What Was Built</h2>
+    <ul>
+      <li>Crawler with no-interaction, accept, and reject states.</li>
+      <li>Tracker classification using filter lists and heuristics.</li>
+      <li>Dark-pattern detection and GDPR-oriented compliance scoring.</li>
+      <li>Browser PET evaluation, CMP comparison, and differential privacy reporting.</li>
+      <li>Visualization and HTML reporting pipeline with provenance checks.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Current Repository Status</h2>
+    <table>
+      <thead>
+        <tr><th>Area</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Software pipeline</td><td>Implemented</td></tr>
+        <tr><td>Mock/demo dataset</td><td>Reproducible</td></tr>
+        <tr><td>Real study list</td><td>Prepared with 100 domains</td></tr>
+        <tr><td>Real crawl outputs</td><td>Not yet executed</td></tr>
+        <tr><td>Final empirical results</td><td>Pending real study</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Current Demo Findings</h2>
+    <ul>
+      <li>84.2% pre-consent tracker violations in the mock dataset.</li>
+      <li>75.0% of mock sites show at least one dark pattern.</li>
+      <li>Average mock compliance score is 50.8 / 100.</li>
+      <li>Brave Shields is the strongest browser PET in the mock comparison.</li>
+      <li>Didomi is the strongest CMP in the mock comparison.</li>
+    </ul>
+    <p class="warning">These values are demonstration outputs from <code>data/mock/</code>, not final real-study claims.</p>
+  </section>
+
+  <section>
+    <h2>Final Actions Before Submission</h2>
+    <ul>
+      <li>Run the real crawl and PET evaluation under <code>data/real/</code>.</li>
+      <li>Regenerate every figure and report from real processed data only.</li>
+      <li>Replace the demo findings in the report and slides with real results and citations.</li>
+    </ul>
+  </section>
+</body>
+</html>

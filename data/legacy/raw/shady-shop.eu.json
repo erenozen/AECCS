@@ -1,0 +1,1141 @@
+{
+  "domain": "shady-shop.eu",
+  "category": "E-Commerce",
+  "region": "EU",
+  "rank": 9019,
+  "crawl_timestamp": "2026-03-01T11:36:08.938296+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": null,
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div class=\"cookie-wall\" role=\"dialog\">\n  <h2>This website uses cookies</h2>\n  <p>shady-shop.eu uses cookies. By continuing to browse, you agree.</p>\n  <button id=\"ok-btn\" class=\"accept-button\"\n          style=\"width:250px; height:44px; font-size:16px; font-weight:500;\n                 background-color:#059669; color:#fff;\">\n    OK, I Agree\n  </button>\n  <a href=\"/cookie-settings\" style=\"font-size:12px;\">Manage Settings</a>\n</div>",
+    "text_content": "This website uses cookies \n   shady-shop.eu uses cookies. By continuing to browse, you agree. \n   \n    OK, I Agree\n   \n   Manage Settings",
+    "buttons": [
+      {
+        "text": "OK, I Agree",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#ok-btn",
+        "computed_styles": {
+          "width": "250px",
+          "height": "44px",
+          "background_color": "#059669",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": false,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 999
+  },
+  "screenshot_path": "data/raw/screenshots/shady-shop.eu.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "remember_me",
+        "value": "5b6f9347432dc39aa3ce56812be",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1793918310,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "d97598216611c413953fe4b1df19",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1800997048,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "498e9efa063e03d5ce07c99dc516bee72b17357ce3e0c396",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1795306212,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "0cb6627ef5360393bec9f0bd12205a349711487b5e3bfc",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1782189393,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "58156f71ed8481bc037cf0d494f0d6067",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1779899808,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_509e",
+        "value": "c9c5d66bb016badf799826be20cf1385",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1785609187,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_444a",
+        "value": "19542777f7d30f49",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1782905549,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_2c4d",
+        "value": "32da3a287583fff0dd803181",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1774967366,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_55d6",
+        "value": "e25c56a7f920ee09c8c8953d0b6f11e38986bd80787",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1781400841,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_433c",
+        "value": "35fb7f6181573c3dfe3eaa9c516827e32726cb7",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1775757410,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d021",
+        "value": "dee568b1ee99f0b5767d4722cee1e95a6789f1459e9d6552",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1777173447,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_eb64",
+        "value": "14147e4efcea23dc0ef8c0d03f9b8d41bd76",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1781195280,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_fb15",
+        "value": "b31257ba1be01b838dafa",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1780620063,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://shady-shop.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "shady-shop.eu"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "adnxs.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "casalemedia.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "criteo.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "facebook.net",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "hotjar.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "newrelic.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "openx.net",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "segment.io",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "taboola.com",
+        "referer": "https://shady-shop.eu/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "criteo.com",
+      "facebook.net",
+      "hotjar.com",
+      "newrelic.com",
+      "openx.net",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 13,
+    "total_third_party_domains": 10,
+    "total_requests": 11
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "user_pref",
+        "value": "b9a358fedea7a9843fec67362fa562edd9a043d685",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1795017442,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "c64073a073e8c1f928f06c55c1038fd6b4256830d",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1797706251,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "67243c341ca2b411bc60d92bc394580434a741f87e830765",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1790708796,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "3f6359a5cf12d73297b93c44525960bcc85a5b8df11b",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1784974500,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "813d1e7a82d601fbe45e924acf",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1784825761,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "735bfe2b7527f0b3171991ae5034e6b5",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1798104442,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "remember_me",
+        "value": "12b441c9c5c94cda72cf1c22d5e0",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1789538547,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "__cfduid",
+        "value": "5818667488edffdbd87ca865057ab38ff62b07804154e9",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1773493587,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7dcc",
+        "value": "59bb2d1d17b5d4dab5",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1794916841,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_2fb5",
+        "value": "f6da1d8b174382bd",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1772476760,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_817d",
+        "value": "9711b29fcc351b3dae3c2",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1774158203,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_4496",
+        "value": "43f47155c8da2f929f6aa45f8b48",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1779439224,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_701a",
+        "value": "7759ae515e275e2528c799bb73b",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1792532832,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_a4fe",
+        "value": "164992249b8f92ac01c2567a3242d6b28c0218637673e65e",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1785786433,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_db66",
+        "value": "5af0e235809613704162",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1777426817,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6d0f",
+        "value": "2681c5ba6c228a0aa606b1ce8cbdf126cd10fb489d",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1786960989,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4175",
+        "value": "454d82505a950b311ba64fb3ddb87152fae6f1e",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1797509796,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_62bb",
+        "value": "d613448d3c57c6bc4a9ea",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1781518170,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3ca4",
+        "value": "9f530514bd9a56e05577b3ba40dfa853f545a09256f0f",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1791039578,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f686",
+        "value": "13f922cb66c69551efc586d",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1788972415,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d7e2",
+        "value": "0dcaa196630398196092aaf09c683e7b37",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1796285916,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_2109",
+        "value": "39fcf8195e27f00adfd164b1ca807b46dc5b8a6124dc1",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1778037705,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://shady-shop.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "shady-shop.eu"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "adnxs.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "casalemedia.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "cloudflare.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.net",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "googlesyndication.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "hotjar.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "moatads.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "newrelic.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "optimizely.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "quantserve.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "rubiconproject.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "scorecardresearch.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "segment.io",
+        "referer": "https://shady-shop.eu/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "cloudflare.com",
+      "facebook.com",
+      "facebook.net",
+      "googlesyndication.com",
+      "hotjar.com",
+      "moatads.com",
+      "newrelic.com",
+      "optimizely.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "scorecardresearch.com",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 22,
+    "total_third_party_domains": 15,
+    "total_requests": 16,
+    "new_cookies_after_interaction": [
+      {
+        "name": "theme",
+        "value": "67243c341ca2b411bc60d92bc394580434a741f87e830765",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1790708796,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "813d1e7a82d601fbe45e924acf",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1784825761,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "__cfduid",
+        "value": "5818667488edffdbd87ca865057ab38ff62b07804154e9",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1773493587,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7dcc",
+        "value": "59bb2d1d17b5d4dab5",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1794916841,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_2fb5",
+        "value": "f6da1d8b174382bd",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1772476760,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_817d",
+        "value": "9711b29fcc351b3dae3c2",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1774158203,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_4496",
+        "value": "43f47155c8da2f929f6aa45f8b48",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1779439224,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_701a",
+        "value": "7759ae515e275e2528c799bb73b",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1792532832,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_a4fe",
+        "value": "164992249b8f92ac01c2567a3242d6b28c0218637673e65e",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1785786433,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_db66",
+        "value": "5af0e235809613704162",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1777426817,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6d0f",
+        "value": "2681c5ba6c228a0aa606b1ce8cbdf126cd10fb489d",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1786960989,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4175",
+        "value": "454d82505a950b311ba64fb3ddb87152fae6f1e",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1797509796,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_62bb",
+        "value": "d613448d3c57c6bc4a9ea",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1781518170,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3ca4",
+        "value": "9f530514bd9a56e05577b3ba40dfa853f545a09256f0f",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1791039578,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f686",
+        "value": "13f922cb66c69551efc586d",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1788972415,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d7e2",
+        "value": "0dcaa196630398196092aaf09c683e7b37",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1796285916,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_2109",
+        "value": "39fcf8195e27f00adfd164b1ca807b46dc5b8a6124dc1",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1778037705,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "cloudflare.com",
+      "facebook.com",
+      "googlesyndication.com",
+      "moatads.com",
+      "optimizely.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "scorecardresearch.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "consent_given",
+        "value": "4b94ba2c29d43d92058d87efa9886ead77",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1785114969,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "5434cca57eeddc833a61",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1783425259,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "88bdf0934bba3b709813d1e8039978c5a",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1778959525,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "1383799d1ec3c970c97288f4d34847ff75f72164e7a8",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1778497475,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "remember_me",
+        "value": "3858149922ccd92ffacc4e7d4255b7",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1786639197,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_274d",
+        "value": "3b455c58338d1357b7f0abe74961",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1793830944,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8747",
+        "value": "5c62243139c4840c1cb5",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1801005038,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_b353",
+        "value": "5ab4b0166708e80608cc79ab9fc8cd1e9fcc647",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1801914607,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_a1a5",
+        "value": "e6496052d9c8a3deeb932418f0251dea32f3ec0ef1f",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1773221652,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d307",
+        "value": "36d12eb1c179b53fc54170c6d5fd",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1786936187,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3bac",
+        "value": "0fbe0d20827093b49d6282ca5ec0365d90007b268cb215",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1779841129,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f17f",
+        "value": "29a47e2a59b7bd332f3116e132a5fa89ec26a9e0e603",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1778481261,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ad36",
+        "value": "975ad9739814ce5e",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1780934491,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://shady-shop.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "shady-shop.eu"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "cloudflare.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "facebook.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "googlesyndication.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "hotjar.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "mixpanel.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "optimizely.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "quantserve.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "rubiconproject.com",
+        "referer": "https://shady-shop.eu/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "segment.io",
+        "referer": "https://shady-shop.eu/"
+      }
+    ],
+    "third_party_domains": [
+      "casalemedia.com",
+      "cloudflare.com",
+      "facebook.com",
+      "googlesyndication.com",
+      "hotjar.com",
+      "mixpanel.com",
+      "optimizely.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 13,
+    "total_third_party_domains": 10,
+    "total_requests": 11,
+    "new_cookies_after_interaction": [
+      {
+        "name": "csrf_token",
+        "value": "88bdf0934bba3b709813d1e8039978c5a",
+        "domain": ".shady-shop.eu",
+        "path": "/",
+        "expires": 1778959525,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_274d",
+        "value": "3b455c58338d1357b7f0abe74961",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1793830944,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8747",
+        "value": "5c62243139c4840c1cb5",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1801005038,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_b353",
+        "value": "5ab4b0166708e80608cc79ab9fc8cd1e9fcc647",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1801914607,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_a1a5",
+        "value": "e6496052d9c8a3deeb932418f0251dea32f3ec0ef1f",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1773221652,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d307",
+        "value": "36d12eb1c179b53fc54170c6d5fd",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1786936187,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3bac",
+        "value": "0fbe0d20827093b49d6282ca5ec0365d90007b268cb215",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1779841129,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f17f",
+        "value": "29a47e2a59b7bd332f3116e132a5fa89ec26a9e0e603",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1778481261,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ad36",
+        "value": "975ad9739814ce5e",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1780934491,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "cloudflare.com",
+      "facebook.com",
+      "googlesyndication.com",
+      "mixpanel.com",
+      "optimizely.com",
+      "quantserve.com",
+      "rubiconproject.com"
+    ],
+    "reject_button_found": false,
+    "reject_successful": false
+  }
+}

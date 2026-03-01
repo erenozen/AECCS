@@ -1,0 +1,44 @@
+{
+  "domain": "wall-site.nl",
+  "category": "Entertainment",
+  "overall_score": 2.0,
+  "criterion_scores": {
+    "no_pre_consent_trackers": {
+      "score": 0,
+      "weight": 0.25,
+      "weighted_score": 0.0,
+      "details": "13 pre-consent trackers found"
+    },
+    "reject_option_available": {
+      "score": 0,
+      "weight": 0.2,
+      "weighted_score": 0.0,
+      "details": "No reject option available"
+    },
+    "equal_accept_reject_effort": {
+      "score": 0,
+      "weight": 0.15,
+      "weighted_score": 0.0,
+      "details": "No reject option"
+    },
+    "no_dark_patterns": {
+      "score": 0,
+      "weight": 0.15,
+      "weighted_score": 0.0,
+      "details": "3 dark patterns detected: missing_reject, forced_action, multi_layer_rejection"
+    },
+    "post_reject_compliance": {
+      "score": 0,
+      "weight": 0.15,
+      "weighted_score": 0.0,
+      "details": "No reject option available"
+    },
+    "transparent_information": {
+      "score": 20,
+      "weight": 0.1,
+      "weighted_score": 2.0,
+      "details": "clear language"
+    }
+  },
+  "grade": "F"
+}

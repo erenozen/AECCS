@@ -1,0 +1,319 @@
+{
+  "summary": {
+    "total_sites_crawled": 23,
+    "successful_crawls": 22,
+    "failed_crawls": 1,
+    "sites_with_banners": 19,
+    "sites_without_banners": 3
+  },
+  "pre_consent_violations": {
+    "sites_with_pre_consent_trackers": 18,
+    "percentage": 81.8,
+    "avg_pre_consent_trackers_per_site": 6.5,
+    "median_pre_consent_trackers": 4,
+    "by_category": {
+      "E-Commerce": {
+        "count": 3,
+        "total": 3,
+        "percentage": 100.0,
+        "avg_trackers": 8
+      },
+      "Education": {
+        "count": 1,
+        "total": 2,
+        "percentage": 50.0,
+        "avg_trackers": 1
+      },
+      "Entertainment": {
+        "count": 3,
+        "total": 3,
+        "percentage": 100.0,
+        "avg_trackers": 10
+      },
+      "Finance": {
+        "count": 1,
+        "total": 2,
+        "percentage": 50.0,
+        "avg_trackers": 1.5
+      },
+      "Government": {
+        "count": 2,
+        "total": 3,
+        "percentage": 66.7,
+        "avg_trackers": 0.7
+      },
+      "News": {
+        "count": 4,
+        "total": 4,
+        "percentage": 100.0,
+        "avg_trackers": 10.5
+      },
+      "Social Media": {
+        "count": 1,
+        "total": 1,
+        "percentage": 100.0,
+        "avg_trackers": 6
+      },
+      "Technology": {
+        "count": 1,
+        "total": 1,
+        "percentage": 100.0,
+        "avg_trackers": 5
+      },
+      "Unknown": {
+        "count": 2,
+        "total": 3,
+        "percentage": 66.7,
+        "avg_trackers": 9.7
+      }
+    }
+  },
+  "tracker_analysis": {
+    "total_unique_trackers": 473,
+    "total_unique_tracker_domains": 64,
+    "top_tracker_vendors": [
+      {
+        "vendor": "Google",
+        "sites_present": 16,
+        "percentage": 72.7,
+        "cookie_count": 60
+      },
+      {
+        "vendor": "OpenX",
+        "sites_present": 14,
+        "percentage": 63.6,
+        "cookie_count": 22
+      },
+      {
+        "vendor": "Meta",
+        "sites_present": 13,
+        "percentage": 59.1,
+        "cookie_count": 31
+      },
+      {
+        "vendor": "Hotjar",
+        "sites_present": 13,
+        "percentage": 59.1,
+        "cookie_count": 24
+      },
+      {
+        "vendor": "Taboola",
+        "sites_present": 13,
+        "percentage": 59.1,
+        "cookie_count": 25
+      },
+      {
+        "vendor": "Outbrain",
+        "sites_present": 13,
+        "percentage": 59.1,
+        "cookie_count": 19
+      },
+      {
+        "vendor": "Quantcast",
+        "sites_present": 13,
+        "percentage": 59.1,
+        "cookie_count": 22
+      },
+      {
+        "vendor": "Amazon",
+        "sites_present": 13,
+        "percentage": 59.1,
+        "cookie_count": 17
+      },
+      {
+        "vendor": "Mixpanel",
+        "sites_present": 13,
+        "percentage": 59.1,
+        "cookie_count": 21
+      },
+      {
+        "vendor": "New Relic",
+        "sites_present": 12,
+        "percentage": 54.5,
+        "cookie_count": 17
+      },
+      {
+        "vendor": "Chartbeat",
+        "sites_present": 12,
+        "percentage": 54.5,
+        "cookie_count": 17
+      },
+      {
+        "vendor": "PubMatic",
+        "sites_present": 11,
+        "percentage": 50.0,
+        "cookie_count": 31
+      },
+      {
+        "vendor": "Segment",
+        "sites_present": 11,
+        "percentage": 50.0,
+        "cookie_count": 20
+      },
+      {
+        "vendor": "Criteo",
+        "sites_present": 11,
+        "percentage": 50.0,
+        "cookie_count": 18
+      },
+      {
+        "vendor": "Rubicon Project",
+        "sites_present": 10,
+        "percentage": 45.5,
+        "cookie_count": 20
+      }
+    ],
+    "tracker_categories": {
+      "Advertising": {
+        "count": 253,
+        "percentage": 53.5
+      },
+      "Analytics": {
+        "count": 163,
+        "percentage": 34.5
+      },
+      "Social": {
+        "count": 33,
+        "percentage": 7.0
+      },
+      "Fingerprinting": {
+        "count": 24,
+        "percentage": 5.1
+      }
+    },
+    "before_vs_after_consent": {
+      "avg_trackers_no_interaction": 6.5,
+      "avg_trackers_after_accept": 15.3,
+      "avg_trackers_after_reject": 9.5,
+      "reject_reduces_trackers_percentage": 60.0,
+      "reject_eliminates_all_trackers_percentage": 20.0
+    }
+  },
+  "consent_banner_analysis": {
+    "sites_with_reject_button": {
+      "count": 15,
+      "percentage": 78.9
+    },
+    "sites_without_reject_button": {
+      "count": 4,
+      "percentage": 21.1
+    },
+    "avg_accept_clicks": 1,
+    "avg_reject_clicks": 1.3,
+    "sites_with_equal_click_effort": {
+      "count": 12,
+      "percentage": 63.2
+    }
+  },
+  "dark_patterns": {
+    "sites_with_any_dark_pattern": {
+      "count": 18,
+      "percentage": 78.3
+    },
+    "avg_dark_patterns_per_site": 1.1,
+    "by_type": {
+      "missing_reject": {
+        "count": 8,
+        "percentage": 34.8
+      },
+      "multi_layer_rejection": {
+        "count": 7,
+        "percentage": 30.4
+      },
+      "hidden_reject": {
+        "count": 2,
+        "percentage": 8.7
+      },
+      "asymmetric_buttons": {
+        "count": 2,
+        "percentage": 8.7
+      },
+      "preselected_checkboxes": {
+        "count": 2,
+        "percentage": 8.7
+      },
+      "forced_action": {
+        "count": 2,
+        "percentage": 8.7
+      },
+      "confusing_language": {
+        "count": 2,
+        "percentage": 8.7
+      }
+    }
+  },
+  "compliance_scores": {
+    "avg_score": 46.3,
+    "median_score": 53.5,
+    "std_dev": 27.4,
+    "min_score": 2.0,
+    "max_score": 86.5,
+    "grade_distribution": {
+      "A": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "B": {
+        "count": 4,
+        "percentage": 18.2
+      },
+      "C": {
+        "count": 3,
+        "percentage": 13.6
+      },
+      "D": {
+        "count": 6,
+        "percentage": 27.3
+      },
+      "F": {
+        "count": 9,
+        "percentage": 40.9
+      }
+    },
+    "by_category": {
+      "E-Commerce": {
+        "avg_score": 42.3,
+        "median": 53.5
+      },
+      "Education": {
+        "avg_score": 51.5,
+        "median": 51.5
+      },
+      "Entertainment": {
+        "avg_score": 13.8,
+        "median": 2.0
+      },
+      "Finance": {
+        "avg_score": 76.8,
+        "median": 76.8
+      },
+      "Government": {
+        "avg_score": 79.8,
+        "median": 76.5
+      },
+      "News": {
+        "avg_score": 46.1,
+        "median": 46.8
+      },
+      "Social Media": {
+        "avg_score": 59.5,
+        "median": 59.5
+      },
+      "Technology": {
+        "avg_score": 56.0,
+        "median": 56.0
+      }
+    }
+  },
+  "cmp_analysis_preview": {
+    "cmp_distribution": {
+      "Custom/Unknown": 8,
+      "OneTrust": 4,
+      "TrustArc": 3,
+      "Cookiebot": 2,
+      "Didomi": 2,
+      "Usercentrics": 2,
+      "Quantcast": 1
+    }
+  }
+}

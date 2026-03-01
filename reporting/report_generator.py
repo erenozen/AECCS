@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import PROCESSED_DIR
+from config import DEFAULT_SOURCE_MODE, PROCESSED_DIR, get_dataset_layout
 
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
@@ -132,6 +132,84 @@ def _df_to_html(df: pd.DataFrame, max_rows: int = 30) -> str:
                                       float_format=lambda x: f"{x:.1f}")
 
 
+def _collect_source_modes(processed_dir: Path) -> tuple[set[str], list[str]]:
+    """Collect source_mode values from processed JSON and CSV artifacts."""
+    modes: set[str] = set()
+    missing: list[str] = []
+
+    for path in sorted(processed_dir.glob("*_classified.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        mode = data.get("source_mode") if isinstance(data, dict) else None
+        if mode:
+            modes.add(str(mode))
+        else:
+            missing.append(path.name)
+
+    for path in sorted(processed_dir.glob("*_dark_patterns.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        mode = data.get("source_mode") if isinstance(data, dict) else None
+        if mode:
+            modes.add(str(mode))
+        else:
+            missing.append(path.name)
+
+    for path in sorted(processed_dir.glob("*_score.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        mode = data.get("source_mode") if isinstance(data, dict) else None
+        if mode:
+            modes.add(str(mode))
+        else:
+            missing.append(path.name)
+
+    for name in (
+        "aggregate_metrics.json",
+        "dp_aggregate_metrics.json",
+        "cmp_comparison_detailed.json",
+        "pets_summary.json",
+    ):
+        path = processed_dir / name
+        if not path.exists():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        mode = data.get("source_mode") if isinstance(data, dict) else None
+        if mode:
+            modes.add(str(mode))
+        else:
+            missing.append(name)
+
+    for name in ("compliance_scores.csv", "pets_effectiveness.csv", "cmp_comparison.csv"):
+        path = processed_dir / name
+        if not path.exists():
+            continue
+        df = pd.read_csv(path)
+        if df.empty:
+            continue
+        if "source_mode" not in df.columns:
+            missing.append(name)
+            continue
+        modes.update({str(v) for v in df["source_mode"].dropna().unique()})
+
+    return modes, missing
+
+
+def _validate_processed_inputs(processed_dir: Path, expected_source_mode: str) -> str:
+    """Reject mixed or provenance-free processed directories."""
+    modes, missing = _collect_source_modes(processed_dir)
+    if missing:
+        raise ValueError(
+            "Processed inputs are missing provenance fields for: " + ", ".join(sorted(missing))
+        )
+    if len(modes) > 1:
+        raise ValueError(
+            "Mixed processed inputs detected; report generation requires a single source_mode."
+        )
+    if modes and modes != {expected_source_mode}:
+        raise ValueError(
+            f"Processed inputs are tagged as {sorted(modes)} but source_mode={expected_source_mode!r} was requested."
+        )
+    return next(iter(modes)) if modes else expected_source_mode
+
+
 # ── Report builder ────────────────────────────────────────────────────────────
 
 
@@ -139,11 +217,14 @@ def generate_html_report(
     processed_dir: str | None = None,
     figures_dir: str | None = None,
     output_path: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
 ) -> Path:
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
-    f_dir = Path(figures_dir) if figures_dir else Path("reporting/figures")
-    out = Path(output_path) if output_path else Path("reporting/compliance_report.html")
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
+    f_dir = Path(figures_dir) if figures_dir else layout.figures_dir
+    out = Path(output_path) if output_path else layout.html_report
     out.parent.mkdir(parents=True, exist_ok=True)
+    effective_source_mode = _validate_processed_inputs(p_dir, source_mode)
 
     # ── Load data ─────────────────────────────────────────────────────────
     metrics: dict = {}
@@ -211,7 +292,7 @@ def generate_html_report(
   <div class="container">
     <h1>GDPR Cookie Consent Compliance Analysis Report</h1>
     <p class="subtitle">Automated Analysis of Privacy Risks on Popular Websites</p>
-    <p class="meta">Generated: {timestamp} &nbsp;|&nbsp; Sites analyzed: {n_sites} &nbsp;|&nbsp; PETs evaluated: {n_pets}</p>
+    <p class="meta">Generated: {timestamp} &nbsp;|&nbsp; Dataset: {effective_source_mode} &nbsp;|&nbsp; Sites analyzed: {n_sites} &nbsp;|&nbsp; PETs evaluated: {n_pets}</p>
   </div>
 </header>
 """)
@@ -552,12 +633,19 @@ def main() -> None:
                         help="Output HTML path")
     parser.add_argument("--open", action="store_true",
                         help="Open report in browser after generation")
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
     args = parser.parse_args()
 
     path = generate_html_report(
         processed_dir=args.processed_dir,
         figures_dir=args.figures_dir,
         output_path=args.output,
+        source_mode=args.source_mode,
     )
 
     if args.open:

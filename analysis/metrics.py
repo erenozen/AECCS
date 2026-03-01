@@ -21,7 +21,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import PROCESSED_DIR, RAW_DIR
+from config import (
+    DEFAULT_SOURCE_MODE,
+    PROCESSED_DIR,
+    RAW_DIR,
+    build_provenance,
+    get_dataset_layout,
+    unwrap_payload,
+)
 
 
 def _safe_pct(num: int, denom: int) -> float:
@@ -40,14 +47,19 @@ def _safe_stats(values: list[float]) -> dict:
     }
 
 
-def compute_aggregate_metrics(processed_dir: str | None = None) -> dict:
+def compute_aggregate_metrics(
+    processed_dir: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
+) -> dict:
     """Compute aggregate statistics across all processed sites.
 
     Loads compliance_scores.csv and per-site processed data to compute
     comprehensive metrics.
     """
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
-    raw_dir = RAW_DIR
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
+    raw_dir = layout.raw_dir
 
     # ── Load compliance scores CSV ────────────────────────────────────────
     scores_csv = p_dir / "compliance_scores.csv"
@@ -128,7 +140,8 @@ def compute_aggregate_metrics(processed_dir: str | None = None) -> dict:
 
     for cf in all_classified_files:
         try:
-            cookies = json.loads(cf.read_text(encoding="utf-8"))
+            cookies_doc = json.loads(cf.read_text(encoding="utf-8"))
+            cookies = unwrap_payload(cookies_doc, "cookies")
         except Exception:
             continue
         domain_stem = cf.stem.replace("_classified", "")
@@ -332,18 +345,53 @@ def compute_aggregate_metrics(processed_dir: str | None = None) -> dict:
         "dark_patterns": dark_patterns,
         "compliance_scores": compliance_scores_section,
         "cmp_analysis_preview": {"cmp_distribution": cmp_distribution},
+        **build_provenance(
+            source_mode=source_mode,
+            run_id=run_id or _infer_run_id(sites),
+            site_list_source=_infer_site_list_source(sites),
+        ),
     }
 
 
+def _infer_run_id(sites: list[dict]) -> str | None:
+    run_ids = {
+        s.get("run_id")
+        for s in sites
+        if isinstance(s, dict) and s.get("run_id")
+    }
+    if len(run_ids) == 1:
+        return next(iter(run_ids))
+    return None
+
+
+def _infer_site_list_source(sites: list[dict]) -> str | None:
+    values = {
+        s.get("site_list_source")
+        for s in sites
+        if isinstance(s, dict) and s.get("site_list_source")
+    }
+    if len(values) == 1:
+        return next(iter(values))
+    return None
+
+
 def run_metrics(
-    processed_dir: str | None = None, output_path: str | None = None
+    processed_dir: str | None = None,
+    output_path: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> None:
     """Compute and save aggregate metrics to a JSON file."""
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
     out = Path(output_path) if output_path else p_dir / "aggregate_metrics.json"
     p_dir.mkdir(parents=True, exist_ok=True)
 
-    metrics = compute_aggregate_metrics(processed_dir)
+    metrics = compute_aggregate_metrics(
+        processed_dir=processed_dir,
+        source_mode=source_mode,
+        run_id=run_id,
+    )
 
     out.write_text(json.dumps(metrics, indent=2, default=str), encoding="utf-8")
     print(f"Metrics saved to {out}")
@@ -409,9 +457,26 @@ def main() -> None:
         "--output", type=str, default=None,
         help="Output JSON path (default: PROCESSED_DIR/aggregate_metrics.json)",
     )
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
-    run_metrics(processed_dir=args.processed_dir, output_path=args.output)
+    run_metrics(
+        processed_dir=args.processed_dir,
+        output_path=args.output,
+        source_mode=args.source_mode,
+        run_id=args.run_id,
+    )
 
 
 if __name__ == "__main__":

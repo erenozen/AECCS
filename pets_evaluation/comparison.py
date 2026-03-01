@@ -18,7 +18,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import PROCESSED_DIR
+from config import (
+    DEFAULT_SOURCE_MODE,
+    PROCESSED_DIR,
+    build_provenance,
+    get_dataset_layout,
+    infer_common_field,
+)
 
 
 # ── Load all PET results ──────────────────────────────────────────────────────
@@ -26,6 +32,7 @@ from config import PROCESSED_DIR
 
 def load_all_pet_results(
     processed_dir: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
 ) -> dict:
     """Load results from all three Phase 3 modules.
 
@@ -36,7 +43,8 @@ def load_all_pet_results(
       ``cmp_csv``       – DataFrame rows from cmp_comparison.csv
     Any file that does not exist is returned as ``None``.
     """
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
 
     results: dict = {}
 
@@ -198,24 +206,24 @@ def _build_dp_privacy_cost(dp_report: dict | None) -> dict:
         "recommended_epsilon": metadata.get("recommended_epsilon", None),
     }
 
-    # Extract per-epsilon utility from tradeoff
-    for eps_key, eps_data in tradeoff.items():
-        eps_val = eps_data.get("epsilon")
-        if eps_val is None:
+    # tradeoff format: metric_name -> {"true_value": ..., "by_epsilon": {...}}
+    per_epsilon_maes: dict[str, list[float]] = {}
+    for metric_data in tradeoff.values():
+        if not isinstance(metric_data, dict):
             continue
-        # Pick representative mean absolute error
-        count_section = eps_data.get("counting_queries", {})
-        mean_section = eps_data.get("mean_queries", {})
+        by_epsilon = metric_data.get("by_epsilon", {})
+        if not isinstance(by_epsilon, dict):
+            continue
+        for eps_key, eps_stats in by_epsilon.items():
+            if not isinstance(eps_stats, dict):
+                continue
+            per_epsilon_maes.setdefault(str(eps_key), []).append(float(eps_stats.get("mae", 0)))
 
-        count_maes = [v.get("mae", 0) for v in count_section.values()] if isinstance(count_section, dict) else []
-        mean_maes = [v.get("mae", 0) for v in mean_section.values()] if isinstance(mean_section, dict) else []
-
-        all_maes = count_maes + mean_maes
-        avg_mae = round(sum(all_maes) / len(all_maes), 3) if all_maes else 0
-
-        summary[f"epsilon_{eps_val}"] = {
+    for eps_key, maes in per_epsilon_maes.items():
+        avg_mae = round(sum(maes) / len(maes), 3) if maes else 0
+        summary[f"epsilon_{eps_key}"] = {
             "avg_mae": avg_mae,
-            "num_queries": len(all_maes),
+            "num_queries": len(maes),
         }
 
     return summary
@@ -317,7 +325,7 @@ def _build_user_recommendations(
         "Always click 'Reject All' when possible — some CMPs actually honour it."
     )
     recs.append(
-        "Differential privacy with moderate epsilon (≈1.0) can protect individual "
+        "Differential privacy with a moderate epsilon can protect individual "
         "browsing data when publishing aggregate compliance statistics."
     )
 
@@ -329,9 +337,10 @@ def _build_user_recommendations(
 
 def compare_all_pets(
     processed_dir: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
 ) -> dict:
     """Run the full comparison and return structured results."""
-    all_results = load_all_pet_results(processed_dir)
+    all_results = load_all_pet_results(processed_dir, source_mode=source_mode)
 
     browser_ranking = _build_browser_pets_ranking(all_results["browser_pets"])
     cmp_ranking = _build_cmp_as_pets_ranking(all_results["cmp_detailed"])
@@ -350,17 +359,48 @@ def compare_all_pets(
     }
 
 
+def _infer_upstream_provenance(all_results: dict) -> dict[str, str | None]:
+    """Infer shared provenance from upstream PET artifacts."""
+    primary_sources: list[dict | None] = []
+    if all_results.get("dp_report"):
+        primary_sources.append(all_results["dp_report"])
+    if all_results.get("cmp_detailed"):
+        primary_sources.append(all_results["cmp_detailed"])
+
+    secondary_sources: list[dict | None] = []
+    secondary_sources.extend(all_results.get("browser_pets") or [])
+    secondary_sources.extend(all_results.get("cmp_csv") or [])
+    return {
+        "run_id": infer_common_field(primary_sources, "run_id")
+        or infer_common_field(secondary_sources, "run_id"),
+        "site_list_source": infer_common_field(primary_sources, "site_list_source")
+        or infer_common_field(secondary_sources, "site_list_source"),
+    }
+
+
 def run_comparison(
     processed_dir: str | None = None,
     output_path: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> None:
     """Run the comparison and save results."""
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
     out = Path(output_path) if output_path else p_dir / "pets_summary.json"
     p_dir.mkdir(parents=True, exist_ok=True)
 
     print("Loading all PET evaluation results …")
-    summary = compare_all_pets(processed_dir)
+    all_results = load_all_pet_results(processed_dir, source_mode=source_mode)
+    summary = compare_all_pets(processed_dir, source_mode=source_mode)
+    upstream = _infer_upstream_provenance(all_results)
+    summary.update(
+        build_provenance(
+            source_mode=source_mode,
+            run_id=run_id or upstream.get("run_id"),
+            site_list_source=upstream.get("site_list_source"),
+        )
+    )
 
     out.write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
     print(f"PETs summary saved to {out}")
@@ -452,9 +492,26 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="AECCS PETs Comparison")
     parser.add_argument("--processed-dir", type=str, default=None, help="Processed data directory")
     parser.add_argument("--output", type=str, default=None, help="Output JSON path")
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
-    run_comparison(processed_dir=args.processed_dir, output_path=args.output)
+    run_comparison(
+        processed_dir=args.processed_dir,
+        output_path=args.output,
+        source_mode=args.source_mode,
+        run_id=args.run_id,
+    )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,477 @@
+{
+  "cmp_effectiveness": {
+    "Cookiebot": {
+      "site_count": 2,
+      "sites": [
+        "cleansite.de",
+        "shopmore.de"
+      ],
+      "compliance": {
+        "avg_score": 71.8,
+        "median_score": 71.8,
+        "min_score": 67.0,
+        "max_score": 76.5,
+        "std_dev": 6.7,
+        "grade_distribution": {
+          "A": 0,
+          "B": 1,
+          "C": 1,
+          "D": 0,
+          "F": 0
+        }
+      },
+      "pre_consent_tracking": {
+        "sites_with_pre_consent_trackers": 2,
+        "percentage": 100.0,
+        "avg_pre_consent_trackers": 1,
+        "avg_pre_consent_tracker_domains": 2
+      },
+      "reject_functionality": {
+        "sites_with_reject_button": 2,
+        "percentage": 100.0,
+        "avg_reject_clicks": 1,
+        "reject_actually_works": 1,
+        "reject_works_percentage": 50.0,
+        "description": "How often rejecting via this CMP actually reduces trackers"
+      },
+      "post_reject_effectiveness": {
+        "avg_tracker_reduction_after_reject": 0.17,
+        "sites_where_reject_eliminates_all_trackers": 0,
+        "sites_where_reject_has_no_effect": 1,
+        "avg_trackers_after_reject": 1.5
+      },
+      "dark_patterns": {
+        "sites_with_dark_patterns": 1,
+        "percentage": 50.0,
+        "most_common_pattern": "preselected_checkboxes",
+        "pattern_breakdown": {
+          "preselected_checkboxes": 1
+        }
+      },
+      "tcf_support": {
+        "sites_with_tcf": 0,
+        "percentage": 0.0
+      }
+    },
+    "Didomi": {
+      "site_count": 2,
+      "sites": [
+        "edu-portal.fr",
+        "socialnet.fr"
+      ],
+      "compliance": {
+        "avg_score": 64.2,
+        "median_score": 64.2,
+        "min_score": 59.5,
+        "max_score": 69.0,
+        "std_dev": 6.7,
+        "grade_distribution": {
+          "A": 0,
+          "B": 0,
+          "C": 1,
+          "D": 1,
+          "F": 0
+        }
+      },
+      "pre_consent_tracking": {
+        "sites_with_pre_consent_trackers": 2,
+        "percentage": 100.0,
+        "avg_pre_consent_trackers": 3,
+        "avg_pre_consent_tracker_domains": 4
+      },
+      "reject_functionality": {
+        "sites_with_reject_button": 2,
+        "percentage": 100.0,
+        "avg_reject_clicks": 1,
+        "reject_actually_works": 2,
+        "reject_works_percentage": 100.0,
+        "description": "How often rejecting via this CMP actually reduces trackers"
+      },
+      "post_reject_effectiveness": {
+        "avg_tracker_reduction_after_reject": 0.33,
+        "sites_where_reject_eliminates_all_trackers": 0,
+        "sites_where_reject_has_no_effect": 0,
+        "avg_trackers_after_reject": 3
+      },
+      "dark_patterns": {
+        "sites_with_dark_patterns": 1,
+        "percentage": 50.0,
+        "most_common_pattern": "asymmetric_buttons",
+        "pattern_breakdown": {
+          "asymmetric_buttons": 1
+        }
+      },
+      "tcf_support": {
+        "sites_with_tcf": 0,
+        "percentage": 0.0
+      }
+    },
+    "No CMP Detected": {
+      "site_count": 9,
+      "sites": [
+        "broken-crawl.net",
+        "clickbait.io",
+        "dark-patterns.shop",
+        "example.com",
+        "freestream.tv",
+        "lemonde.fr",
+        "minimal.org",
+        "shady-shop.eu",
+        "wall-site.nl"
+      ],
+      "compliance": {
+        "avg_score": 25.4,
+        "median_score": 22.8,
+        "min_score": 2.0,
+        "max_score": 59.5,
+        "std_dev": 23.1,
+        "grade_distribution": {
+          "A": 0,
+          "B": 0,
+          "C": 0,
+          "D": 2,
+          "F": 6
+        }
+      },
+      "pre_consent_tracking": {
+        "sites_with_pre_consent_trackers": 6,
+        "percentage": 66.7,
+        "avg_pre_consent_trackers": 6.8,
+        "avg_pre_consent_tracker_domains": 7.9
+      },
+      "reject_functionality": {
+        "sites_with_reject_button": 2,
+        "percentage": 22.2,
+        "avg_reject_clicks": 1,
+        "reject_actually_works": 2,
+        "reject_works_percentage": 33.3,
+        "description": "How often rejecting via this CMP actually reduces trackers"
+      },
+      "post_reject_effectiveness": {
+        "avg_tracker_reduction_after_reject": 0.03,
+        "sites_where_reject_eliminates_all_trackers": 1,
+        "sites_where_reject_has_no_effect": 3,
+        "avg_trackers_after_reject": 9.5
+      },
+      "dark_patterns": {
+        "sites_with_dark_patterns": 9,
+        "percentage": 100.0,
+        "most_common_pattern": "missing_reject",
+        "pattern_breakdown": {
+          "missing_reject": 7,
+          "multi_layer_rejection": 4,
+          "forced_action": 2,
+          "asymmetric_buttons": 1,
+          "hidden_reject": 1
+        }
+      },
+      "tcf_support": {
+        "sites_with_tcf": 0,
+        "percentage": 0.0
+      }
+    },
+    "OneTrust": {
+      "site_count": 4,
+      "sites": [
+        "news-daily.co.uk",
+        "open-data.gov.uk",
+        "privacy-first.nl",
+        "tracker-heavy.de"
+      ],
+      "compliance": {
+        "avg_score": 58.6,
+        "median_score": 58.2,
+        "min_score": 31.5,
+        "max_score": 86.5,
+        "std_dev": 27.0,
+        "grade_distribution": {
+          "A": 0,
+          "B": 2,
+          "C": 0,
+          "D": 1,
+          "F": 1
+        }
+      },
+      "pre_consent_tracking": {
+        "sites_with_pre_consent_trackers": 3,
+        "percentage": 75.0,
+        "avg_pre_consent_trackers": 2.8,
+        "avg_pre_consent_tracker_domains": 3.8
+      },
+      "reject_functionality": {
+        "sites_with_reject_button": 4,
+        "percentage": 100.0,
+        "avg_reject_clicks": 1.8,
+        "reject_actually_works": 3,
+        "reject_works_percentage": 75.0,
+        "description": "How often rejecting via this CMP actually reduces trackers"
+      },
+      "post_reject_effectiveness": {
+        "avg_tracker_reduction_after_reject": 0.34,
+        "sites_where_reject_eliminates_all_trackers": 2,
+        "sites_where_reject_has_no_effect": 0,
+        "avg_trackers_after_reject": 3
+      },
+      "dark_patterns": {
+        "sites_with_dark_patterns": 2,
+        "percentage": 50.0,
+        "most_common_pattern": "multi_layer_rejection",
+        "pattern_breakdown": {
+          "multi_layer_rejection": 2,
+          "confusing_language": 1
+        }
+      },
+      "tcf_support": {
+        "sites_with_tcf": 0,
+        "percentage": 0.0
+      }
+    },
+    "Quantcast": {
+      "site_count": 1,
+      "sites": [
+        "techblog.com"
+      ],
+      "compliance": {
+        "avg_score": 56.0,
+        "median_score": 56.0,
+        "min_score": 56.0,
+        "max_score": 56.0,
+        "std_dev": 0.0,
+        "grade_distribution": {
+          "A": 0,
+          "B": 0,
+          "C": 0,
+          "D": 1,
+          "F": 0
+        }
+      },
+      "pre_consent_tracking": {
+        "sites_with_pre_consent_trackers": 1,
+        "percentage": 100.0,
+        "avg_pre_consent_trackers": 4,
+        "avg_pre_consent_tracker_domains": 5
+      },
+      "reject_functionality": {
+        "sites_with_reject_button": 1,
+        "percentage": 100.0,
+        "avg_reject_clicks": 1,
+        "reject_actually_works": 1,
+        "reject_works_percentage": 100.0,
+        "description": "How often rejecting via this CMP actually reduces trackers"
+      },
+      "post_reject_effectiveness": {
+        "avg_tracker_reduction_after_reject": 0.2,
+        "sites_where_reject_eliminates_all_trackers": 0,
+        "sites_where_reject_has_no_effect": 0,
+        "avg_trackers_after_reject": 4
+      },
+      "dark_patterns": {
+        "sites_with_dark_patterns": 1,
+        "percentage": 100.0,
+        "most_common_pattern": "confusing_language",
+        "pattern_breakdown": {
+          "confusing_language": 1
+        }
+      },
+      "tcf_support": {
+        "sites_with_tcf": 0,
+        "percentage": 0.0
+      }
+    },
+    "TrustArc": {
+      "site_count": 3,
+      "sites": [
+        "adtracker-news.com",
+        "bbc.co.uk",
+        "vidshare.com"
+      ],
+      "compliance": {
+        "avg_score": 33.3,
+        "median_score": 37.5,
+        "min_score": 9.0,
+        "max_score": 53.5,
+        "std_dev": 22.5,
+        "grade_distribution": {
+          "A": 0,
+          "B": 0,
+          "C": 0,
+          "D": 1,
+          "F": 2
+        }
+      },
+      "pre_consent_tracking": {
+        "sites_with_pre_consent_trackers": 3,
+        "percentage": 100.0,
+        "avg_pre_consent_trackers": 6.7,
+        "avg_pre_consent_tracker_domains": 15
+      },
+      "reject_functionality": {
+        "sites_with_reject_button": 2,
+        "percentage": 66.7,
+        "avg_reject_clicks": 2,
+        "reject_actually_works": 2,
+        "reject_works_percentage": 66.7,
+        "description": "How often rejecting via this CMP actually reduces trackers"
+      },
+      "post_reject_effectiveness": {
+        "avg_tracker_reduction_after_reject": -0.7,
+        "sites_where_reject_eliminates_all_trackers": 0,
+        "sites_where_reject_has_no_effect": 1,
+        "avg_trackers_after_reject": 35.7
+      },
+      "dark_patterns": {
+        "sites_with_dark_patterns": 3,
+        "percentage": 100.0,
+        "most_common_pattern": "hidden_reject",
+        "pattern_breakdown": {
+          "hidden_reject": 1,
+          "missing_reject": 1,
+          "multi_layer_rejection": 1
+        }
+      },
+      "tcf_support": {
+        "sites_with_tcf": 0,
+        "percentage": 0.0
+      }
+    },
+    "Usercentrics": {
+      "site_count": 2,
+      "sites": [
+        "fintech.eu",
+        "goodbank.eu"
+      ],
+      "compliance": {
+        "avg_score": 76.8,
+        "median_score": 76.8,
+        "min_score": 67.0,
+        "max_score": 86.5,
+        "std_dev": 13.8,
+        "grade_distribution": {
+          "A": 0,
+          "B": 1,
+          "C": 1,
+          "D": 0,
+          "F": 0
+        }
+      },
+      "pre_consent_tracking": {
+        "sites_with_pre_consent_trackers": 1,
+        "percentage": 50.0,
+        "avg_pre_consent_trackers": 1,
+        "avg_pre_consent_tracker_domains": 1.5
+      },
+      "reject_functionality": {
+        "sites_with_reject_button": 2,
+        "percentage": 100.0,
+        "avg_reject_clicks": 1,
+        "reject_actually_works": 1,
+        "reject_works_percentage": 50.0,
+        "description": "How often rejecting via this CMP actually reduces trackers"
+      },
+      "post_reject_effectiveness": {
+        "avg_tracker_reduction_after_reject": 0.33,
+        "sites_where_reject_eliminates_all_trackers": 1,
+        "sites_where_reject_has_no_effect": 0,
+        "avg_trackers_after_reject": 0.5
+      },
+      "dark_patterns": {
+        "sites_with_dark_patterns": 1,
+        "percentage": 50.0,
+        "most_common_pattern": "preselected_checkboxes",
+        "pattern_breakdown": {
+          "preselected_checkboxes": 1
+        }
+      },
+      "tcf_support": {
+        "sites_with_tcf": 0,
+        "percentage": 0.0
+      }
+    }
+  },
+  "rankings": [
+    {
+      "cmp": "Didomi",
+      "pet_score": 75.1,
+      "breakdown": {
+        "avg_compliance_score": 64.2,
+        "reject_works_pct": 100.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 33.0
+      },
+      "rank": 1
+    },
+    {
+      "cmp": "OneTrust",
+      "pet_score": 67.2,
+      "breakdown": {
+        "avg_compliance_score": 58.6,
+        "reject_works_pct": 75.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 34.0
+      },
+      "rank": 2
+    },
+    {
+      "cmp": "Usercentrics",
+      "pet_score": 66.3,
+      "breakdown": {
+        "avg_compliance_score": 76.8,
+        "reject_works_pct": 50.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 33.0
+      },
+      "rank": 3
+    },
+    {
+      "cmp": "Quantcast",
+      "pet_score": 63.8,
+      "breakdown": {
+        "avg_compliance_score": 56.0,
+        "reject_works_pct": 100.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 0.0,
+        "avg_tracker_reduction_pct": 20.0
+      },
+      "rank": 4
+    },
+    {
+      "cmp": "Cookiebot",
+      "pet_score": 63.2,
+      "breakdown": {
+        "avg_compliance_score": 71.8,
+        "reject_works_pct": 50.0,
+        "reject_available_pct": 100.0,
+        "inverse_dark_pattern_pct": 50.0,
+        "avg_tracker_reduction_pct": 17.0
+      },
+      "rank": 5
+    },
+    {
+      "cmp": "TrustArc",
+      "pet_score": 33.0,
+      "breakdown": {
+        "avg_compliance_score": 33.3,
+        "reject_works_pct": 66.7,
+        "reject_available_pct": 66.7,
+        "inverse_dark_pattern_pct": 0.0,
+        "avg_tracker_reduction_pct": -70.0
+      },
+      "rank": 6
+    },
+    {
+      "cmp": "No CMP Detected",
+      "pet_score": 20.7,
+      "breakdown": {
+        "avg_compliance_score": 25.4,
+        "reject_works_pct": 33.3,
+        "reject_available_pct": 22.2,
+        "inverse_dark_pattern_pct": 0.0,
+        "avg_tracker_reduction_pct": 3.0
+      },
+      "rank": 7
+    }
+  ]
+}

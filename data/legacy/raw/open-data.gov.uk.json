@@ -1,0 +1,355 @@
+{
+  "domain": "open-data.gov.uk",
+  "category": "Government",
+  "region": "UK",
+  "rank": 3758,
+  "crawl_timestamp": "2026-03-01T11:36:08.943567+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "OneTrust",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-consent-banner\" role=\"dialog\" aria-label=\"Cookie consent\">\n  <div class=\"banner-content\">\n    <h2>We value your privacy</h2>\n    <p>We use cookies to enhance your browsing experience on open-data.gov.uk.\n       You can accept or reject non-essential cookies.</p>\n    <div class=\"button-group\" style=\"display:flex; gap:10px;\">\n      <button id=\"accept-all\" class=\"btn btn-primary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#2563eb; color:#fff;\">\n        Accept All\n      </button>\n      <button id=\"reject-all\" class=\"btn btn-secondary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#dc2626; color:#fff;\">\n        Reject All\n      </button>\n    </div>\n    <a href=\"/privacy-policy\">Privacy Policy</a>\n  </div>\n</div>",
+    "text_content": "We value your privacy \n     We use cookies to enhance your browsing experience on open-data.gov.uk.\n       You can accept or reject non-essential cookies. \n     \n       \n        Accept All\n       \n       \n        Reject All\n       \n     \n     Privacy Policy",
+    "buttons": [
+      {
+        "text": "Accept All",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Reject All",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#dc2626",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/open-data.gov.uk.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "remember_me",
+        "value": "63dc92fcbf1a70531e0ba917227808",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1787345589,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "__cfduid",
+        "value": "ad7a8bd849e9795e2718656819afe013cdd5d16d2",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1787837105,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "dbc1993e81d3dbae08fb13d7673a26cb61d19840d490",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1788347914,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://open-data.gov.uk/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "open-data.gov.uk"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "openx.net",
+        "referer": "https://open-data.gov.uk/"
+      }
+    ],
+    "third_party_domains": [
+      "openx.net"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 3,
+    "total_third_party_domains": 1,
+    "total_requests": 2
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "consent_given",
+        "value": "bed399c174b92ece1c19b5e1bff4762edfb60",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1795729616,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "944db8516c90c76a5f09b4e97ae0f9",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1801434881,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "7ae5fe6813f7e7727340e4",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1794194257,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "bf19ed3c6e235e18a444fd4aa2",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1781747387,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "b46bf1b615f0c445",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1793205775,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_75d2",
+        "value": "fa98d61ec036929f0f3669e622536911dc3a",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1800412511,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_c44a",
+        "value": "46a8363489f471f869b8c544b",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1778294114,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://open-data.gov.uk/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "open-data.gov.uk"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.net",
+        "referer": "https://open-data.gov.uk/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "optimizely.com",
+        "referer": "https://open-data.gov.uk/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "segment.io",
+        "referer": "https://open-data.gov.uk/"
+      }
+    ],
+    "third_party_domains": [
+      "facebook.net",
+      "optimizely.com",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 7,
+    "total_third_party_domains": 3,
+    "total_requests": 4,
+    "new_cookies_after_interaction": [
+      {
+        "name": "lang",
+        "value": "944db8516c90c76a5f09b4e97ae0f9",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1801434881,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "bf19ed3c6e235e18a444fd4aa2",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1781747387,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "b46bf1b615f0c445",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1793205775,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_75d2",
+        "value": "fa98d61ec036929f0f3669e622536911dc3a",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1800412511,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_c44a",
+        "value": "46a8363489f471f869b8c544b",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1778294114,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "facebook.net",
+      "optimizely.com",
+      "segment.io"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "consent_given",
+        "value": "95fdaecf9eedd36ed",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1786526841,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "51d607c80cc5287efb966f69940b7",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1801002327,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "914710cc4fbf16d6b0588fa6a4ea3bf5ef95ef4c056",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1801120425,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://open-data.gov.uk/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "open-data.gov.uk"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 3,
+    "total_third_party_domains": 0,
+    "total_requests": 1,
+    "new_cookies_after_interaction": [
+      {
+        "name": "csrf_token",
+        "value": "51d607c80cc5287efb966f69940b7",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1801002327,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "914710cc4fbf16d6b0588fa6a4ea3bf5ef95ef4c056",
+        "domain": ".open-data.gov.uk",
+        "path": "/",
+        "expires": 1801120425,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

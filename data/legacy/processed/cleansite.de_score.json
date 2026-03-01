@@ -1,0 +1,44 @@
+{
+  "domain": "cleansite.de",
+  "category": "Government",
+  "overall_score": 76.5,
+  "criterion_scores": {
+    "no_pre_consent_trackers": {
+      "score": 60,
+      "weight": 0.25,
+      "weighted_score": 15.0,
+      "details": "1 pre-consent trackers found"
+    },
+    "reject_option_available": {
+      "score": 100,
+      "weight": 0.2,
+      "weighted_score": 20.0,
+      "details": "Direct reject button available"
+    },
+    "equal_accept_reject_effort": {
+      "score": 100,
+      "weight": 0.15,
+      "weighted_score": 15.0,
+      "details": "Equal clicks: 1 vs 1"
+    },
+    "no_dark_patterns": {
+      "score": 100,
+      "weight": 0.15,
+      "weighted_score": 15.0,
+      "details": "No dark patterns detected"
+    },
+    "post_reject_compliance": {
+      "score": 50,
+      "weight": 0.15,
+      "weighted_score": 7.5,
+      "details": "Some new trackers after reject, but fewer than accept"
+    },
+    "transparent_information": {
+      "score": 40,
+      "weight": 0.1,
+      "weighted_score": 4.0,
+      "details": "privacy policy link; clear language"
+    }
+  },
+  "grade": "B"
+}

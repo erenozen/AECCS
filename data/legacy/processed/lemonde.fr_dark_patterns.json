@@ -1,0 +1,46 @@
+{
+  "domain": "lemonde.fr",
+  "banner_found": true,
+  "dark_patterns_detected": [
+    "missing_reject",
+    "multi_layer_rejection"
+  ],
+  "dark_pattern_count": 2,
+  "details": {
+    "asymmetric_buttons": {
+      "detected": false,
+      "accept_button": null,
+      "reject_button": null,
+      "size_ratio": null,
+      "font_size_ratio": null,
+      "contrast_issue": false
+    },
+    "hidden_reject": {
+      "detected": false,
+      "description": null
+    },
+    "missing_reject": {
+      "detected": true,
+      "description": "No reject button in consent banner"
+    },
+    "preselected_checkboxes": {
+      "detected": false,
+      "checkbox_count": 0,
+      "preselected_count": 0
+    },
+    "forced_action": {
+      "detected": false,
+      "is_cookie_wall": false
+    },
+    "multi_layer_rejection": {
+      "detected": true,
+      "accept_clicks": 1,
+      "reject_clicks": 999,
+      "click_ratio": 999.0
+    },
+    "confusing_language": {
+      "detected": false,
+      "suspicious_phrases": []
+    }
+  }
+}

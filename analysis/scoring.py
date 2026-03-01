@@ -21,7 +21,15 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import COMPLIANCE_WEIGHTS, PROCESSED_DIR, RAW_DIR
+from config import (
+    COMPLIANCE_WEIGHTS,
+    DEFAULT_SOURCE_MODE,
+    PROCESSED_DIR,
+    RAW_DIR,
+    build_provenance,
+    get_dataset_layout,
+    unwrap_payload,
+)
 
 # Grade thresholds
 _GRADES = [
@@ -291,14 +299,17 @@ def compute_compliance_score(
 def run_scoring(
     processed_dir: str | None = None,
     output_path: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> None:
     """Batch-score all websites and write results."""
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
     p_dir.mkdir(parents=True, exist_ok=True)
     csv_path = Path(output_path) if output_path else p_dir / "compliance_scores.csv"
 
     # Find raw site JSONs
-    raw_dir = RAW_DIR
+    raw_dir = layout.raw_dir
     raw_files = sorted(raw_dir.glob("*.json"))
     if not raw_files:
         print(f"[WARN] No raw JSON files found in {raw_dir}")
@@ -322,7 +333,8 @@ def run_scoring(
         classified_cookies = []
         if cls_path.exists():
             try:
-                classified_cookies = json.loads(cls_path.read_text(encoding="utf-8"))
+                classified_doc = json.loads(cls_path.read_text(encoding="utf-8"))
+                classified_cookies = unwrap_payload(classified_doc, "cookies")
             except Exception:
                 pass
 
@@ -339,6 +351,16 @@ def run_scoring(
         result = compute_compliance_score(site_data, dark_pattern_data, classified_cookies)
 
         # Save detailed per-site JSON
+        provenance = build_provenance(
+            source_mode=site_data.get("source_mode", source_mode),
+            run_id=site_data.get("run_id", run_id),
+            proxy_used=site_data.get("proxy_used"),
+            browser_name=site_data.get("browser_name"),
+            browser_version=site_data.get("browser_version"),
+            site_list_source=site_data.get("site_list_source"),
+        )
+        result.update(provenance)
+
         score_json_path = p_dir / f"{domain}_score.json"
         score_json_path.write_text(
             json.dumps(result, indent=2, default=str), encoding="utf-8"
@@ -349,6 +371,8 @@ def run_scoring(
         pre = site_data.get("pre_consent") or {}
         row = {
             "domain": domain,
+            "source_mode": provenance["source_mode"],
+            "run_id": provenance["run_id"],
             "category": site_data.get("category", ""),
             "region": site_data.get("region", ""),
             "rank": site_data.get("rank", 0),
@@ -428,13 +452,26 @@ def main() -> None:
         "--domain", type=str, default=None,
         help="Score a single domain only",
     )
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
     if args.domain:
-        p_dir = Path(args.processed_dir) if args.processed_dir else PROCESSED_DIR
+        layout = get_dataset_layout(args.source_mode)
+        p_dir = Path(args.processed_dir) if args.processed_dir else layout.processed_dir
         p_dir.mkdir(parents=True, exist_ok=True)
 
-        site_path = RAW_DIR / f"{args.domain}.json"
+        site_path = layout.raw_dir / f"{args.domain}.json"
         if not site_path.exists():
             print(f"[ERROR] {site_path} not found")
             return
@@ -443,7 +480,8 @@ def main() -> None:
         cls_path = p_dir / f"{args.domain}_classified.json"
         classified = []
         if cls_path.exists():
-            classified = json.loads(cls_path.read_text(encoding="utf-8"))
+            classified_doc = json.loads(cls_path.read_text(encoding="utf-8"))
+            classified = unwrap_payload(classified_doc, "cookies")
 
         dp_path = p_dir / f"{args.domain}_dark_patterns.json"
         dp_data: dict = {"dark_pattern_count": 0, "dark_patterns_detected": []}
@@ -451,6 +489,15 @@ def main() -> None:
             dp_data = json.loads(dp_path.read_text(encoding="utf-8"))
 
         result = compute_compliance_score(site_data, dp_data, classified)
+        provenance = build_provenance(
+            source_mode=site_data.get("source_mode", args.source_mode),
+            run_id=site_data.get("run_id", args.run_id),
+            proxy_used=site_data.get("proxy_used"),
+            browser_name=site_data.get("browser_name"),
+            browser_version=site_data.get("browser_version"),
+            site_list_source=site_data.get("site_list_source"),
+        )
+        result.update(provenance)
 
         out = p_dir / f"{args.domain}_score.json"
         out.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
@@ -459,7 +506,12 @@ def main() -> None:
             print(f"  {cname:35s} {cval['score']:>3d} x {cval['weight']:.2f} = {cval['weighted_score']:5.1f}  ({cval['details']})")
         return
 
-    run_scoring(processed_dir=args.processed_dir, output_path=args.output)
+    run_scoring(
+        processed_dir=args.processed_dir,
+        output_path=args.output,
+        source_mode=args.source_mode,
+        run_id=args.run_id,
+    )
 
 
 if __name__ == "__main__":

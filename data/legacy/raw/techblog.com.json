@@ -1,0 +1,891 @@
+{
+  "domain": "techblog.com",
+  "category": "Technology",
+  "region": "US",
+  "rank": 3249,
+  "crawl_timestamp": "2026-03-01T11:36:08.936458+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "Quantcast",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div class=\"gdpr-banner\" role=\"dialog\">\n  <h3>Help us keep techblog.com free!</h3>\n  <p>Without cookies, we cannot provide you with the best experience.\n     Don't you not want to miss out on personalised content?</p>\n  <p>By declining, you may lose access to premium features and\n     the content you love will suffer.</p>\n  <div class=\"choices\">\n    <button id=\"accept\" class=\"btn-green\"\n            style=\"width:250px; height:48px; font-size:16px; font-weight:600;\n                   background-color:#16a34a; color:#fff;\">\n      Yes, I want the best experience\n    </button>\n    <button id=\"decline\" class=\"btn-gray\"\n            style=\"width:250px; height:48px; font-size:16px; font-weight:600;\n                   background-color:#6b7280; color:#fff;\">\n      No, I don't want personalisation\n    </button>\n  </div>\n</div>",
+    "text_content": "Help us keep techblog.com free! \n   Without cookies, we cannot provide you with the best experience.\n     Don't you not want to miss out on personalised content? \n   By declining, you may lose access to premium features and\n     the content you love will suffer. \n   \n     \n      Yes, I want the best experience\n     \n     \n      No, I don't want personalisation",
+    "buttons": [
+      {
+        "text": "Yes, I want the best experience",
+        "tag": "button",
+        "type": "unknown",
+        "selector": "button#accept",
+        "computed_styles": {
+          "width": "250px",
+          "height": "48px",
+          "background_color": "#16a34a",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "600",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "No, I don't want personalisation",
+        "tag": "button",
+        "type": "unknown",
+        "selector": "button#decline",
+        "computed_styles": {
+          "width": "250px",
+          "height": "48px",
+          "background_color": "#6b7280",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "600",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": false,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/techblog.com.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "user_pref",
+        "value": "707572c921dc5ac86698f65d9c6c83a1e979",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1787901197,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "csrf_token",
+        "value": "d2f11dc67a1deea0228693",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1795236476,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "__cfduid",
+        "value": "eebef998dd0ef08f14069ab663228d564d2",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1772757891,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "2eaf22cdebe976d63",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1786621546,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_4e90",
+        "value": "9b17b2bffc71e17bf1",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1793631597,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_405c",
+        "value": "7e955f42b94c4a99a4b0721c4944b9eba52c3280ff9ddc",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1786224799,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ab29",
+        "value": "04d0777fe3a64864c658f185d9a44c497a3ac8",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1795109015,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_5001",
+        "value": "11734301fadfab1d2ae9feb47eae46ec521c650f47",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1788868013,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://techblog.com/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "techblog.com"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adsrvr.org",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "criteo.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "newrelic.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "taboola.com",
+        "referer": "https://techblog.com/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "criteo.com",
+      "facebook.com",
+      "newrelic.com",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 8,
+    "total_third_party_domains": 5,
+    "total_requests": 6
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "csrf_token",
+        "value": "c07a0062560bc76bc136bc18f540fa5d",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1783779181,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "a2063bea51ab23b971848d7f00c01ca7ad",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1777366622,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "__cfduid",
+        "value": "e02a7e0b2204c729d17c3c6cfa5f92",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1800434403,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "5126b87e01d9c07021ae6ccb3a8",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1786194045,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "9b91d4683ff9df87a3",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1774149268,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "af72a0a465cc0be2c71eb953a",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1783296741,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "3363e1906392573545094176c342cfe98368",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1801299167,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "d4bb359e9290f07c087cd7380bf24a174bdb07cd6c57ad",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1774740819,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_c1eb",
+        "value": "8e506705ab8c258abcd",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1795952086,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_c5e8",
+        "value": "415781ba849cfcf1e71e4f14b7d8a4f8257a41d3fa6",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1783870774,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_c7a8",
+        "value": "79e4c354d24f92822bec21f9753baf27f810ecfe2f88",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1794086471,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_74ff",
+        "value": "cbe5170a109355938cc31daff",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1785603228,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_59fe",
+        "value": "6b66054783eb672beb6d924f85e960a4279e3d4",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1788829889,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d487",
+        "value": "c24aa1a42ea0c7f95",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1788490999,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_da7b",
+        "value": "5b04927b505af04a13ac925",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1782978829,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4b58",
+        "value": "d08575e1233e9d888c171de745de9c5b0d3d23",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1776574420,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_f6c1",
+        "value": "cc01c80141acce3e2",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1784164080,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_2b49",
+        "value": "28b39190334e8f138b597f256331f112cb8051",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1781884988,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_bad3",
+        "value": "4d31d7a2f717a12691ef1f59f1db4b94ca679674c1",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1780780323,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3f0b",
+        "value": "7029549ca8774788c80c",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1786810610,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://techblog.com/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "techblog.com"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adnxs.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "chartbeat.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "cloudflare.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "criteo.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.net",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "google-analytics.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "googlesyndication.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "openx.net",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "optimizely.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "quantserve.com",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "segment.io",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "taboola.com",
+        "referer": "https://techblog.com/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "cloudflare.com",
+      "criteo.com",
+      "facebook.net",
+      "google-analytics.com",
+      "googlesyndication.com",
+      "openx.net",
+      "optimizely.com",
+      "quantserve.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 20,
+    "total_third_party_domains": 14,
+    "total_requests": 15,
+    "new_cookies_after_interaction": [
+      {
+        "name": "theme",
+        "value": "a2063bea51ab23b971848d7f00c01ca7ad",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1777366622,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "9b91d4683ff9df87a3",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1774149268,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "3363e1906392573545094176c342cfe98368",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1801299167,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "d4bb359e9290f07c087cd7380bf24a174bdb07cd6c57ad",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1774740819,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_c1eb",
+        "value": "8e506705ab8c258abcd",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1795952086,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_c5e8",
+        "value": "415781ba849cfcf1e71e4f14b7d8a4f8257a41d3fa6",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1783870774,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_c7a8",
+        "value": "79e4c354d24f92822bec21f9753baf27f810ecfe2f88",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1794086471,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_74ff",
+        "value": "cbe5170a109355938cc31daff",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1785603228,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_59fe",
+        "value": "6b66054783eb672beb6d924f85e960a4279e3d4",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1788829889,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d487",
+        "value": "c24aa1a42ea0c7f95",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1788490999,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_da7b",
+        "value": "5b04927b505af04a13ac925",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1782978829,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4b58",
+        "value": "d08575e1233e9d888c171de745de9c5b0d3d23",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1776574420,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_f6c1",
+        "value": "cc01c80141acce3e2",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1784164080,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_2b49",
+        "value": "28b39190334e8f138b597f256331f112cb8051",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1781884988,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_bad3",
+        "value": "4d31d7a2f717a12691ef1f59f1db4b94ca679674c1",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1780780323,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3f0b",
+        "value": "7029549ca8774788c80c",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1786810610,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adnxs.com",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "cloudflare.com",
+      "facebook.net",
+      "google-analytics.com",
+      "googlesyndication.com",
+      "openx.net",
+      "optimizely.com",
+      "quantserve.com",
+      "segment.io"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "lang",
+        "value": "7f95f500d5b0e51555a3a9e145057d9e",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1781314813,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "consent_given",
+        "value": "9f669c1a58c59567dcd840f63b1d151c73ca4c683697c2",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1772992791,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "93fb7e89c69a8522a465d136da4",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1792542575,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "133d786a0224ca2df70d19de65a1fb2",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1776124394,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a9c8",
+        "value": "e31c596b3622f74975f56afee5bd0f9dafbc384f5c1dd6e",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1785554639,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_1d33",
+        "value": "eaec60ddf76dbeddb859db700a",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1793513106,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_26a5",
+        "value": "13bca296f7d229541566d",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1791507699,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://techblog.com/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "techblog.com"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adsrvr.org",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "doubleclick.net",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "openx.net",
+        "referer": "https://techblog.com/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "segment.io",
+        "referer": "https://techblog.com/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "doubleclick.net",
+      "openx.net",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 7,
+    "total_third_party_domains": 4,
+    "total_requests": 5,
+    "new_cookies_after_interaction": [
+      {
+        "name": "consent_given",
+        "value": "9f669c1a58c59567dcd840f63b1d151c73ca4c683697c2",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1772992791,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "93fb7e89c69a8522a465d136da4",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1792542575,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "133d786a0224ca2df70d19de65a1fb2",
+        "domain": ".techblog.com",
+        "path": "/",
+        "expires": 1776124394,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a9c8",
+        "value": "e31c596b3622f74975f56afee5bd0f9dafbc384f5c1dd6e",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1785554639,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_1d33",
+        "value": "eaec60ddf76dbeddb859db700a",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1793513106,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_26a5",
+        "value": "13bca296f7d229541566d",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1791507699,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "doubleclick.net",
+      "openx.net",
+      "segment.io"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

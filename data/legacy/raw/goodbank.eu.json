@@ -1,0 +1,386 @@
+{
+  "domain": "goodbank.eu",
+  "category": "Finance",
+  "region": "EU",
+  "rank": 3497,
+  "crawl_timestamp": "2026-03-01T11:36:08.934946+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "Usercentrics",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-consent-banner\" role=\"dialog\" aria-label=\"Cookie consent\">\n  <div class=\"banner-content\">\n    <h2>We value your privacy</h2>\n    <p>We use cookies to enhance your browsing experience on goodbank.eu.\n       You can accept or reject non-essential cookies.</p>\n    <div class=\"button-group\" style=\"display:flex; gap:10px;\">\n      <button id=\"accept-all\" class=\"btn btn-primary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#2563eb; color:#fff;\">\n        Accept All\n      </button>\n      <button id=\"reject-all\" class=\"btn btn-secondary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#dc2626; color:#fff;\">\n        Reject All\n      </button>\n    </div>\n    <a href=\"/privacy-policy\">Privacy Policy</a>\n  </div>\n</div>",
+    "text_content": "We value your privacy \n     We use cookies to enhance your browsing experience on goodbank.eu.\n       You can accept or reject non-essential cookies. \n     \n       \n        Accept All\n       \n       \n        Reject All\n       \n     \n     Privacy Policy",
+    "buttons": [
+      {
+        "text": "Accept All",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Reject All",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#dc2626",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/goodbank.eu.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "csrf_token",
+        "value": "e1de382d7ab7e702698a",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1782709022,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "40316b80ef7422abf5e7e61fd2d1f62fdcf7b6637",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1777573577,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "0a9ee3197ad3078cc2f3e99",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1798290648,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "42a340feea67ffac5626c7d4bce8f82",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1780517547,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "aed1b34a9d3cb87d5f0ef1f7393e8c6854871",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1796608745,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://goodbank.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "goodbank.eu"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 5,
+    "total_third_party_domains": 0,
+    "total_requests": 1
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "b089b433938f5c7bb7b5282eff8d1d",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1773996440,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "d3b0859a97708084f0dace11",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1777364738,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "d46569f3adadc16800276c9d1803de70",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1774863274,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "remember_me",
+        "value": "2d032dde499da86bcb",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1775000164,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "06d5cf6c04f75f6aa19cb12bab510454227860",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1784243960,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "d06cb8f38a2442244c5fb797206d6d76da94",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1792608979,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_265b",
+        "value": "fc54c5e3f2c0bf3cd1dca2442667998ed60fbc9e13a299a",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1794069682,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f604",
+        "value": "b8b357ab2f74e1db55c851b710b051ceb88567ca2a6be760",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1779575929,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://goodbank.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "goodbank.eu"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "cloudflare.com",
+        "referer": "https://goodbank.eu/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "googlesyndication.com",
+        "referer": "https://goodbank.eu/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "moatads.com",
+        "referer": "https://goodbank.eu/"
+      }
+    ],
+    "third_party_domains": [
+      "cloudflare.com",
+      "googlesyndication.com",
+      "moatads.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 8,
+    "total_third_party_domains": 3,
+    "total_requests": 4,
+    "new_cookies_after_interaction": [
+      {
+        "name": "remember_me",
+        "value": "2d032dde499da86bcb",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1775000164,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "06d5cf6c04f75f6aa19cb12bab510454227860",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1784243960,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "d06cb8f38a2442244c5fb797206d6d76da94",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1792608979,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_265b",
+        "value": "fc54c5e3f2c0bf3cd1dca2442667998ed60fbc9e13a299a",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1794069682,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f604",
+        "value": "b8b357ab2f74e1db55c851b710b051ceb88567ca2a6be760",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1779575929,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "cloudflare.com",
+      "googlesyndication.com",
+      "moatads.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "lang",
+        "value": "4d8a9995d9db4912142b862",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1785243737,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "remember_me",
+        "value": "abaf872570502df87a6d710c44827bc811cd5d0b8f1dc4f",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1787459081,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "7fc3c95ba223305485b44",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1801158835,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "csrf_token",
+        "value": "2c604ab2253d62aa61cc6b",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1795678953,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "50cbb7a5183634d59975a01c71d70f3b2a2e4a45e264b3a",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1795980756,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://goodbank.eu/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "goodbank.eu"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 5,
+    "total_third_party_domains": 0,
+    "total_requests": 1,
+    "new_cookies_after_interaction": [
+      {
+        "name": "remember_me",
+        "value": "abaf872570502df87a6d710c44827bc811cd5d0b8f1dc4f",
+        "domain": ".goodbank.eu",
+        "path": "/",
+        "expires": 1787459081,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

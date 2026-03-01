@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AECCS Final Report</title>
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #4b5563;
+      --accent: #0f4c81;
+      --rule: #cbd5e1;
+      --bg: #ffffff;
+      --warn-bg: #fff7ed;
+      --warn-border: #ea580c;
+    }
+
+    @page {
+      size: A4;
+      margin: 16mm 14mm 18mm 14mm;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: "Times New Roman", Georgia, serif;
+      font-size: 10pt;
+      line-height: 1.35;
+    }
+
+    .page {
+      padding: 16mm 14mm 18mm 14mm;
+    }
+
+    .title-block {
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 12pt;
+      padding-bottom: 8pt;
+    }
+
+    h1 {
+      font-size: 18pt;
+      line-height: 1.1;
+      margin: 0 0 6pt 0;
+      color: var(--accent);
+    }
+
+    .authors, .meta {
+      font-size: 9pt;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .columns {
+      column-count: 2;
+      column-gap: 18pt;
+      column-fill: balance;
+    }
+
+    h2, h3 {
+      color: var(--accent);
+      break-after: avoid;
+      page-break-after: avoid;
+      margin-bottom: 4pt;
+    }
+
+    h2 {
+      font-size: 11pt;
+      margin-top: 10pt;
+    }
+
+    h3 {
+      font-size: 10pt;
+      margin-top: 8pt;
+    }
+
+    p, ul, table {
+      margin-top: 0;
+      margin-bottom: 6pt;
+      break-inside: avoid;
+    }
+
+    ul {
+      padding-left: 16pt;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    th, td {
+      border: 1px solid var(--rule);
+      padding: 4pt 5pt;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      text-align: left;
+    }
+
+    .callout {
+      break-inside: avoid;
+      border-left: 4px solid var(--warn-border);
+      background: var(--warn-bg);
+      padding: 8pt 10pt;
+      margin: 8pt 0;
+      font-size: 9pt;
+    }
+
+    .mono {
+      font-family: "Courier New", monospace;
+      font-size: 8.8pt;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="title-block">
+      <h1>AECCS: Assessing the Effectiveness of Cookie Consent Systems</h1>
+      <p class="authors">Ahmed Hatem Haikal, Atakan Keser, Deniz Sahin, Seyhmus Eren Ozen, Moin Khan</p>
+      <p class="meta">CS475 Privacy-Enhancing Technologies · Final report template aligned with the current repository state</p>
+    </div>
+
+    <div class="columns">
+      <h2>Abstract</h2>
+      <p>
+        AECCS is an implementation-focused measurement system for studying cookie consent
+        systems, GDPR-oriented compliance signals, dark patterns, and privacy-enhancing
+        technologies (PETs). The repository now contains a provenance-aware pipeline that
+        separates synthetic development data from the final real-study dataset. The current
+        implementation supports automated crawling, tracker classification, dark-pattern
+        detection, compliance scoring, browser PET evaluation, CMP comparison, differential
+        privacy reporting, and report generation. The remaining gap is empirical rather than
+        architectural: the real crawl and real PET experiments must be executed under the
+        <span class="mono">data/real/</span> tree before final claims are made.
+      </p>
+
+      <div class="callout">
+        The metrics currently available in the repository are demonstration values generated
+        from the synthetic dataset in <span class="mono">data/mock/</span>. They are useful for
+        validating the pipeline and report structure, but they are not final study findings.
+      </div>
+
+      <h2>1. Problem Statement</h2>
+      <p>
+        Cookie consent systems are intended to provide meaningful user control over non-essential
+        tracking. Prior work and regulatory guidance suggest that many banners either manipulate
+        users toward acceptance or fail to technically enforce rejection. The core question of
+        this project is whether consent systems protect privacy in practice and, when they do not,
+        whether PETs reduce user exposure.
+      </p>
+
+      <h2>2. Related Work</h2>
+      <p>
+        AECCS is grounded in three main strands of prior work: studies of dark patterns in
+        consent banners, studies of enforcement failures after rejection, and large-scale
+        automated cookie-consent measurement. A companion literature review is included in
+        <span class="mono">docs/literature_review.md</span>.
+      </p>
+
+      <h3>Key references</h3>
+      <ul>
+        <li>Nouwens et al., <em>Dark Patterns after the GDPR</em></li>
+        <li>Matte et al., <em>Do Cookie Banners Respect My Choice?</em></li>
+        <li>Bollinger et al., <em>Automating Cookie Consent and GDPR Violation Detection</em></li>
+        <li>GDPR Regulation (EU) 2016/679</li>
+        <li>CNIL cookie and tracker guidance</li>
+      </ul>
+
+      <h2>3. System Overview</h2>
+      <p>
+        The implemented pipeline follows the proposal closely. Each target site is visited in
+        three states: no interaction, accept all, and reject all. Raw crawl outputs are then
+        processed into tracker classifications, dark-pattern findings, compliance scores,
+        aggregate statistics, PET comparisons, and report artifacts.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Crawler</td><td>Implemented</td></tr>
+          <tr><td>Tracker classification</td><td>Implemented</td></tr>
+          <tr><td>Dark-pattern detection</td><td>Implemented</td></tr>
+          <tr><td>Compliance scoring</td><td>Implemented</td></tr>
+          <tr><td>Aggregate metrics</td><td>Implemented</td></tr>
+          <tr><td>Browser PET evaluation</td><td>Implemented, awaiting real runs</td></tr>
+          <tr><td>CMP analysis</td><td>Implemented</td></tr>
+          <tr><td>Differential privacy reporting</td><td>Implemented</td></tr>
+          <tr><td>Visualization and HTML reporting</td><td>Implemented</td></tr>
+        </tbody>
+      </table>
+
+      <h2>4. Data Hygiene and Reproducibility</h2>
+      <p>
+        A major repository milestone in the current phase was separating historical mixed outputs
+        from the active datasets. New runs now target <span class="mono">data/mock/</span> or
+        <span class="mono">data/real/</span>, while older root-level artifacts have been quarantined
+        under <span class="mono">data/legacy/</span> and <span class="mono">reporting/legacy/</span>.
+      </p>
+      <p>
+        Raw and processed artifacts now carry provenance fields including source mode, run ID,
+        generation timestamp, browser information, proxy state, and study-list origin. The report
+        generator rejects mixed processed inputs to avoid blending mock and real findings.
+      </p>
+
+      <h2>5. Current Demo Findings</h2>
+      <p>
+        The synthetic dataset currently bundled with the repository contains 20 mock sites, of
+        which 19 are successful crawls and 1 is a deliberate failure case. These values should be
+        read as pipeline-validation outputs, not final empirical conclusions.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Current demo value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Pre-consent tracker violations</td><td>84.2%</td></tr>
+          <tr><td>Sites with any dark pattern</td><td>75.0%</td></tr>
+          <tr><td>Average compliance score</td><td>50.8 / 100</td></tr>
+          <tr><td>Best browser PET</td><td>Brave Shields (98.5% average reduction)</td></tr>
+          <tr><td>Best CMP</td><td>Didomi (PET score 75.1)</td></tr>
+          <tr><td>Recommended DP epsilon</td><td>2.0</td></tr>
+        </tbody>
+      </table>
+
+      <h2>6. Proposal Coverage</h2>
+      <p>
+        The original proposal committed to a real-site automated measurement study over 100 to
+        200 websites. The repository now includes a 100-domain seed list in
+        <span class="mono">data/websites.csv</span>, which brings the project back in line with the
+        proposal at the planning level. What remains is execution of the final study under EU-like
+        browsing conditions and regeneration of all figures and report outputs from real data only.
+      </p>
+
+      <h2>7. Remaining Work</h2>
+      <ul>
+        <li>Execute the final real crawl into <span class="mono">data/real/raw/</span>.</li>
+        <li>Run the real PET subset or full PET evaluation into <span class="mono">data/real/processed/</span>.</li>
+        <li>Regenerate aggregate metrics, DP outputs, CMP comparison, figures, and HTML report from real data only.</li>
+        <li>Replace the demo findings in this document with real-study findings and citations.</li>
+      </ul>
+
+      <h2>8. Ethics and Limitations</h2>
+      <p>
+        The project uses automated browsing and therefore must remain rate-limited and transparent
+        about its collection scope. The current repository includes synthetic data for development
+        and validation, but no final claims should be made until the real-site runs are completed.
+        The current draft also does not yet contain a final reference section formatted for an ACM
+        submission.
+      </p>
+
+      <h2>9. Conclusion</h2>
+      <p>
+        AECCS is now structurally ready for an honest final course submission. The core software
+        system is built, the data model is provenance-aware, and the mock dataset validates the
+        end-to-end pipeline. The final step is operational: execute the real measurement study and
+        replace the demonstration findings with real evidence.
+      </p>
+
+      <h2>References</h2>
+      <p>
+        Final ACM-format citations should be inserted here after the real-result draft is prepared.
+        The literature review file already identifies the core sources to cite.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 """
 Generate mock PET evaluation data for testing Phase 3 Modules 2-4.
 
-Produces ``data/processed/pets_effectiveness.csv`` with realistic patterns:
+Produces ``data/mock/processed/pets_effectiveness.csv`` with realistic patterns:
 - baseline: most trackers (no protection)
 - ublock_origin: near-zero trackers
 - privacy_badger: moderate reduction (~60-80%)
@@ -24,7 +24,17 @@ import json
 import random
 from pathlib import Path
 
-from config import PROCESSED_DIR, RAW_DIR
+from config import (
+    PET_EFFECTIVENESS_FIELDS,
+    build_provenance,
+    generate_run_id,
+    get_dataset_layout,
+    infer_common_field,
+)
+
+LAYOUT = get_dataset_layout("mock")
+PROCESSED_DIR = LAYOUT.processed_dir
+RAW_DIR = LAYOUT.raw_dir
 
 
 PETS = [
@@ -38,18 +48,23 @@ PETS = [
 ]
 
 
-def _get_domains() -> list[str]:
-    """Get all crawled domains from raw data."""
-    domains: list[str] = []
+def _get_sites() -> list[dict[str, str]]:
+    """Get successful mock sites and their categories from raw data."""
+    sites: list[dict[str, str]] = []
     raw = Path(RAW_DIR)
     for f in sorted(raw.glob("*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             if data.get("success"):
-                domains.append(data.get("domain", f.stem))
+                sites.append(
+                    {
+                        "domain": data.get("domain", f.stem),
+                        "category": data.get("category", ""),
+                    }
+                )
         except Exception:
             continue
-    return domains
+    return sites
 
 
 def _baseline_trackers(domain: str) -> tuple[int, int, int, int]:
@@ -83,25 +98,30 @@ def _baseline_trackers(domain: str) -> tuple[int, int, int, int]:
 def generate_mock_pets_effectiveness() -> None:
     """Generate pets_effectiveness.csv with realistic per-PET results."""
     random.seed(42)
-    domains = _get_domains()
+    sites = _get_sites()
+    raw_docs: list[dict] = []
+    for path in sorted(Path(RAW_DIR).glob("*.json")):
+        try:
+            raw_docs.append(json.loads(path.read_text(encoding="utf-8")))
+        except Exception:
+            continue
+    run_id = infer_common_field(raw_docs, "run_id") or generate_run_id("mock-pets")
+    site_list_source = infer_common_field(raw_docs, "site_list_source") or "tests/generate_mock_data.py"
 
-    if not domains:
+    if not sites:
         print("No crawled domains found in raw data. Run generate_mock_data first.")
         return
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     out_csv = PROCESSED_DIR / "pets_effectiveness.csv"
 
-    fields = [
-        "domain", "pet_name", "tracker_domains", "tracker_cookies",
-        "total_cookies", "total_requests", "page_load_time_ms",
-        "consent_banner_detected", "cookies_after_reject",
-    ]
-
     rows: list[dict] = []
 
-    for domain in domains:
+    for site in sites:
+        domain = site["domain"]
+        category = site["category"]
         base_td, base_tc, base_tot_c, base_req = _baseline_trackers(domain)
+        base_total_tp = base_td + random.randint(0, 2)
 
         for pet in PETS:
             if pet == "baseline":
@@ -109,9 +129,10 @@ def generate_mock_pets_effectiveness() -> None:
                 tc = base_tc
                 tot_c = base_tot_c
                 tot_r = base_req
+                total_tp = base_total_tp
+                blocked_requests = 0
                 load_ms = random.randint(800, 3000)
                 banner = True
-                cookies_after_rej = max(0, tot_c - random.randint(0, 2))
 
             elif pet == "ublock_origin":
                 # Near-complete blocking
@@ -119,9 +140,10 @@ def generate_mock_pets_effectiveness() -> None:
                 tc = random.randint(0, max(1, base_tc // 8))
                 tot_c = max(tc, base_tot_c - random.randint(base_tc // 2, base_tc))
                 tot_r = max(5, base_req - random.randint(base_req // 3, base_req // 2))
+                total_tp = td + random.randint(0, 1)
+                blocked_requests = max(0, base_req - tot_r)
                 load_ms = random.randint(500, 1800)
                 banner = random.random() < 0.3  # uBlock may hide banners
-                cookies_after_rej = max(0, tc - random.randint(0, tc))
 
             elif pet == "privacy_badger":
                 # Moderate blocking (60-80%)
@@ -130,9 +152,10 @@ def generate_mock_pets_effectiveness() -> None:
                 tc = max(0, int(base_tc * (1 - reduction)))
                 tot_c = max(tc, base_tot_c - int(base_tc * reduction * 0.7))
                 tot_r = max(5, base_req - int(base_req * reduction * 0.3))
+                total_tp = td + random.randint(0, 2)
+                blocked_requests = max(0, base_req - tot_r)
                 load_ms = random.randint(600, 2200)
                 banner = True
-                cookies_after_rej = max(0, tot_c - random.randint(0, 3))
 
             elif pet == "firefox_etp_standard":
                 # Significant blocking (50-70%)
@@ -141,9 +164,10 @@ def generate_mock_pets_effectiveness() -> None:
                 tc = max(0, int(base_tc * (1 - reduction)))
                 tot_c = max(tc, base_tot_c - int(base_tc * reduction * 0.6))
                 tot_r = max(5, base_req - int(base_req * reduction * 0.25))
+                total_tp = td + random.randint(0, 2)
+                blocked_requests = max(0, base_req - tot_r)
                 load_ms = random.randint(700, 2500)
                 banner = True
-                cookies_after_rej = max(0, tot_c - random.randint(0, 2))
 
             elif pet == "firefox_etp_strict":
                 # Stronger blocking (70-85%)
@@ -152,9 +176,10 @@ def generate_mock_pets_effectiveness() -> None:
                 tc = max(0, int(base_tc * (1 - reduction)))
                 tot_c = max(tc, base_tot_c - int(base_tc * reduction * 0.8))
                 tot_r = max(5, base_req - int(base_req * reduction * 0.35))
+                total_tp = td + random.randint(0, 1)
+                blocked_requests = max(0, base_req - tot_r)
                 load_ms = random.randint(600, 2200)
                 banner = True
-                cookies_after_rej = max(0, tot_c - random.randint(0, 2))
 
             elif pet == "brave_shields":
                 # Strong blocking (80-95%)
@@ -163,9 +188,10 @@ def generate_mock_pets_effectiveness() -> None:
                 tc = max(0, int(base_tc * (1 - reduction)))
                 tot_c = max(tc, base_tot_c - int(base_tc * reduction * 0.9))
                 tot_r = max(5, base_req - int(base_req * reduction * 0.4))
+                total_tp = td + random.randint(0, 1)
+                blocked_requests = max(0, base_req - tot_r)
                 load_ms = random.randint(500, 1800)
                 banner = random.random() < 0.6  # Brave may block some banners
-                cookies_after_rej = max(0, tc)
 
             elif pet == "consent_o_matic":
                 # Does NOT block network trackers — auto-rejects consent
@@ -174,35 +200,65 @@ def generate_mock_pets_effectiveness() -> None:
                 # But after auto-reject, cookies drop
                 tot_c = max(0, base_tot_c - random.randint(2, max(3, base_tc)))
                 tot_r = base_req  # Same requests
+                total_tp = base_total_tp
+                blocked_requests = 0
                 load_ms = random.randint(900, 3500)  # Slightly slower (interaction)
                 banner = True  # Always detects banner to interact with it
-                cookies_after_rej = max(0, tot_c - random.randint(2, max(3, base_tc // 2)))
 
             else:
                 continue
 
             rows.append({
                 "domain": domain,
+                "source_mode": "mock",
+                "run_id": run_id,
+                "category": category,
                 "pet_name": pet,
+                "measurement_mode": "simulated" if pet == "brave_shields" else "real",
+                "browser_name": "chromium" if "firefox" not in pet else "firefox",
+                "browser_version": "synthetic",
+                "extension_name": pet if pet in ("ublock_origin", "privacy_badger", "consent_o_matic") else "",
+                "extension_version": "synthetic" if pet in ("ublock_origin", "privacy_badger", "consent_o_matic") else "",
+                "extension_path": f"data/pet_extensions/{pet}" if pet in ("ublock_origin", "privacy_badger", "consent_o_matic") else "",
+                "extension_enabled": pet in ("ublock_origin", "privacy_badger", "consent_o_matic"),
+                "consent_banner_detected": banner,
+                "page_load_time_ms": load_ms,
+                "total_cookies": tot_c,
                 "tracker_domains": td,
                 "tracker_cookies": tc,
-                "total_cookies": tot_c,
+                "total_third_party_domains": total_tp,
                 "total_requests": tot_r,
-                "page_load_time_ms": load_ms,
-                "consent_banner_detected": banner,
-                "cookies_after_reject": cookies_after_rej,
+                "blocked_requests": blocked_requests,
+                "success": True,
+                "error": "",
             })
 
     with open(out_csv, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+        writer = csv.DictWriter(f, fieldnames=PET_EFFECTIVENESS_FIELDS)
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"Generated {len(rows)} rows ({len(domains)} sites × {len(PETS)} PETs)")
+    out_json = PROCESSED_DIR / "pets_raw_results.json"
+    out_json.write_text(
+        json.dumps(
+            {
+                **build_provenance(
+                    source_mode="mock",
+                    run_id=run_id,
+                    site_list_source=site_list_source,
+                ),
+                "results": rows,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    print(f"Generated {len(rows)} rows ({len(sites)} sites × {len(PETS)} PETs)")
     print(f"Saved to {out_csv}")
 
     # Print summary statistics
-    _print_summary(rows, domains)
+    _print_summary(rows, [site["domain"] for site in sites])
 
 
 def _print_summary(rows: list[dict], domains: list[str]) -> None:

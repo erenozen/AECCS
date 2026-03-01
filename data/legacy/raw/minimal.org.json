@@ -1,0 +1,166 @@
+{
+  "domain": "minimal.org",
+  "category": "Education",
+  "region": "EU",
+  "rank": 6248,
+  "crawl_timestamp": "2026-03-01T11:36:08.940403+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": null,
+  "consent_banner": {
+    "found": false
+  },
+  "screenshot_path": "data/raw/screenshots/minimal.org.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "user_pref",
+        "value": "14f1edd4caf0e819f77831",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1791757646,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "eee42bcda621234be56bbd875d2ff22ab354cf40f4a4",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1788046005,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://minimal.org/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "minimal.org"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 2,
+    "total_third_party_domains": 0,
+    "total_requests": 1
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "lang",
+        "value": "d123ef48cb7fbf7e63aaa223d8ad",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1802491698,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "a0d96305a09c3b82",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1793310860,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://minimal.org/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "minimal.org"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 2,
+    "total_third_party_domains": 0,
+    "total_requests": 1,
+    "new_cookies_after_interaction": [
+      {
+        "name": "lang",
+        "value": "d123ef48cb7fbf7e63aaa223d8ad",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1802491698,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": []
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "0eba11d78816f44a",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1784430193,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "08deb797c1aaeb5a18f848699f8cec94f7bd1da43cd",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1792441411,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://minimal.org/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "minimal.org"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 2,
+    "total_third_party_domains": 0,
+    "total_requests": 1,
+    "new_cookies_after_interaction": [
+      {
+        "name": "theme",
+        "value": "0eba11d78816f44a",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1784430193,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "08deb797c1aaeb5a18f848699f8cec94f7bd1da43cd",
+        "domain": ".minimal.org",
+        "path": "/",
+        "expires": 1792441411,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [],
+    "reject_button_found": false,
+    "reject_successful": false
+  }
+}

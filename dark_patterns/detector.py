@@ -23,7 +23,15 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from config import BANNERS_DIR, CONSENT_BUTTON_KEYWORDS, PROCESSED_DIR, RAW_DIR
+from config import (
+    BANNERS_DIR,
+    CONSENT_BUTTON_KEYWORDS,
+    DEFAULT_SOURCE_MODE,
+    PROCESSED_DIR,
+    RAW_DIR,
+    build_provenance,
+    get_dataset_layout,
+)
 
 # ── Suspicious language patterns ──────────────────────────────────────────────
 
@@ -527,11 +535,14 @@ def run_dark_pattern_detection(
     banners_dir: str | None = None,
     raw_dir: str | None = None,
     output_dir: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> None:
     """Batch-analyze all saved consent banners for dark patterns."""
-    b_dir = Path(banners_dir) if banners_dir else BANNERS_DIR
-    r_dir = Path(raw_dir) if raw_dir else RAW_DIR
-    o_dir = Path(output_dir) if output_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    b_dir = Path(banners_dir) if banners_dir else layout.banners_dir
+    r_dir = Path(raw_dir) if raw_dir else layout.raw_dir
+    o_dir = Path(output_dir) if output_dir else layout.processed_dir
     o_dir.mkdir(parents=True, exist_ok=True)
 
     # Process banners that exist
@@ -578,6 +589,15 @@ def run_dark_pattern_detection(
                 result["dark_pattern_count"] = len(detected)
 
         out_path = o_dir / f"{domain}_dark_patterns.json"
+        provenance = build_provenance(
+            source_mode=(site_data or {}).get("source_mode", source_mode),
+            run_id=(site_data or {}).get("run_id", run_id),
+            proxy_used=(site_data or {}).get("proxy_used"),
+            browser_name=(site_data or {}).get("browser_name"),
+            browser_version=(site_data or {}).get("browser_version"),
+            site_list_source=(site_data or {}).get("site_list_source"),
+        )
+        result.update(provenance)
         out_path.write_text(
             json.dumps(result, indent=2, default=str), encoding="utf-8"
         )
@@ -624,13 +644,26 @@ def main() -> None:
         "--output-dir", type=str, default=None,
         help=f"Output directory (default: {PROCESSED_DIR})",
     )
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
     if args.domain:
-        r_dir = Path(args.raw_dir) if args.raw_dir else RAW_DIR
-        o_dir = Path(args.output_dir) if args.output_dir else PROCESSED_DIR
+        layout = get_dataset_layout(args.source_mode)
+        r_dir = Path(args.raw_dir) if args.raw_dir else layout.raw_dir
+        o_dir = Path(args.output_dir) if args.output_dir else layout.processed_dir
         o_dir.mkdir(parents=True, exist_ok=True)
-        b_dir = Path(args.banners_dir) if args.banners_dir else BANNERS_DIR
+        b_dir = Path(args.banners_dir) if args.banners_dir else layout.banners_dir
 
         site_json = r_dir / f"{args.domain}.json"
         site_data = None
@@ -652,6 +685,15 @@ def main() -> None:
                 result["dark_pattern_count"] = len(detected)
 
         out_path = o_dir / f"{args.domain}_dark_patterns.json"
+        provenance = build_provenance(
+            source_mode=(site_data or {}).get("source_mode", args.source_mode),
+            run_id=(site_data or {}).get("run_id", args.run_id),
+            proxy_used=(site_data or {}).get("proxy_used"),
+            browser_name=(site_data or {}).get("browser_name"),
+            browser_version=(site_data or {}).get("browser_version"),
+            site_list_source=(site_data or {}).get("site_list_source"),
+        )
+        result.update(provenance)
         out_path.write_text(
             json.dumps(result, indent=2, default=str), encoding="utf-8"
         )
@@ -663,6 +705,8 @@ def main() -> None:
         banners_dir=args.banners_dir,
         raw_dir=args.raw_dir,
         output_dir=args.output_dir,
+        source_mode=args.source_mode,
+        run_id=args.run_id,
     )
 
 

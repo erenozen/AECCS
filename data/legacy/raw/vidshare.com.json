@@ -1,0 +1,973 @@
+{
+  "domain": "vidshare.com",
+  "category": "Entertainment",
+  "region": "US",
+  "rank": 719,
+  "crawl_timestamp": "2026-03-01T11:36:08.941851+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "TrustArc",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div class=\"consent-layer\" role=\"dialog\">\n  <h3>vidshare.com \u2014 Cookie Consent</h3>\n  <p>We use cookies for essential functions and with your consent for analytics and ads.</p>\n  <button id=\"accept\" class=\"btn primary\"\n          style=\"width:250px; height:44px; font-size:16px; font-weight:500;\n                 background-color:#2563eb; color:#fff;\">\n    Accept All\n  </button>\n  <a href=\"/cookie-settings\" class=\"settings-link\"\n     style=\"font-size:13px; color:#6b7280;\">\n    Manage cookie settings\n  </a>\n</div>",
+    "text_content": "vidshare.com \u2014 Cookie Consent \n   We use cookies for essential functions and with your consent for analytics and ads. \n   \n    Accept All\n   \n   \n    Manage cookie settings",
+    "buttons": [
+      {
+        "text": "Accept All",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept",
+        "computed_styles": {
+          "width": "250px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 3
+  },
+  "screenshot_path": "data/raw/screenshots/vidshare.com.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "remember_me",
+        "value": "c8ab55d80aa4c2ef2d60f9c8d4a",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1773037076,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "1919febff10164217030fd84c43b1832841041",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1786632100,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "5325175c864b3aed",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1780175763,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "15de474f7d96f535be181",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1787435853,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "__cfduid",
+        "value": "29c7152dacc7362c6bfc67",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1777111367,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0816",
+        "value": "c7fc7b3743027dd8572095c68fe28406",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1780779713,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_7ea2",
+        "value": "dbf38e7b52e6870ebc8e",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1785568355,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_3055",
+        "value": "4508dc79bf5d6403a57b8e75461b0d8",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1777306524,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_36d7",
+        "value": "2b2a71175e61760498148935fdf09",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1799429264,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_026f",
+        "value": "1f4a4d08d7ecec1e",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1787322040,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_af43",
+        "value": "67449dd79c6388f06e425bd819b",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1779913830,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://vidshare.com/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "vidshare.com"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "criteo.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "googlesyndication.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "moatads.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "newrelic.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "scorecardresearch.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "segment.io",
+        "referer": "https://vidshare.com/"
+      }
+    ],
+    "third_party_domains": [
+      "casalemedia.com",
+      "criteo.com",
+      "facebook.com",
+      "googlesyndication.com",
+      "moatads.com",
+      "newrelic.com",
+      "scorecardresearch.com",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 11,
+    "total_third_party_domains": 8,
+    "total_requests": 9
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "session_id",
+        "value": "d84f94b90b8840bfcd000b1fd92cecfe304903e533025",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1773735475,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "5f1e355be36888b33c32d626085b8a1dcc1e0",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1798543566,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "theme",
+        "value": "5d9202f61794102c41379c927b15b26f72da66e20",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1793199522,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "c309aee52021535013c1a4a0d79a492b42f83daab812",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1803496039,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "76ad33329855905baf4e58cb8d8f56c2c08629243cdb19",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1778031650,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "25c85ce6cf783cea1fc34499c9a",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1785603073,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "060eed0962740b90c93c822d1f3db6087a541a6d7624",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1796148981,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "093241dada3d360e94162315e4e327e876e0d3",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1780790994,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d793",
+        "value": "b028744c24653d97c0548b6c694736b10f9",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1779990004,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_a5b4",
+        "value": "64590c938464dab47f847",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1785662139,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_1cdf",
+        "value": "e467a638cf1ae1589007e2d085bad6436e0e33",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1781327905,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_836a",
+        "value": "06be1e226deac9c7a63cac07364db",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1795641905,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_cf0d",
+        "value": "dda92174d6b1da763dc62eae7f92dd1fde78",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1786417122,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_fcc3",
+        "value": "7e06d92923b8f3ea35aab",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1776158699,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c960",
+        "value": "915835f8f488ca302dab7868e66aaa5a9ce06de9",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1796618795,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ea10",
+        "value": "c1092a0e3888ef1222f8acdd5fa028959a74186919ed",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1778122834,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6002",
+        "value": "310c2e3e4459a24fa",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1801730204,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_10bc",
+        "value": "4a5601ef732e96db36c0e462c",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1795511254,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_53c4",
+        "value": "bdcc4036bde81d9f35f62",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1778998437,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_66c9",
+        "value": "4154dfda2bf282f9266ff963599e9d9bcb3587f877",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1792867475,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_e643",
+        "value": "0fced1383c1f60e40fbe29b1cba",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1800987380,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_b931",
+        "value": "895ed70965a4bab409b283d0ef6f1",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1781126904,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://vidshare.com/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "vidshare.com"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "adsrvr.org",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "cloudflare.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "criteo.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "doubleclick.net",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.net",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "google-analytics.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "newrelic.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "optimizely.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "pubmatic.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "rubiconproject.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "scorecardresearch.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "segment.io",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "taboola.com",
+        "referer": "https://vidshare.com/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "cloudflare.com",
+      "criteo.com",
+      "doubleclick.net",
+      "facebook.com",
+      "facebook.net",
+      "google-analytics.com",
+      "newrelic.com",
+      "optimizely.com",
+      "pubmatic.com",
+      "rubiconproject.com",
+      "scorecardresearch.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 22,
+    "total_third_party_domains": 16,
+    "total_requests": 17,
+    "new_cookies_after_interaction": [
+      {
+        "name": "csrf_token",
+        "value": "5f1e355be36888b33c32d626085b8a1dcc1e0",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1798543566,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "25c85ce6cf783cea1fc34499c9a",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1785603073,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "060eed0962740b90c93c822d1f3db6087a541a6d7624",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1796148981,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d793",
+        "value": "b028744c24653d97c0548b6c694736b10f9",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1779990004,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_a5b4",
+        "value": "64590c938464dab47f847",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1785662139,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_1cdf",
+        "value": "e467a638cf1ae1589007e2d085bad6436e0e33",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1781327905,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_836a",
+        "value": "06be1e226deac9c7a63cac07364db",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1795641905,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_cf0d",
+        "value": "dda92174d6b1da763dc62eae7f92dd1fde78",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1786417122,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_fcc3",
+        "value": "7e06d92923b8f3ea35aab",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1776158699,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c960",
+        "value": "915835f8f488ca302dab7868e66aaa5a9ce06de9",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1796618795,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ea10",
+        "value": "c1092a0e3888ef1222f8acdd5fa028959a74186919ed",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1778122834,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6002",
+        "value": "310c2e3e4459a24fa",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1801730204,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_10bc",
+        "value": "4a5601ef732e96db36c0e462c",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1795511254,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_53c4",
+        "value": "bdcc4036bde81d9f35f62",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1778998437,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_66c9",
+        "value": "4154dfda2bf282f9266ff963599e9d9bcb3587f877",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1792867475,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_e643",
+        "value": "0fced1383c1f60e40fbe29b1cba",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1800987380,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_b931",
+        "value": "895ed70965a4bab409b283d0ef6f1",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1781126904,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adsrvr.org",
+      "amazon-adsystem.com",
+      "cloudflare.com",
+      "doubleclick.net",
+      "facebook.net",
+      "google-analytics.com",
+      "optimizely.com",
+      "pubmatic.com",
+      "rubiconproject.com",
+      "taboola.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "consent_given",
+        "value": "b5fa79d107327f06cc20bdb",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1791958606,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "csrf_token",
+        "value": "98373bcd4d49c70b8dc5",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1774572722,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "61c170e8c573ad9153491c8581b1e74c65916ad049ecb5",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1782829438,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "theme",
+        "value": "ff3eb218a962fb35d8a4fba8062b1e469",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1801458637,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "__cfduid",
+        "value": "563e9740eecd78f8f02fb998bbe431a",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1802918822,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_5450",
+        "value": "c3a1a0fca203ea7f547bcdaa2a",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1778968265,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c4bd",
+        "value": "b96ccf263b9e5f26b427873665d606600be1a",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1781293439,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_81d9",
+        "value": "f0ba2295bc757931a260b62",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1787919991,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://vidshare.com/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "vidshare.com"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "chartbeat.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "hotjar.com",
+        "referer": "https://vidshare.com/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "optimizely.com",
+        "referer": "https://vidshare.com/"
+      }
+    ],
+    "third_party_domains": [
+      "casalemedia.com",
+      "chartbeat.com",
+      "hotjar.com",
+      "optimizely.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 8,
+    "total_third_party_domains": 4,
+    "total_requests": 5,
+    "new_cookies_after_interaction": [
+      {
+        "name": "csrf_token",
+        "value": "98373bcd4d49c70b8dc5",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1774572722,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "61c170e8c573ad9153491c8581b1e74c65916ad049ecb5",
+        "domain": ".vidshare.com",
+        "path": "/",
+        "expires": 1782829438,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_5450",
+        "value": "c3a1a0fca203ea7f547bcdaa2a",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1778968265,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c4bd",
+        "value": "b96ccf263b9e5f26b427873665d606600be1a",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1781293439,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_81d9",
+        "value": "f0ba2295bc757931a260b62",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1787919991,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "chartbeat.com",
+      "hotjar.com",
+      "optimizely.com"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AECCS Midterm Presentation</title>
+  <style>
+    @page { size: 16:9; margin: 12mm; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; margin: 0; color: #111827; }
+    section { page-break-after: always; padding: 2.2rem 2.8rem; min-height: 92vh; }
+    h1, h2 { color: #0f4c81; margin-top: 0; }
+    ul { font-size: 1.05rem; line-height: 1.45; }
+    .lede { font-size: 1.15rem; max-width: 54rem; }
+    .note { color: #9a3412; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.98rem; }
+    th, td { border: 1px solid #cbd5e1; padding: 0.5rem 0.65rem; text-align: left; }
+    th { background: #eff6ff; }
+  </style>
+</head>
+<body>
+  <section>
+    <h1>AECCS Midterm Presentation</h1>
+    <p class="lede">Assessing the Effectiveness of Cookie Consent Systems through automated measurement, tracker analysis, dark-pattern detection, and PET evaluation.</p>
+    <p>CS475 Privacy-Enhancing Technologies</p>
+  </section>
+
+  <section>
+    <h2>Problem Statement</h2>
+    <ul>
+      <li>Cookie banners are supposed to provide meaningful user control over tracking.</li>
+      <li>In practice, many banners use dark patterns or fail to enforce rejection choices.</li>
+      <li>The project asks whether consent systems protect privacy and whether PETs reduce exposure when they do not.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Related Work</h2>
+    <ul>
+      <li>Nouwens et al.: dark patterns remain widespread after GDPR.</li>
+      <li>Matte et al.: many banners do not technically respect user choice.</li>
+      <li>Bollinger et al.: automated cookie-consent analysis can be scaled.</li>
+      <li>GDPR and CNIL guidance define the baseline consent expectations.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Implemented System</h2>
+    <table>
+      <thead>
+        <tr><th>Component</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Playwright crawler</td><td>Implemented</td></tr>
+        <tr><td>Tracker classifier</td><td>Implemented</td></tr>
+        <tr><td>Dark-pattern detector</td><td>Implemented</td></tr>
+        <tr><td>Compliance scoring</td><td>Implemented</td></tr>
+        <tr><td>Aggregate metrics</td><td>Implemented</td></tr>
+        <tr><td>Browser PET evaluation</td><td>Implemented</td></tr>
+        <tr><td>CMP analysis / DP reporting / reporting</td><td>Implemented</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Current Milestone</h2>
+    <ul>
+      <li>Mock and real datasets are separated.</li>
+      <li>Artifacts now carry provenance metadata and run IDs.</li>
+      <li>Report generation rejects mixed processed inputs.</li>
+      <li>Validation tests cover tracker classification, dark patterns, scoring, PET skip behavior, and reporting contracts.</li>
+    </ul>
+    <p class="note">Current percentages in the repository are synthetic demo values, not final study findings.</p>
+  </section>
+
+  <section>
+    <h2>Next Steps</h2>
+    <ul>
+      <li>Run the 100-site real study list under <code>data/real/</code>.</li>
+      <li>Execute the PET experiments on a real subset or the full list.</li>
+      <li>Regenerate figures, report outputs, and submission artifacts from real data only.</li>
+    </ul>
+  </section>
+</body>
+</html>

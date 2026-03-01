@@ -1,0 +1,44 @@
+{
+  "domain": "lemonde.fr",
+  "category": "",
+  "overall_score": 11.5,
+  "criterion_scores": {
+    "no_pre_consent_trackers": {
+      "score": 0,
+      "weight": 0.25,
+      "weighted_score": 0.0,
+      "details": "11 pre-consent trackers found"
+    },
+    "reject_option_available": {
+      "score": 0,
+      "weight": 0.2,
+      "weighted_score": 0.0,
+      "details": "No reject option available"
+    },
+    "equal_accept_reject_effort": {
+      "score": 0,
+      "weight": 0.15,
+      "weighted_score": 0.0,
+      "details": "No reject option"
+    },
+    "no_dark_patterns": {
+      "score": 30,
+      "weight": 0.15,
+      "weighted_score": 4.5,
+      "details": "2 dark patterns detected: missing_reject, multi_layer_rejection"
+    },
+    "post_reject_compliance": {
+      "score": 0,
+      "weight": 0.15,
+      "weighted_score": 0.0,
+      "details": "No reject option available"
+    },
+    "transparent_information": {
+      "score": 70,
+      "weight": 0.1,
+      "weighted_score": 7.0,
+      "details": "mentions purposes; privacy policy link; clear language"
+    }
+  },
+  "grade": "F"
+}

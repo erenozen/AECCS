@@ -1,0 +1,1530 @@
+{
+  "domain": "clickbait.io",
+  "category": "News",
+  "region": "US",
+  "rank": 1104,
+  "crawl_timestamp": "2026-03-01T11:36:08.939645+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": null,
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-consent\" role=\"dialog\">\n  <div class=\"consent-body\">\n    <h3>Cookie Notice \u2014 clickbait.io</h3>\n    <p>We and our partners use cookies for analytics and advertising.</p>\n    <div class=\"actions\">\n      <button id=\"accept\" class=\"btn-accept\"\n              style=\"width:300px; height:60px; font-size:18px; font-weight:700;\n                     background-color:#22c55e; color:#fff;\">\n        Accept All Cookies\n      </button>\n      <button id=\"reject\" class=\"btn-reject\"\n              style=\"width:100px; height:30px; font-size:11px; font-weight:300;\n                     background-color:#e5e7eb; color:#9ca3af;\">\n        Decline\n      </button>\n    </div>\n  </div>\n</div>",
+    "text_content": "Cookie Notice \u2014 clickbait.io \n     We and our partners use cookies for analytics and advertising. \n     \n       \n        Accept All Cookies\n       \n       \n        Decline",
+    "buttons": [
+      {
+        "text": "Accept All Cookies",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept",
+        "computed_styles": {
+          "width": "300px",
+          "height": "60px",
+          "background_color": "#22c55e",
+          "color": "#fff",
+          "font_size": "18px",
+          "font_weight": "700",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Decline",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject",
+        "computed_styles": {
+          "width": "100px",
+          "height": "30px",
+          "background_color": "#e5e7eb",
+          "color": "#9ca3af",
+          "font_size": "11px",
+          "font_weight": "300",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/clickbait.io.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "session_id",
+        "value": "88cde6b2a065371eb24426b5c4fba",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1774926280,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "f1cc42c58d8879c5",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1775456585,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d87e",
+        "value": "0dc6cc62979bfbdec8755e0390a55b057218c9",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1788254236,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_fb59",
+        "value": "ca38601fafbdf4dff5",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1789088306,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_40f5",
+        "value": "de9d5145e23c34d88dc89",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1795537306,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_ea16",
+        "value": "4e15b21f0e0c612fe3",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1783577856,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_a9da",
+        "value": "7b2bda36ae9bd7369",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1785402489,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_42f6",
+        "value": "49eb49019bb9d9f3b33016f41031b6572a",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1776503955,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f684",
+        "value": "d263af3740070e0746e2460c895a",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1787446019,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_ddf4",
+        "value": "3e0373f8e1b8b4acb09e34cca89c827820cc6572bb6b43",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1785855895,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_9569",
+        "value": "5d5c8768b1e3d36f1af72b314e6faee",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1775505335,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_9149",
+        "value": "0b8ab0dd36519e46557b01a0422bb33",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1776818830,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0790",
+        "value": "5ccd6bd26202d612166b2bbe8e9f9",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1783443184,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d9a3",
+        "value": "69c443bc0668ed1be3bf17e9b28832e89e385845226d",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1779257305,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_b127",
+        "value": "b8b524d0cccbdb12ba1b7c7ea0af02561eac41d9977",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1802911610,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_2c8c",
+        "value": "60609043555886932435a5dc60ba036d89c0",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1793319892,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_2140",
+        "value": "d48eeb4bfa87e33b3a63a26",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1795115219,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://clickbait.io/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "clickbait.io"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adnxs.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adsrvr.org",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "chartbeat.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "cloudflare.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "criteo.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "doubleclick.net",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "googlesyndication.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "mixpanel.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "outbrain.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "pubmatic.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "quantserve.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "rubiconproject.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "segment.io",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "taboola.com",
+        "referer": "https://clickbait.io/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "adsrvr.org",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "cloudflare.com",
+      "criteo.com",
+      "doubleclick.net",
+      "googlesyndication.com",
+      "mixpanel.com",
+      "outbrain.com",
+      "pubmatic.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 17,
+    "total_third_party_domains": 16,
+    "total_requests": 17
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "__cfduid",
+        "value": "63a5a4fe0166449d8ecb5882f5f",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1787994286,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "a54af433fd389e1bcc1",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1796236021,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "bc8939a33653edbfe98c567868de02df01c129e367b44",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1792369429,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "eea695e19cda91438502f3d2392345140bb28f050c",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1780342733,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "6c0b12c003f836e1d0275b123e5d8297d68e9fd4f14",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1790975531,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_7b90",
+        "value": "f9149eb74c699f69cdadacbacd182c9a9294ce9",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1798953695,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e1dc",
+        "value": "42f68f6bf761cf07b4fb83a953f2ec",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1800419108,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_efe1",
+        "value": "e960cc6c82a1895ae38c1decc",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1782894414,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_fc43",
+        "value": "629cd4edd2c0a89e6f1f63139dd0f60a1",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1793503230,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d57c",
+        "value": "dfaa05a4e7960febc6220cb7a760",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1777769885,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_e1c0",
+        "value": "1333ef5b25f1810de21901c38a279513",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1774862871,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_440f",
+        "value": "0d40d6407ad68eeb78e1daee9d138f28b7b9",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1780215758,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d8ed",
+        "value": "8f6597b7b8a6e170d7e8cd0c62a",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1778104371,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_a52f",
+        "value": "05fea621ae19567909c4694802e0509ba8f9b84",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1776730247,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_5b8a",
+        "value": "4787ceb752e663ca094cf",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1774498639,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a797",
+        "value": "d967dd283f0a5862a3040e5f6",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1793156852,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_70a2",
+        "value": "c554e6935d4aa28946dd3fee521",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1795203348,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_85f7",
+        "value": "6f2f3b59a1df1b50a8ff8057ad33a1a89e177",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1773941929,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d53c",
+        "value": "d3457551b5ed7d836d0f4",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1800775920,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_dc4c",
+        "value": "0579f1970b2742d8d5225",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1799517387,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_05c8",
+        "value": "84d2b8fe4ab65dcd484911bf0e0024a9e13adf155357",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1789876831,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a821",
+        "value": "48969b2fbe6ecb46b2dfbe4f13dbc12d29e",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1794016139,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_4160",
+        "value": "8673858c6ba22574f8422",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1791535490,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_21dd",
+        "value": "6a310dbfa2737b3992d022fe362165d1482e55fcd85f4",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1776467461,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_abe3",
+        "value": "4f944cc9b27dd722103e78717e598e32cc1c6cd82",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1802009596,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://clickbait.io/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "clickbait.io"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adsrvr.org",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "casalemedia.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "chartbeat.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "cloudflare.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "criteo.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "facebook.net",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "google-analytics.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "googlesyndication.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "hotjar.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "mixpanel.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "moatads.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "newrelic.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "openx.net",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "optimizely.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "outbrain.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "pubmatic.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "quantserve.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "rubiconproject.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "scorecardresearch.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "segment.io",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "taboola.com",
+        "referer": "https://clickbait.io/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "casalemedia.com",
+      "chartbeat.com",
+      "cloudflare.com",
+      "criteo.com",
+      "facebook.com",
+      "facebook.net",
+      "google-analytics.com",
+      "googlesyndication.com",
+      "hotjar.com",
+      "mixpanel.com",
+      "moatads.com",
+      "newrelic.com",
+      "openx.net",
+      "optimizely.com",
+      "outbrain.com",
+      "pubmatic.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "scorecardresearch.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 25,
+    "total_third_party_domains": 22,
+    "total_requests": 23,
+    "new_cookies_after_interaction": [
+      {
+        "name": "__cfduid",
+        "value": "63a5a4fe0166449d8ecb5882f5f",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1787994286,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "a54af433fd389e1bcc1",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1796236021,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "bc8939a33653edbfe98c567868de02df01c129e367b44",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1792369429,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "eea695e19cda91438502f3d2392345140bb28f050c",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1780342733,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7b90",
+        "value": "f9149eb74c699f69cdadacbacd182c9a9294ce9",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1798953695,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e1dc",
+        "value": "42f68f6bf761cf07b4fb83a953f2ec",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1800419108,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_efe1",
+        "value": "e960cc6c82a1895ae38c1decc",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1782894414,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_fc43",
+        "value": "629cd4edd2c0a89e6f1f63139dd0f60a1",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1793503230,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d57c",
+        "value": "dfaa05a4e7960febc6220cb7a760",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1777769885,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_e1c0",
+        "value": "1333ef5b25f1810de21901c38a279513",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1774862871,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_440f",
+        "value": "0d40d6407ad68eeb78e1daee9d138f28b7b9",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1780215758,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d8ed",
+        "value": "8f6597b7b8a6e170d7e8cd0c62a",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1778104371,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_a52f",
+        "value": "05fea621ae19567909c4694802e0509ba8f9b84",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1776730247,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_5b8a",
+        "value": "4787ceb752e663ca094cf",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1774498639,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a797",
+        "value": "d967dd283f0a5862a3040e5f6",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1793156852,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_70a2",
+        "value": "c554e6935d4aa28946dd3fee521",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1795203348,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_85f7",
+        "value": "6f2f3b59a1df1b50a8ff8057ad33a1a89e177",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1773941929,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d53c",
+        "value": "d3457551b5ed7d836d0f4",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1800775920,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_dc4c",
+        "value": "0579f1970b2742d8d5225",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1799517387,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_05c8",
+        "value": "84d2b8fe4ab65dcd484911bf0e0024a9e13adf155357",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1789876831,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a821",
+        "value": "48969b2fbe6ecb46b2dfbe4f13dbc12d29e",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1794016139,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_4160",
+        "value": "8673858c6ba22574f8422",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1791535490,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_21dd",
+        "value": "6a310dbfa2737b3992d022fe362165d1482e55fcd85f4",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1776467461,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_abe3",
+        "value": "4f944cc9b27dd722103e78717e598e32cc1c6cd82",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1802009596,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "facebook.com",
+      "facebook.net",
+      "google-analytics.com",
+      "hotjar.com",
+      "moatads.com",
+      "newrelic.com",
+      "openx.net",
+      "optimizely.com",
+      "scorecardresearch.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "session_id",
+        "value": "a2efba134d80de9f1a7916ab1",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1777650188,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "6c21ca161e09025b873eb3436302aa482c210868ed952",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1792377856,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c9dc",
+        "value": "f1465554e30fec0fe65237090bf6d0",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1780025731,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d8f1",
+        "value": "4ddaa3b4319e67ea5e417af562371d4618cc",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1789621687,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3cb6",
+        "value": "16c12888ca720bfb730737310d5844",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1799246562,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_1306",
+        "value": "8856640103ad36de7466d198db70f66459cc09",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1794733822,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e0b4",
+        "value": "8f1bcda403f1c098c4dde69faa39ad6",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1791043019,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_1ef2",
+        "value": "40743252bfa99ef70be26fa078d82102a0ca1eefc3ac99e",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1798542347,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_ee17",
+        "value": "b8afe8ddfee42c7e5",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1789586868,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_9787",
+        "value": "800865ad23946cae",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1789511469,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d42a",
+        "value": "2b6fada005b4cc650ea24eb8561e9daa2aeeb49634907410",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1791187005,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_62e9",
+        "value": "d68289c38889e247fc7969143d9cb5c",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1792490827,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_fdb1",
+        "value": "76023e586cbe5fc7496adb4c6d7be",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1803619756,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_c248",
+        "value": "8fbd781148fcd9eaf8",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1793053807,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_9eb9",
+        "value": "489bd59fc01292dcf3ee0176b39c8663fa1959600a9c",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1782391725,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_40ef",
+        "value": "cb8670c40c465c5e9c453cc02d5cecd26",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1795876750,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://clickbait.io/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "clickbait.io"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adnxs.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adsrvr.org",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "doubleclick.net",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "google-analytics.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "googlesyndication.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "moatads.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "openx.net",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "optimizely.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "pubmatic.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "quantserve.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "rubiconproject.com",
+        "referer": "https://clickbait.io/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "taboola.com",
+        "referer": "https://clickbait.io/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "adsrvr.org",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "doubleclick.net",
+      "facebook.com",
+      "google-analytics.com",
+      "googlesyndication.com",
+      "moatads.com",
+      "openx.net",
+      "optimizely.com",
+      "pubmatic.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 16,
+    "total_third_party_domains": 15,
+    "total_requests": 16,
+    "new_cookies_after_interaction": [
+      {
+        "name": "user_pref",
+        "value": "6c21ca161e09025b873eb3436302aa482c210868ed952",
+        "domain": ".clickbait.io",
+        "path": "/",
+        "expires": 1792377856,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c9dc",
+        "value": "f1465554e30fec0fe65237090bf6d0",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1780025731,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_d8f1",
+        "value": "4ddaa3b4319e67ea5e417af562371d4618cc",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1789621687,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3cb6",
+        "value": "16c12888ca720bfb730737310d5844",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1799246562,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_1306",
+        "value": "8856640103ad36de7466d198db70f66459cc09",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1794733822,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e0b4",
+        "value": "8f1bcda403f1c098c4dde69faa39ad6",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1791043019,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_1ef2",
+        "value": "40743252bfa99ef70be26fa078d82102a0ca1eefc3ac99e",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1798542347,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_ee17",
+        "value": "b8afe8ddfee42c7e5",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1789586868,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_9787",
+        "value": "800865ad23946cae",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1789511469,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d42a",
+        "value": "2b6fada005b4cc650ea24eb8561e9daa2aeeb49634907410",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1791187005,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_62e9",
+        "value": "d68289c38889e247fc7969143d9cb5c",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1792490827,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_fdb1",
+        "value": "76023e586cbe5fc7496adb4c6d7be",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1803619756,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_c248",
+        "value": "8fbd781148fcd9eaf8",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1793053807,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_9eb9",
+        "value": "489bd59fc01292dcf3ee0176b39c8663fa1959600a9c",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1782391725,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_40ef",
+        "value": "cb8670c40c465c5e9c453cc02d5cecd26",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1795876750,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "facebook.com",
+      "google-analytics.com",
+      "moatads.com",
+      "openx.net",
+      "optimizely.com"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

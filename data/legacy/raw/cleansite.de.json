@@ -1,0 +1,424 @@
+{
+  "domain": "cleansite.de",
+  "category": "Government",
+  "region": "DE",
+  "rank": 7754,
+  "crawl_timestamp": "2026-03-01T11:36:08.932896+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "Cookiebot",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-consent-banner\" role=\"dialog\" aria-label=\"Cookie consent\">\n  <div class=\"banner-content\">\n    <h2>We value your privacy</h2>\n    <p>We use cookies to enhance your browsing experience on cleansite.de.\n       You can accept or reject non-essential cookies.</p>\n    <div class=\"button-group\" style=\"display:flex; gap:10px;\">\n      <button id=\"accept-all\" class=\"btn btn-primary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#2563eb; color:#fff;\">\n        Accept All\n      </button>\n      <button id=\"reject-all\" class=\"btn btn-secondary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#dc2626; color:#fff;\">\n        Reject All\n      </button>\n    </div>\n    <a href=\"/privacy-policy\">Privacy Policy</a>\n  </div>\n</div>",
+    "text_content": "We value your privacy \n     We use cookies to enhance your browsing experience on cleansite.de.\n       You can accept or reject non-essential cookies. \n     \n       \n        Accept All\n       \n       \n        Reject All\n       \n     \n     Privacy Policy",
+    "buttons": [
+      {
+        "text": "Accept All",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Reject All",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#dc2626",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/cleansite.de.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "csrf_token",
+        "value": "321b8901398bb674dc2643c16554071e1",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1782205998,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "9b0341314a5534ea92b26fa8adc30543fe5a6e7",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1781256471,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "b695f27cd22a969748fa1ecc5420bbfc",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1789403538,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://cleansite.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "cleansite.de"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "chartbeat.com",
+        "referer": "https://cleansite.de/"
+      }
+    ],
+    "third_party_domains": [
+      "chartbeat.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 3,
+    "total_third_party_domains": 1,
+    "total_requests": 2
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "715fc3391bdf82af289fecbb6a5e7310890b",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1774344043,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "d13a32e97cc31667ba",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1794050762,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "bc138227d1cd1a801c367de206ec4bbca7330b050",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1788366935,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "08d11d6f9901a954a542a7ee09",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1791259499,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "825134784fc8a8e1e4eb2435ad84e",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1774073096,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "__cfduid",
+        "value": "d052f27b81fb2058605ef05aa58dfbe32c262ec6ab3",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1777710361,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3e5d",
+        "value": "3a641c58ad50e49f095c6f1e3068ca",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1797264281,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_36fe",
+        "value": "a1e8a5b83a6b296d43c957a8cfba4a91f34c",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1777312946,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_37d1",
+        "value": "e9b662bedec3cb78e127885c7de6e72d7cd4c737b3",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1783637741,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_1262",
+        "value": "168636e9bdc605cdf6b8933605a62",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1788051578,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://cleansite.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "cleansite.de"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "casalemedia.com",
+        "referer": "https://cleansite.de/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "doubleclick.net",
+        "referer": "https://cleansite.de/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "pubmatic.com",
+        "referer": "https://cleansite.de/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "segment.io",
+        "referer": "https://cleansite.de/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "taboola.com",
+        "referer": "https://cleansite.de/"
+      }
+    ],
+    "third_party_domains": [
+      "casalemedia.com",
+      "doubleclick.net",
+      "pubmatic.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 10,
+    "total_third_party_domains": 5,
+    "total_requests": 6,
+    "new_cookies_after_interaction": [
+      {
+        "name": "theme",
+        "value": "715fc3391bdf82af289fecbb6a5e7310890b",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1774344043,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "bc138227d1cd1a801c367de206ec4bbca7330b050",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1788366935,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "08d11d6f9901a954a542a7ee09",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1791259499,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3e5d",
+        "value": "3a641c58ad50e49f095c6f1e3068ca",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1797264281,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_36fe",
+        "value": "a1e8a5b83a6b296d43c957a8cfba4a91f34c",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1777312946,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_37d1",
+        "value": "e9b662bedec3cb78e127885c7de6e72d7cd4c737b3",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1783637741,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_1262",
+        "value": "168636e9bdc605cdf6b8933605a62",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1788051578,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "casalemedia.com",
+      "doubleclick.net",
+      "pubmatic.com",
+      "segment.io",
+      "taboola.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "remember_me",
+        "value": "635c6cd4108f5acacf3022a93bc29b1d",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1782805302,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "csrf_token",
+        "value": "e9e6f39d3b4acc908",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1794565540,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "a06765e7228a9ec7d953e47c9a57575449e88336837b7046",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1780532534,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://cleansite.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "cleansite.de"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "pubmatic.com",
+        "referer": "https://cleansite.de/"
+      }
+    ],
+    "third_party_domains": [
+      "pubmatic.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 3,
+    "total_third_party_domains": 1,
+    "total_requests": 2,
+    "new_cookies_after_interaction": [
+      {
+        "name": "remember_me",
+        "value": "635c6cd4108f5acacf3022a93bc29b1d",
+        "domain": ".cleansite.de",
+        "path": "/",
+        "expires": 1782805302,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "pubmatic.com"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

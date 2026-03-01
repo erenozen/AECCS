@@ -14,7 +14,7 @@ Generates 11 publication-quality figures (300 DPI) for the final report:
 10. CMP comparison
 11. Summary dashboard (2×2)
 
-All figures are saved to ``reporting/figures/``.
+All figures are saved to ``reporting/{source_mode}/figures/``.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from config import PROCESSED_DIR
+from config import DEFAULT_SOURCE_MODE, FIGURES_DIR, PROCESSED_DIR, get_dataset_layout
 
 # ── Style ─────────────────────────────────────────────────────────────────────
 
@@ -63,7 +63,7 @@ COLORS = {
     "diverging": "RdYlGn",
 }
 
-FIGURE_DIR = Path("reporting/figures")
+FIGURE_DIR = FIGURES_DIR
 
 PET_LABELS = {
     "baseline": "Baseline",
@@ -175,7 +175,11 @@ def plot_tracker_vendor_share(
 
 
 def plot_cookie_comparison(
-    metrics: dict, output_dir: Path | None = None, fmt: str = "png",
+    metrics: dict,
+    scores_path: str | None = None,
+    raw_dir: str | None = None,
+    output_dir: Path | None = None,
+    fmt: str = "png",
 ) -> Path:
     out = (output_dir or FIGURE_DIR) / f"cookie_comparison_by_category.{fmt}"
     bva = metrics.get("tracker_analysis", {}).get("before_vs_after_consent", {})
@@ -188,9 +192,9 @@ def plot_cookie_comparison(
         return _empty_figure(out, "No category data", fmt)
 
     # Load individual site data for per-category breakdown
-    scores_path = PROCESSED_DIR / "compliance_scores.csv"
-    if scores_path.exists():
-        df = pd.read_csv(scores_path)
+    sp = Path(scores_path) if scores_path else PROCESSED_DIR / "compliance_scores.csv"
+    if sp.exists():
+        df = pd.read_csv(sp)
     else:
         df = pd.DataFrame()
 
@@ -199,8 +203,8 @@ def plot_cookie_comparison(
     after_acc: dict[str, list[float]] = {c: [] for c in cats}
     after_rej: dict[str, list[float]] = {c: [] for c in cats}
 
-    from config import RAW_DIR
-    for f in sorted(RAW_DIR.glob("*.json")):
+    src_raw_dir = Path(raw_dir) if raw_dir else get_dataset_layout().raw_dir
+    for f in sorted(src_raw_dir.glob("*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
         except Exception:
@@ -483,7 +487,10 @@ def plot_pet_effectiveness(
 
 
 def plot_pet_heatmap(
-    pets_path: str | None = None, output_dir: Path | None = None, fmt: str = "png",
+    pets_path: str | None = None,
+    scores_path: str | None = None,
+    output_dir: Path | None = None,
+    fmt: str = "png",
 ) -> Path:
     out = (output_dir or FIGURE_DIR) / f"pet_effectiveness_heatmap.{fmt}"
     pp = Path(pets_path) if pets_path else PROCESSED_DIR / "pets_effectiveness.csv"
@@ -492,12 +499,13 @@ def plot_pet_heatmap(
 
     df = pd.read_csv(pp)
 
-    # Need category per domain — load from compliance_scores.csv
-    scores_path = PROCESSED_DIR / "compliance_scores.csv"
-    if scores_path.exists():
-        cs = pd.read_csv(scores_path)[["domain", "category"]].drop_duplicates()
+    # New PET CSVs already carry category; fall back to scores.csv only if needed.
+    has_category = "category" in df.columns and df["category"].notna().any()
+    sp = Path(scores_path) if scores_path else PROCESSED_DIR / "compliance_scores.csv"
+    if not has_category and sp.exists():
+        cs = pd.read_csv(sp)[["domain", "category"]].drop_duplicates()
         df = df.merge(cs, on="domain", how="left")
-    else:
+    elif "category" not in df.columns:
         df["category"] = "All"
 
     df["category"] = df["category"].fillna("Unknown")
@@ -764,7 +772,7 @@ FIGURE_REGISTRY: dict[str, dict] = {
     },
     "cookie_comparison": {
         "func": "plot_cookie_comparison",
-        "needs": ["metrics"],
+        "needs": ["metrics", "scores_path"],
         "desc": "Cookie count comparison before/after consent",
     },
     "compliance_distribution": {
@@ -815,9 +823,11 @@ def generate_all_visualizations(
     output_dir: str | None = None,
     figures: list[str] | None = None,
     fmt: str = "png",
+    source_mode: str = DEFAULT_SOURCE_MODE,
 ) -> list[Path]:
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
-    o_dir = Path(output_dir) if output_dir else FIGURE_DIR
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
+    o_dir = Path(output_dir) if output_dir else layout.figures_dir
     _ensure_dir(o_dir)
 
     # Load data files (once)
@@ -830,6 +840,7 @@ def generate_all_visualizations(
     pets_path = str(p_dir / "pets_effectiveness.csv")
     dp_path = str(p_dir / "dp_aggregate_metrics.json")
     cmp_path = str(p_dir / "cmp_comparison.csv")
+    raw_dir = str(layout.raw_dir)
 
     targets = figures if figures else list(FIGURE_REGISTRY.keys())
     generated: list[Path] = []
@@ -852,8 +863,12 @@ def generate_all_visualizations(
                 kwargs["metrics"] = metrics
             if "scores_path" in needs:
                 kwargs["scores_path"] = scores_path
+            if name == "cookie_comparison":
+                kwargs["raw_dir"] = raw_dir
             if "pets_path" in needs:
                 kwargs["pets_path"] = pets_path
+                if name == "pet_heatmap":
+                    kwargs["scores_path"] = scores_path
             if "dp_path" in needs:
                 kwargs["dp_path"] = dp_path
             if "cmp_path" in needs:
@@ -889,6 +904,12 @@ def main() -> None:
     parser.add_argument("--format", type=str, default="png",
                         choices=["png", "pdf", "svg"],
                         help="Output format (default: png)")
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
     args = parser.parse_args()
 
     if args.list:
@@ -904,6 +925,7 @@ def main() -> None:
         output_dir=args.output_dir,
         figures=args.figures,
         fmt=args.format,
+        source_mode=args.source_mode,
     )
 
 

@@ -1,0 +1,8 @@
+cmp_name,site_count,avg_compliance_score,median_compliance_score,pct_with_reject_button,pct_reject_works,avg_tracker_reduction,pct_with_dark_patterns,pet_score,rank
+Didomi,2,64.2,64.2,100.0,100.0,0.33,50.0,75.1,1
+OneTrust,4,58.6,58.2,100.0,75.0,0.34,50.0,67.2,2
+Usercentrics,2,76.8,76.8,100.0,50.0,0.33,50.0,66.3,3
+Quantcast,1,56.0,56.0,100.0,100.0,0.2,100.0,63.8,4
+Cookiebot,2,71.8,71.8,100.0,50.0,0.17,50.0,63.2,5
+TrustArc,3,33.3,37.5,66.7,66.7,-0.7,100.0,33.0,6
+No CMP Detected,9,25.4,22.8,22.2,33.3,0.03,100.0,20.7,7

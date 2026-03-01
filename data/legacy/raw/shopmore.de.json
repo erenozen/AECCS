@@ -1,0 +1,713 @@
+{
+  "domain": "shopmore.de",
+  "category": "E-Commerce",
+  "region": "DE",
+  "rank": 5955,
+  "crawl_timestamp": "2026-03-01T11:36:08.935933+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "Cookiebot",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-preferences\" role=\"dialog\">\n  <h3>Cookie Preferences \u2014 shopmore.de</h3>\n  <p>Choose which cookies you'd like to allow:</p>\n  <form>\n    <label><input type=\"checkbox\" checked disabled> Necessary cookies</label>\n    <label><input type=\"checkbox\" checked> Analytics cookies</label>\n    <label><input type=\"checkbox\" checked> Advertising cookies</label>\n    <label><input type=\"checkbox\" checked> Social media cookies</label>\n  </form>\n  <div class=\"actions\" style=\"display:flex; gap:10px;\">\n    <button id=\"save-prefs\" class=\"btn\"\n            style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                   background-color:#2563eb; color:#fff;\">\n      Accept Selected\n    </button>\n    <button id=\"reject-all\" class=\"btn\"\n            style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                   background-color:#dc2626; color:#fff;\">\n      Reject All\n    </button>\n  </div>\n</div>",
+    "text_content": "Cookie Preferences \u2014 shopmore.de \n   Choose which cookies you'd like to allow: \n   \n       Necessary cookies \n       Analytics cookies \n       Advertising cookies \n       Social media cookies \n   \n   \n     \n      Accept Selected\n     \n     \n      Reject All",
+    "buttons": [
+      {
+        "text": "Accept Selected",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#save-prefs",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Reject All",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#dc2626",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/shopmore.de.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "remember_me",
+        "value": "29dd284e11080969e88f7c",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1784643404,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "281503ffac2299d2bf0c343a8c6ee0a1fa",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1781545547,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "669e14f36d5ce0e7384229da651",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1795025507,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "9a632928e22e86faebdf39773629c",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1793280083,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "consent_given",
+        "value": "2ae916208ead92e9e8c1ae80fa66db6f",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1788545946,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "64ce19840b08863c616948",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1791315757,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_c6c7",
+        "value": "87f9c62d13cf18cc9a06acd791459be6a4f0c27",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1772727949,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_e83c",
+        "value": "8320302fc5698b114de5f493e946114fcfed9bf9ccf77901",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1774635312,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://shopmore.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "shopmore.de"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "moatads.com",
+        "referer": "https://shopmore.de/"
+      }
+    ],
+    "third_party_domains": [
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "moatads.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 8,
+    "total_third_party_domains": 3,
+    "total_requests": 4
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "__cfduid",
+        "value": "ad1e75e4fae73bd333921eaa9c80797fed7fe4390",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1799187616,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "86a2fb7b0395948379",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1784646945,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "3b5d42293143662f2c27fd8bc4896b0d7a7558e401d",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1792688327,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "f458c7197fdae696e155ab96ecf",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1797463776,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "620bafb1211e806c142ae434a2d0ad57f847fb29aa98",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1793827575,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "remember_me",
+        "value": "73146208c248b7c4cc9c83e63bad31a8c9b4a8",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1781388738,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "24a9493008214bb32754",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1799194073,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "b01c24682e460fb6f3f3b1a36fe2bb817450af360c963",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1773777631,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_fp_0",
+        "value": "b2c37a5fc05281758a5eb06b40b8879857d9d287d87c8b",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1801994862,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_fp_1",
+        "value": "c3ba8687895a181d2d3719da8b4591e37e1c08f",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1786325641,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_ff1b",
+        "value": "383a2b61a57ae22652f755f55c6b993ce4f76bf9",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1789736656,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0f35",
+        "value": "e8991724e3449931577ebd1a0c6ce5e6e",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1776413236,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a90c",
+        "value": "08595b2affc916c257b8466bc73698f8346a9165",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1778760343,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_904f",
+        "value": "97e3a2b1b392d45c475b38c89fba6e8403b47f1aae51",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1782183090,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_36f1",
+        "value": "7913f8b0e47b0a54ff4046ffff3562b8ada6",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1791591853,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_fe58",
+        "value": "a9a32bee6eca9218b2d205ff4bdab",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1777467400,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_20f9",
+        "value": "9301c2d7a267236fef3a332f79bde6",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1798414012,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_b659",
+        "value": "87d0f86b88a0464d76",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1792941940,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://shopmore.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "shopmore.de"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adsrvr.org",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "cloudflare.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "criteo.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "facebook.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.net",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "googlesyndication.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "mixpanel.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "moatads.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "quantserve.com",
+        "referer": "https://shopmore.de/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "cloudflare.com",
+      "criteo.com",
+      "facebook.com",
+      "facebook.net",
+      "googlesyndication.com",
+      "mixpanel.com",
+      "moatads.com",
+      "quantserve.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 18,
+    "total_third_party_domains": 9,
+    "total_requests": 10,
+    "new_cookies_after_interaction": [
+      {
+        "name": "__cfduid",
+        "value": "ad1e75e4fae73bd333921eaa9c80797fed7fe4390",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1799187616,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "f458c7197fdae696e155ab96ecf",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1797463776,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_fp_0",
+        "value": "b2c37a5fc05281758a5eb06b40b8879857d9d287d87c8b",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1801994862,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_fp_1",
+        "value": "c3ba8687895a181d2d3719da8b4591e37e1c08f",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1786325641,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_ff1b",
+        "value": "383a2b61a57ae22652f755f55c6b993ce4f76bf9",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1789736656,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0f35",
+        "value": "e8991724e3449931577ebd1a0c6ce5e6e",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1776413236,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_a90c",
+        "value": "08595b2affc916c257b8466bc73698f8346a9165",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1778760343,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_904f",
+        "value": "97e3a2b1b392d45c475b38c89fba6e8403b47f1aae51",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1782183090,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_36f1",
+        "value": "7913f8b0e47b0a54ff4046ffff3562b8ada6",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1791591853,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_fe58",
+        "value": "a9a32bee6eca9218b2d205ff4bdab",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1777467400,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_20f9",
+        "value": "9301c2d7a267236fef3a332f79bde6",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1798414012,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_b659",
+        "value": "87d0f86b88a0464d76",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1792941940,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adsrvr.org",
+      "cloudflare.com",
+      "criteo.com",
+      "facebook.com",
+      "facebook.net",
+      "googlesyndication.com",
+      "mixpanel.com",
+      "quantserve.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "lang",
+        "value": "5ab2b1ba1bbf928025dd22c04bf42ef0",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1798050989,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "77c973a7790e4ad32052099511f24ab98fb50c5edcd17",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1776462988,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "88b91baf7bef4958f5298a729bf00a1dcf658",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1793759637,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "b4148c1569fd3de770227de7de08",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1791324897,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "8095ec12d5682921c4db41e5d48250318ce2",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1783780963,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "c2ddfa2b7b80ea91708a494e53457124098",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1779300154,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_52b4",
+        "value": "24e800e0616beab7553cc1ec91cb14a",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1798087821,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://shopmore.de/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "shopmore.de"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://shopmore.de/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.net",
+        "referer": "https://shopmore.de/"
+      }
+    ],
+    "third_party_domains": [
+      "amazon-adsystem.com",
+      "facebook.net"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 7,
+    "total_third_party_domains": 2,
+    "total_requests": 3,
+    "new_cookies_after_interaction": [
+      {
+        "name": "session_id",
+        "value": "c2ddfa2b7b80ea91708a494e53457124098",
+        "domain": ".shopmore.de",
+        "path": "/",
+        "expires": 1779300154,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_52b4",
+        "value": "24e800e0616beab7553cc1ec91cb14a",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1798087821,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "facebook.net"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

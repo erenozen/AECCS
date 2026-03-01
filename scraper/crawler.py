@@ -27,7 +27,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-import tldextract
 from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeout
 from playwright_stealth import Stealth
 from tqdm import tqdm
@@ -38,6 +37,7 @@ from config import (
     BANNERS_DIR,
     CMP_SIGNATURES,
     CONSENT_BUTTON_KEYWORDS,
+    DEFAULT_SOURCE_MODE,
     PAGE_LOAD_TIMEOUT,
     PROXY_URL,
     RAW_DIR,
@@ -45,6 +45,10 @@ from config import (
     SCREENSHOTS_DIR,
     USER_AGENTS,
     WEBSITES_CSV,
+    TLD_EXTRACT,
+    build_provenance,
+    generate_run_id,
+    get_dataset_layout,
 )
 
 # ── CSS selectors tried in order when looking for consent banners ─────────────
@@ -111,7 +115,7 @@ _SETTINGS_KEYWORDS = [
 
 def _extract_registered_domain(url: str) -> str:
     """Return the registered domain (e.g. 'google.com') from a URL."""
-    ext = tldextract.extract(url)
+    ext = TLD_EXTRACT(url)
     return f"{ext.domain}.{ext.suffix}" if ext.suffix else ext.domain
 
 
@@ -557,6 +561,9 @@ async def crawl_site(
     domain: str,
     interaction: str = "none",
     headless: bool = True,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
+    site_list_source: str | None = None,
 ) -> dict:
     """Crawl a single website and capture cookies, requests, and banner HTML.
 
@@ -569,6 +576,7 @@ async def crawl_site(
         A structured dict with pre/post interaction state, banner info,
         CMP detection, etc.
     """
+    layout = get_dataset_layout(source_mode)
     timestamp = datetime.now(timezone.utc).isoformat()
     site_domain = _extract_registered_domain(domain)
     collected_requests: list[dict] = []
@@ -626,8 +634,8 @@ async def crawl_site(
                 await page.wait_for_timeout(3000)
 
                 # Screenshot
-                SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
-                screenshot_path = SCREENSHOTS_DIR / f"{domain}.png"
+                layout.screenshots_dir.mkdir(parents=True, exist_ok=True)
+                screenshot_path = layout.screenshots_dir / f"{domain}.png"
                 try:
                     await page.screenshot(path=str(screenshot_path), full_page=True)
                 except Exception:
@@ -655,13 +663,23 @@ async def crawl_site(
                 banner_html = None
                 if banner and banner["found"]:
                     banner_html = banner["html"]
-                    BANNERS_DIR.mkdir(parents=True, exist_ok=True)
-                    banner_path = BANNERS_DIR / f"{domain}.html"
+                    layout.banners_dir.mkdir(parents=True, exist_ok=True)
+                    banner_path = layout.banners_dir / f"{domain}.html"
                     banner_path.write_text(
                         f"<!-- domain: {domain} | timestamp: {timestamp} -->\n"
                         + banner_html,
                         encoding="utf-8",
                     )
+
+                provenance = build_provenance(
+                    source_mode=source_mode,
+                    run_id=run_id,
+                    generated_at=timestamp,
+                    proxy_used=PROXY_URL,
+                    browser_name="chromium",
+                    browser_version=getattr(browser, "version", None),
+                    site_list_source=site_list_source,
+                )
 
                 result = {
                     "domain": domain,
@@ -673,6 +691,7 @@ async def crawl_site(
                     "consent_banner": banner,
                     "screenshot_path": str(screenshot_path) if screenshot_path else None,
                 }
+                result.update(provenance)
 
                 # Post-interaction capture
                 if interaction in ("accept", "reject"):
@@ -734,6 +753,15 @@ async def crawl_site(
             "consent_banner": None,
             "pre_consent": None,
             "screenshot_path": None,
+            **build_provenance(
+                source_mode=source_mode,
+                run_id=run_id,
+                generated_at=timestamp,
+                proxy_used=PROXY_URL,
+                browser_name="chromium",
+                browser_version=None,
+                site_list_source=site_list_source,
+            ),
         }
 
 
@@ -745,6 +773,8 @@ async def run_full_crawl(
     output_dir: str | Path | None = None,
     headless: bool = True,
     force: bool = False,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> None:
     """Read the websites CSV and crawl every site in all three interaction modes.
 
@@ -754,8 +784,9 @@ async def run_full_crawl(
         headless: Whether to run the browser in headless mode.
         force: If True, re-crawl even if the output JSON already exists.
     """
-    csv_path = Path(websites_csv) if websites_csv else WEBSITES_CSV
-    out_dir = Path(output_dir) if output_dir else RAW_DIR
+    layout = get_dataset_layout(source_mode)
+    csv_path = Path(websites_csv) if websites_csv else layout.websites_csv
+    out_dir = Path(output_dir) if output_dir else layout.raw_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
     df = pd.read_csv(csv_path)
@@ -764,6 +795,8 @@ async def run_full_crawl(
     success_count = 0
     fail_count = 0
     total_cookies = 0
+
+    effective_run_id = run_id or generate_run_id("crawl")
 
     for row in tqdm(domains, desc="Crawling sites"):
         domain = row["domain"]
@@ -786,14 +819,34 @@ async def run_full_crawl(
             "consent_banner": None,
         }
 
+        site_run_id = effective_run_id
         for mode in ("none", "accept", "reject"):
-            data = await crawl_site(domain, interaction=mode, headless=headless)
+            data = await crawl_site(
+                domain,
+                interaction=mode,
+                headless=headless,
+                source_mode=source_mode,
+                run_id=site_run_id,
+                site_list_source=str(csv_path),
+            )
+            if site_run_id is None:
+                site_run_id = data.get("run_id")
 
             if mode == "none":
                 results["cmp_detected"] = data.get("cmp_detected")
                 results["consent_banner"] = data.get("consent_banner")
                 results["screenshot_path"] = data.get("screenshot_path")
                 results["pre_consent"] = data.get("pre_consent")
+                for field in (
+                    "source_mode",
+                    "run_id",
+                    "generated_at",
+                    "proxy_used",
+                    "browser_name",
+                    "browser_version",
+                    "site_list_source",
+                ):
+                    results[field] = data.get(field)
                 if not data.get("success", False):
                     results["success"] = False
                     results["error"] = data.get("error")
@@ -843,6 +896,8 @@ async def _crawl_single(
     output_dir: Path,
     headless: bool,
     force: bool,
+    source_mode: str,
+    run_id: str | None,
 ) -> None:
     """Crawl a single domain in the given interaction modes and save JSON."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -853,7 +908,14 @@ async def _crawl_single(
         return
 
     if len(interactions) == 1 and interactions[0] != "all":
-        result = await crawl_site(domain, interactions[0], headless=headless)
+        result = await crawl_site(
+            domain,
+            interactions[0],
+            headless=headless,
+            source_mode=source_mode,
+            run_id=run_id,
+            site_list_source="single-domain",
+        )
         result.setdefault("category", "")
         result.setdefault("region", "")
         result.setdefault("rank", 0)
@@ -872,13 +934,33 @@ async def _crawl_single(
             "success": True,
             "error": None,
         }
+        site_run_id = run_id or generate_run_id("crawl")
         for mode in ("none", "accept", "reject"):
-            data = await crawl_site(domain, mode, headless=headless)
+            data = await crawl_site(
+                domain,
+                mode,
+                headless=headless,
+                source_mode=source_mode,
+                run_id=site_run_id,
+                site_list_source="single-domain",
+            )
+            if site_run_id is None:
+                site_run_id = data.get("run_id")
             if mode == "none":
                 merged["cmp_detected"] = data.get("cmp_detected")
                 merged["consent_banner"] = data.get("consent_banner")
                 merged["screenshot_path"] = data.get("screenshot_path")
                 merged["pre_consent"] = data.get("pre_consent")
+                for field in (
+                    "source_mode",
+                    "run_id",
+                    "generated_at",
+                    "proxy_used",
+                    "browser_name",
+                    "browser_version",
+                    "site_list_source",
+                ):
+                    merged[field] = data.get(field)
                 if not data.get("success"):
                     merged["success"] = False
                     merged["error"] = data.get("error")
@@ -939,9 +1021,22 @@ def main() -> None:
         action="store_true",
         help="Re-crawl even if output JSON already exists",
     )
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
-    output_dir = Path(args.output) if args.output else RAW_DIR
+    layout = get_dataset_layout(args.source_mode)
+    output_dir = Path(args.output) if args.output else layout.raw_dir
 
     if args.domain:
         interactions = (
@@ -949,7 +1044,13 @@ def main() -> None:
         )
         asyncio.run(
             _crawl_single(
-                args.domain, interactions, output_dir, args.headless, args.force
+                args.domain,
+                interactions,
+                output_dir,
+                args.headless,
+                args.force,
+                args.source_mode,
+                args.run_id,
             )
         )
     else:
@@ -959,6 +1060,8 @@ def main() -> None:
                 output_dir=args.output,
                 headless=args.headless,
                 force=args.force,
+                source_mode=args.source_mode,
+                run_id=args.run_id,
             )
         )
 

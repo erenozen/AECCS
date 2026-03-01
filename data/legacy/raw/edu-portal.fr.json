@@ -1,0 +1,501 @@
+{
+  "domain": "edu-portal.fr",
+  "category": "Education",
+  "region": "FR",
+  "rank": 9762,
+  "crawl_timestamp": "2026-03-01T11:36:08.934499+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "Didomi",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-consent-banner\" role=\"dialog\" aria-label=\"Cookie consent\">\n  <div class=\"banner-content\">\n    <h2>We value your privacy</h2>\n    <p>We use cookies to enhance your browsing experience on edu-portal.fr.\n       You can accept or reject non-essential cookies.</p>\n    <div class=\"button-group\" style=\"display:flex; gap:10px;\">\n      <button id=\"accept-all\" class=\"btn btn-primary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#2563eb; color:#fff;\">\n        Accept All\n      </button>\n      <button id=\"reject-all\" class=\"btn btn-secondary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#dc2626; color:#fff;\">\n        Reject All\n      </button>\n    </div>\n    <a href=\"/privacy-policy\">Privacy Policy</a>\n  </div>\n</div>",
+    "text_content": "We value your privacy \n     We use cookies to enhance your browsing experience on edu-portal.fr.\n       You can accept or reject non-essential cookies. \n     \n       \n        Accept All\n       \n       \n        Reject All\n       \n     \n     Privacy Policy",
+    "buttons": [
+      {
+        "text": "Accept All",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Reject All",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#dc2626",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/edu-portal.fr.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "csrf_token",
+        "value": "1bc898515acdbf9593a31d5c9cdfd9a0ed42b450d96",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1777129091,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "1867245f9e2c01769",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1786266268,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "164a7a0690432450b26b8dc1d00ed99b6105c9de1d398645",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1783544496,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "a83c5fa21422c1fa799aeaf5f577ac9517054af1969fb0e9",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1778684836,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_8f7c",
+        "value": "f1a0bf895e6ca0a55864df921ae4aa2b18a52",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1795951658,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://edu-portal.fr/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "edu-portal.fr"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "googlesyndication.com",
+        "referer": "https://edu-portal.fr/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "mixpanel.com",
+        "referer": "https://edu-portal.fr/"
+      }
+    ],
+    "third_party_domains": [
+      "googlesyndication.com",
+      "mixpanel.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 5,
+    "total_third_party_domains": 2,
+    "total_requests": 3
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "user_pref",
+        "value": "5c3f24c88b8ae9922b9eb05bf9cc3",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1780393731,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "5ff7468fdc24ad81dd4c4e26f375",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1773263471,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "83f50edac24db2b7014d8b814406c71e908326936",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1794661169,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "188f867af40c5bacb508d2c7bac1c74030e8f84",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1797644816,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "5cd515ebe6f77e8cb19d851a496b50d5f4",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1798926156,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "5caf29c01c5699af5c986a31b768447f4e71d7e71",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1795250316,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "b8442bb253fc37597f2e16b7669251782d89c2",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1789241876,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_5b5f",
+        "value": "d4a824882f2ab9d9d00a9ac6a7a4f7ca41",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1774378915,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6752",
+        "value": "bdf258574314693d2595c78740f8f3507ea7",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1790376921,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_6ebc",
+        "value": "00854678d99215f8529600bc82e2e569d988797",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1772926811,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_af9c",
+        "value": "94af93078bc6d39b3",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1787167366,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_2b6c",
+        "value": "db0235a852e55cbab93383f443b55ec41a6fdfc44b5747",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1779148845,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://edu-portal.fr/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "edu-portal.fr"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.com",
+        "referer": "https://edu-portal.fr/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.net",
+        "referer": "https://edu-portal.fr/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "hotjar.com",
+        "referer": "https://edu-portal.fr/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "moatads.com",
+        "referer": "https://edu-portal.fr/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "openx.net",
+        "referer": "https://edu-portal.fr/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "segment.io",
+        "referer": "https://edu-portal.fr/"
+      }
+    ],
+    "third_party_domains": [
+      "facebook.com",
+      "facebook.net",
+      "hotjar.com",
+      "moatads.com",
+      "openx.net",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 12,
+    "total_third_party_domains": 6,
+    "total_requests": 7,
+    "new_cookies_after_interaction": [
+      {
+        "name": "consent_given",
+        "value": "5ff7468fdc24ad81dd4c4e26f375",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1773263471,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lang",
+        "value": "83f50edac24db2b7014d8b814406c71e908326936",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1794661169,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "remember_me",
+        "value": "b8442bb253fc37597f2e16b7669251782d89c2",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1789241876,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_5b5f",
+        "value": "d4a824882f2ab9d9d00a9ac6a7a4f7ca41",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1774378915,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_6752",
+        "value": "bdf258574314693d2595c78740f8f3507ea7",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1790376921,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_6ebc",
+        "value": "00854678d99215f8529600bc82e2e569d988797",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1772926811,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_af9c",
+        "value": "94af93078bc6d39b3",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1787167366,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_2b6c",
+        "value": "db0235a852e55cbab93383f443b55ec41a6fdfc44b5747",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1779148845,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "facebook.com",
+      "facebook.net",
+      "hotjar.com",
+      "moatads.com",
+      "openx.net",
+      "segment.io"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "6b1c08e6ee73f5ae198bee",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1778242767,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "f67efee091f4f87fd7",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1778838244,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "bab054a39a66561f7e06745994",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1784433134,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "a72aeecbaf53f77f5be",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1797781034,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://edu-portal.fr/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "edu-portal.fr"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adnxs.com",
+        "referer": "https://edu-portal.fr/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 4,
+    "total_third_party_domains": 1,
+    "total_requests": 2,
+    "new_cookies_after_interaction": [
+      {
+        "name": "theme",
+        "value": "6b1c08e6ee73f5ae198bee",
+        "domain": ".edu-portal.fr",
+        "path": "/",
+        "expires": 1778242767,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adnxs.com"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

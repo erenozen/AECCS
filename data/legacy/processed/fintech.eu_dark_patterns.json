@@ -1,0 +1,59 @@
+{
+  "domain": "fintech.eu",
+  "banner_found": true,
+  "dark_patterns_detected": [
+    "preselected_checkboxes"
+  ],
+  "dark_pattern_count": 1,
+  "details": {
+    "asymmetric_buttons": {
+      "detected": false,
+      "accept_button": {
+        "text": "Accept Selected",
+        "width": 200.0,
+        "height": 44.0,
+        "font_size": 16.0,
+        "font_weight": 500,
+        "bg_color": "#2563eb"
+      },
+      "reject_button": {
+        "text": "Reject All",
+        "width": 200.0,
+        "height": 44.0,
+        "font_size": 16.0,
+        "font_weight": 500,
+        "bg_color": "#dc2626"
+      },
+      "size_ratio": 1.0,
+      "font_size_ratio": 1.0,
+      "contrast_issue": false
+    },
+    "hidden_reject": {
+      "detected": false,
+      "description": null
+    },
+    "missing_reject": {
+      "detected": false,
+      "description": null
+    },
+    "preselected_checkboxes": {
+      "detected": true,
+      "checkbox_count": 4,
+      "preselected_count": 3
+    },
+    "forced_action": {
+      "detected": false,
+      "is_cookie_wall": false
+    },
+    "multi_layer_rejection": {
+      "detected": false,
+      "accept_clicks": 1,
+      "reject_clicks": 1,
+      "click_ratio": 1.0
+    },
+    "confusing_language": {
+      "detected": false,
+      "suspicious_phrases": []
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "domain": "broken-crawl.net",
+  "category": "Technology",
+  "region": "US",
+  "rank": 4140,
+  "crawl_timestamp": "2026-03-01T11:36:08.940583+00:00",
+  "success": false,
+  "error": "TimeoutError: Page load timed out after 30000ms",
+  "cmp_detected": null,
+  "consent_banner": null,
+  "screenshot_path": null,
+  "pre_consent": {
+    "cookies": [],
+    "http_requests": [],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 0,
+    "total_third_party_domains": 0,
+    "total_requests": 0
+  }
+}

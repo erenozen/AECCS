@@ -1,0 +1,345 @@
+{
+  "domain": "privacy-first.nl",
+  "category": "Government",
+  "region": "NL",
+  "rank": 1100,
+  "crawl_timestamp": "2026-03-01T11:36:08.934113+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "OneTrust",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div id=\"cookie-consent-banner\" role=\"dialog\" aria-label=\"Cookie consent\">\n  <div class=\"banner-content\">\n    <h2>We value your privacy</h2>\n    <p>We use cookies to enhance your browsing experience on privacy-first.nl.\n       You can accept or reject non-essential cookies.</p>\n    <div class=\"button-group\" style=\"display:flex; gap:10px;\">\n      <button id=\"accept-all\" class=\"btn btn-primary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#2563eb; color:#fff;\">\n        Accept All\n      </button>\n      <button id=\"reject-all\" class=\"btn btn-secondary\"\n              style=\"width:200px; height:44px; font-size:16px; font-weight:500;\n                     background-color:#dc2626; color:#fff;\">\n        Reject All\n      </button>\n    </div>\n    <a href=\"/privacy-policy\">Privacy Policy</a>\n  </div>\n</div>",
+    "text_content": "We value your privacy \n     We use cookies to enhance your browsing experience on privacy-first.nl.\n       You can accept or reject non-essential cookies. \n     \n       \n        Accept All\n       \n       \n        Reject All\n       \n     \n     Privacy Policy",
+    "buttons": [
+      {
+        "text": "Accept All",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Reject All",
+        "tag": "button",
+        "type": "reject",
+        "selector": "button#reject-all",
+        "computed_styles": {
+          "width": "200px",
+          "height": "44px",
+          "background_color": "#dc2626",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 1
+  },
+  "screenshot_path": "data/raw/screenshots/privacy-first.nl.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "__cfduid",
+        "value": "5743b5bfb3b49c9fd454b2004fac10475f4d1",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1774561129,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "theme",
+        "value": "9a2cf138699c6e49690f",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1775698294,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://privacy-first.nl/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "privacy-first.nl"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 2,
+    "total_third_party_domains": 0,
+    "total_requests": 1
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "2107943bb7aecaae68aed124b941bbf",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1789161627,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "106541fd9ffa40c7ae29a7155ad5b4fd8755f68fa863",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1784507868,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "__cfduid",
+        "value": "c38e7b1f932881fe71d7b84df386e8ed4c6e8d449f72",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1790440333,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "88753b93c0bbc6adf7089dd787b6a27f5badd",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1801203306,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "ae7893a431fcb1240505636a2296a793a7ae",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1787979876,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_759a",
+        "value": "b74fd1654b0d60dcfebdec3c334cca21a0c052e563c",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1801777705,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_842e",
+        "value": "f4dc71c3aa6d816415b46a5a79f59aa7ba100f13865fb8",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1792076439,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_2617",
+        "value": "f4b3735f5ea04ffd13af05fc3d89d3cc94ff8c1d25",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1798823940,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://privacy-first.nl/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "privacy-first.nl"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "criteo.com",
+        "referer": "https://privacy-first.nl/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "doubleclick.net",
+        "referer": "https://privacy-first.nl/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "hotjar.com",
+        "referer": "https://privacy-first.nl/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "optimizely.com",
+        "referer": "https://privacy-first.nl/"
+      }
+    ],
+    "third_party_domains": [
+      "criteo.com",
+      "doubleclick.net",
+      "hotjar.com",
+      "optimizely.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 8,
+    "total_third_party_domains": 4,
+    "total_requests": 5,
+    "new_cookies_after_interaction": [
+      {
+        "name": "lang",
+        "value": "106541fd9ffa40c7ae29a7155ad5b4fd8755f68fa863",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1784507868,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "88753b93c0bbc6adf7089dd787b6a27f5badd",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1801203306,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "ae7893a431fcb1240505636a2296a793a7ae",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1787979876,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_759a",
+        "value": "b74fd1654b0d60dcfebdec3c334cca21a0c052e563c",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1801777705,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_842e",
+        "value": "f4dc71c3aa6d816415b46a5a79f59aa7ba100f13865fb8",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1792076439,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_2617",
+        "value": "f4b3735f5ea04ffd13af05fc3d89d3cc94ff8c1d25",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1798823940,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "criteo.com",
+      "doubleclick.net",
+      "hotjar.com",
+      "optimizely.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "csrf_token",
+        "value": "7c818f0cd87f076a7e11",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1792779642,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "4a85f8791bdacb37357616a5",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1777490280,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://privacy-first.nl/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "privacy-first.nl"
+      }
+    ],
+    "third_party_domains": [],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 2,
+    "total_third_party_domains": 0,
+    "total_requests": 1,
+    "new_cookies_after_interaction": [
+      {
+        "name": "csrf_token",
+        "value": "7c818f0cd87f076a7e11",
+        "domain": ".privacy-first.nl",
+        "path": "/",
+        "expires": 1792779642,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

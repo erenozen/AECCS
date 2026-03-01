@@ -23,7 +23,11 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from config import BANNERS_DIR, RAW_DIR
+from config import build_provenance, generate_run_id, get_dataset_layout
+
+LAYOUT = get_dataset_layout("mock")
+BANNERS_DIR = LAYOUT.banners_dir
+RAW_DIR = LAYOUT.raw_dir
 
 # ── Tracker definitions ──────────────────────────────────────────────────────
 
@@ -637,7 +641,7 @@ def _make_banner_info(profile: dict) -> dict | None:
     }
 
 
-def generate_site(profile: dict) -> dict:
+def generate_site(profile: dict, run_id: str) -> dict:
     """Generate a single mock site JSON from a profile."""
     domain = profile["domain"]
     ts = datetime.now(timezone.utc).isoformat()
@@ -654,6 +658,15 @@ def generate_site(profile: dict) -> dict:
             "cmp_detected": None,
             "consent_banner": None,
             "screenshot_path": None,
+            **build_provenance(
+                source_mode="mock",
+                run_id=run_id,
+                generated_at=ts,
+                proxy_used=None,
+                browser_name="mock-browser",
+                browser_version="synthetic",
+                site_list_source="tests/generate_mock_data.py",
+            ),
             "pre_consent": {
                 "cookies": [], "http_requests": [], "third_party_domains": [],
                 "local_storage": {}, "session_storage": {},
@@ -707,7 +720,16 @@ def generate_site(profile: dict) -> dict:
         "error": None,
         "cmp_detected": profile.get("cmp"),
         "consent_banner": banner_info,
-        "screenshot_path": f"data/raw/screenshots/{domain}.png",
+        "screenshot_path": str(LAYOUT.screenshots_dir / f"{domain}.png"),
+        **build_provenance(
+            source_mode="mock",
+            run_id=run_id,
+            generated_at=ts,
+            proxy_used=None,
+            browser_name="mock-browser",
+            browser_version="synthetic",
+            site_list_source="tests/generate_mock_data.py",
+        ),
         "pre_consent": pre,
         "post_consent_accept": post_accept,
         "post_consent_reject": post_reject,
@@ -715,15 +737,17 @@ def generate_site(profile: dict) -> dict:
 
 
 def generate_all() -> None:
-    """Generate all 20 mock sites and save to data/raw/."""
+    """Generate all 20 mock sites and save to data/mock/raw/."""
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     BANNERS_DIR.mkdir(parents=True, exist_ok=True)
+    LAYOUT.screenshots_dir.mkdir(parents=True, exist_ok=True)
 
     random.seed(42)  # Reproducible output
+    run_id = generate_run_id("mock")
 
     for profile in SITE_PROFILES:
         domain = profile["domain"]
-        site_data = generate_site(profile)
+        site_data = generate_site(profile, run_id)
 
         # Write JSON
         out_path = RAW_DIR / f"{domain}.json"

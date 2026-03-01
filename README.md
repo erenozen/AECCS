@@ -4,11 +4,21 @@
 
 ## Overview
 
-This project provides a fully automated pipeline for assessing how well popular websites comply with GDPR cookie consent requirements. It crawls websites, captures cookies and network requests across three consent states (no interaction, accept all, reject all), classifies trackers, detects dark patterns in consent banners, computes per-site compliance scores, and evaluates multiple privacy-enhancing technologies (PETs) as countermeasures.
+This project provides an automated pipeline for assessing how well popular websites comply with GDPR cookie consent requirements. It crawls websites, captures cookies and network requests across three consent states (no interaction, accept all, reject all), classifies trackers, detects dark patterns in consent banners, computes per-site compliance scores, and evaluates multiple privacy-enhancing technologies (PETs) as countermeasures.
 
-The analysis covers browser-level PETs (uBlock Origin, Privacy Badger, Firefox ETP, Brave Shields, Consent-O-Matic), differential privacy mechanisms for publishing aggregate statistics, and consent management platform (CMP) effectiveness. Results are presented through 11 publication-quality visualizations and a self-contained HTML report suitable for academic publication.
+The analysis covers browser-level PETs (uBlock Origin, Privacy Badger, Firefox ETP, Brave Shields, Consent-O-Matic), differential privacy mechanisms for publishing aggregate statistics, and consent management platform (CMP) effectiveness. The repository currently contains a reproducible synthetic demo dataset plus the full real-study pipeline; final empirical claims remain pending until the real crawl and PET experiments are completed under `data/real/`.
 
 Built as a course project for **CS475 — Privacy-Enhancing Technologies**.
+
+## Data Modes
+
+The pipeline now separates demonstration data from the final study dataset:
+
+- `data/mock/` and `reporting/mock/`: synthetic demo artifacts used for development and rehearsal
+- `data/real/` and `reporting/real/`: the final study target for real crawls and report generation
+- `data/legacy/` and `reporting/legacy/`: quarantined historical root-level artifacts kept only for traceability
+
+`real` is the default mode for the crawler, analysis stages, PET modules, visualizer, and report generator.
 
 ## Team
 
@@ -31,7 +41,7 @@ Built as a course project for **CS475 — Privacy-Enhancing Technologies**.
 - **Differential privacy reporting** — Laplace, Gaussian, and Randomized Response mechanisms at multiple epsilon values
 - **CMP effectiveness analysis** — ranks consent management platforms (OneTrust, Cookiebot, Quantcast, TrustArc, Didomi, Usercentrics) as privacy tools
 - **Unified PETs comparison** — synthesizes all PET evaluations with combination analysis and user recommendations
-- **11 publication-quality visualizations** (300 DPI) suitable for ACM 2-column papers
+- **11 report-ready visualizations** (300 DPI)
 - **Self-contained HTML report** with embedded images and auto-generated narrative
 
 ## Project Structure
@@ -66,7 +76,7 @@ AECCS/
 │
 ├── reporting/
 │   ├── __init__.py
-│   ├── visualize.py                   # 11 publication-quality figures
+│   ├── visualize.py                   # 11 report-ready figures
 │   ├── report_generator.py            # Self-contained HTML report builder
 │   └── figures/                       # Generated figures (300 DPI PNGs)
 │
@@ -76,24 +86,18 @@ AECCS/
 │   └── generate_mock_pets_data.py     # Mock PET evaluation data generator
 │
 └── data/
-    ├── websites.csv                   # Target website list
-    ├── raw/                           # Per-site crawl JSON files
-    │   ├── {domain}.json
-    │   ├── banners/{domain}.html      # Saved consent banner HTML
-    │   └── screenshots/{domain}.png   # Page screenshots
-    ├── processed/                     # Analysis outputs
-    │   ├── {domain}_classified.json
-    │   ├── {domain}_dark_patterns.json
-    │   ├── {domain}_score.json
-    │   ├── compliance_scores.csv
-    │   ├── aggregate_metrics.json
-    │   ├── pets_effectiveness.csv
-    │   ├── dp_aggregate_metrics.json
-    │   ├── cmp_comparison.csv
-    │   ├── cmp_comparison_detailed.json
-    │   └── pets_summary.json
+    ├── websites.csv                   # Real-study seed list (100 domains)
+    ├── legacy/                        # Quarantined historical root-level outputs
+    ├── mock/                         # Synthetic demo dataset
+    │   ├── raw/
+    │   └── processed/
+    ├── real/                         # Final study dataset
+    │   ├── raw/
+    │   └── processed/
     └── tracker_lists/                 # Downloaded filter lists (auto-fetched)
 ```
+
+Course deliverables are stored under `docs/`. The current report and presentation files are structured submission templates, but they still need to be updated with real-study results before final submission.
 
 ## Prerequisites
 
@@ -114,38 +118,51 @@ playwright install chromium firefox
 ## Quick Start
 
 ```bash
-# 1. Crawl websites (ensure websites.csv is populated)
-python -m scraper.crawler
+# 1. Generate the synthetic demo dataset
+python -m tests.generate_mock_data
+python -m analysis.classifier --source-mode mock
+python -m dark_patterns.detector --source-mode mock
+python -m analysis.scoring --source-mode mock
+python -m analysis.metrics --source-mode mock
+python -m tests.generate_mock_pets_data
+python -m pets_evaluation.dp_reporting --source-mode mock
+python -m pets_evaluation.cmp_analysis --source-mode mock
+python -m pets_evaluation.comparison --source-mode mock
+python -m reporting.visualize --source-mode mock
+python -m reporting.report_generator --source-mode mock
 
-# 2. Classify cookies and trackers
-python -m analysis.classifier
+# 2. Crawl the real study list (writes into data/real by default)
+python -m scraper.crawler --source-mode real
 
-# 3. Detect dark patterns in consent banners
-python -m dark_patterns.detector
+# 3. Classify cookies and trackers
+python -m analysis.classifier --source-mode real
 
-# 4. Compute GDPR compliance scores
-python -m analysis.scoring
+# 4. Detect dark patterns in consent banners
+python -m dark_patterns.detector --source-mode real
 
-# 5. Compute aggregate metrics
-python -m analysis.metrics
+# 5. Compute GDPR compliance scores
+python -m analysis.scoring --source-mode real
 
-# 6. Evaluate browser PETs (requires real browsers — or use mock data)
-python -m pets_evaluation.browser_pets
+# 6. Compute aggregate metrics
+python -m analysis.metrics --source-mode real
 
-# 7. Generate differential privacy report
-python -m pets_evaluation.dp_reporting
+# 7. Evaluate browser PETs (requires real browsers/extensions)
+python -m pets_evaluation.browser_pets --source-mode real
 
-# 8. Analyze CMP effectiveness
-python -m pets_evaluation.cmp_analysis
+# 8. Generate differential privacy report
+python -m pets_evaluation.dp_reporting --source-mode real
 
-# 9. Compare all PETs
-python -m pets_evaluation.comparison
+# 9. Analyze CMP effectiveness
+python -m pets_evaluation.cmp_analysis --source-mode real
 
-# 10. Generate all visualizations
-python -m reporting.visualize
+# 10. Compare all PETs
+python -m pets_evaluation.comparison --source-mode real
 
-# 11. Generate HTML report (opens in browser with --open)
-python -m reporting.report_generator --open
+# 11. Generate all visualizations
+python -m reporting.visualize --source-mode real
+
+# 12. Generate HTML report (opens in browser with --open)
+python -m reporting.report_generator --source-mode real --open
 ```
 
 ## Module Documentation
@@ -188,7 +205,7 @@ python -m analysis.classifier
 python -m analysis.classifier --domain example.com
 
 # Custom data paths
-python -m analysis.classifier --raw-dir data/raw --output-dir data/processed
+python -m analysis.classifier --raw-dir data/real/raw --output-dir data/real/processed
 ```
 
 ### Dark Pattern Detector (`dark_patterns/detector.py`)
@@ -233,7 +250,7 @@ Grades: A (90–100), B (75–89), C (60–74), D (40–59), F (0–39).
 python -m analysis.scoring
 
 # Custom paths
-python -m analysis.scoring --classified-dir data/processed --output data/processed/compliance_scores.csv
+python -m analysis.scoring --processed-dir data/real/processed --output data/real/processed/compliance_scores.csv
 ```
 
 ### Metrics (`analysis/metrics.py`)
@@ -324,7 +341,7 @@ python -m pets_evaluation.comparison
 
 ### Visualization (`reporting/visualize.py`)
 
-Generates 11 publication-quality figures (300 DPI):
+Generates 11 report-ready figures (300 DPI):
 
 | Figure | Filename | Description |
 |--------|----------|-------------|
@@ -354,7 +371,7 @@ python -m reporting.visualize --list
 python -m reporting.visualize --format pdf
 
 # Custom directories
-python -m reporting.visualize --processed-dir data/processed --output-dir reporting/figures
+python -m reporting.visualize --processed-dir data/real/processed --output-dir reporting/real/figures
 ```
 
 ### Report Generator (`reporting/report_generator.py`)
@@ -374,7 +391,7 @@ python -m reporting.report_generator
 python -m reporting.report_generator --open
 
 # Custom output path
-python -m reporting.report_generator --output reporting/my_report.html
+python -m reporting.report_generator --source-mode real --output reporting/real/my_report.html
 ```
 
 ## Configuration
@@ -393,10 +410,11 @@ All configuration is centralized in `config.py`. Key settings:
 
 ## Website List
 
-The `data/websites.csv` file contains the target websites. Populate it with EU-targeted websites from:
+The `data/websites.csv` file contains the current real-study seed list. Expand or refine it from Tranco-like sources as needed:
 - [Tranco List](https://tranco-list.eu/) (recommended)
 - Focus on diverse categories: E-Commerce, News, Social Media, Government, Education, Healthcare, Entertainment, Finance, Technology
-- **Goal**: 100–200 websites for a representative analysis
+- **Current repo target**: 100 websites
+- **Proposal target**: 100–200 websites
 
 CSV format:
 ```csv
@@ -413,40 +431,40 @@ Mock data generators create realistic test data without requiring actual web cra
 # Generate mock crawl data (20 diverse sites)
 python -m tests.generate_mock_data
 
-# Generate mock PET evaluation data (22 sites × 7 PETs)
+# Generate mock PET evaluation data (19 successful mock sites × 7 PETs)
 python -m tests.generate_mock_pets_data
 
 # Run the full analysis pipeline on mock data
-python -m analysis.classifier
-python -m dark_patterns.detector
-python -m analysis.scoring
-python -m analysis.metrics
-python -m pets_evaluation.dp_reporting
-python -m pets_evaluation.cmp_analysis
-python -m pets_evaluation.comparison
-python -m reporting.visualize
-python -m reporting.report_generator --open
+python -m analysis.classifier --source-mode mock
+python -m dark_patterns.detector --source-mode mock
+python -m analysis.scoring --source-mode mock
+python -m analysis.metrics --source-mode mock
+python -m pets_evaluation.dp_reporting --source-mode mock
+python -m pets_evaluation.cmp_analysis --source-mode mock
+python -m pets_evaluation.comparison --source-mode mock
+python -m reporting.visualize --source-mode mock
+python -m reporting.report_generator --source-mode mock --open
 ```
 
 ## Output Files
 
 | File | Description |
 |------|-------------|
-| `data/raw/{domain}.json` | Per-site crawl data (cookies, requests, banner) |
-| `data/raw/banners/{domain}.html` | Saved consent banner HTML |
-| `data/raw/screenshots/{domain}.png` | Page screenshots |
-| `data/processed/{domain}_classified.json` | Classified cookies with tracker/category |
-| `data/processed/{domain}_dark_patterns.json` | Dark pattern detection results |
-| `data/processed/{domain}_score.json` | Detailed compliance score breakdown |
-| `data/processed/compliance_scores.csv` | All sites' compliance scores and grades |
-| `data/processed/aggregate_metrics.json` | Aggregate statistics across all sites |
-| `data/processed/pets_effectiveness.csv` | Browser PET evaluation results |
-| `data/processed/dp_aggregate_metrics.json` | Differential privacy analysis |
-| `data/processed/cmp_comparison.csv` | CMP effectiveness rankings |
-| `data/processed/cmp_comparison_detailed.json` | Detailed CMP analysis |
-| `data/processed/pets_summary.json` | Unified PETs comparison |
-| `reporting/figures/*.png` | All visualizations (300 DPI) |
-| `reporting/compliance_report.html` | Self-contained HTML report |
+| `data/{mode}/raw/{domain}.json` | Per-site crawl data (cookies, requests, banner) |
+| `data/{mode}/raw/banners/{domain}.html` | Saved consent banner HTML |
+| `data/{mode}/raw/screenshots/{domain}.png` | Page screenshots |
+| `data/{mode}/processed/{domain}_classified.json` | Classified cookies with tracker/category |
+| `data/{mode}/processed/{domain}_dark_patterns.json` | Dark pattern detection results |
+| `data/{mode}/processed/{domain}_score.json` | Detailed compliance score breakdown |
+| `data/{mode}/processed/compliance_scores.csv` | All sites' compliance scores and grades |
+| `data/{mode}/processed/aggregate_metrics.json` | Aggregate statistics across all sites |
+| `data/{mode}/processed/pets_effectiveness.csv` | Browser PET evaluation results |
+| `data/{mode}/processed/dp_aggregate_metrics.json` | Differential privacy analysis |
+| `data/{mode}/processed/cmp_comparison.csv` | CMP effectiveness rankings |
+| `data/{mode}/processed/cmp_comparison_detailed.json` | Detailed CMP analysis |
+| `data/{mode}/processed/pets_summary.json` | Unified PETs comparison |
+| `reporting/{mode}/figures/*.png` | All visualizations (300 DPI) |
+| `reporting/{mode}/compliance_report.html` | Self-contained HTML report |
 
 ## References
 

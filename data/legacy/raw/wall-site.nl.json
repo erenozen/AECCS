@@ -1,0 +1,930 @@
+{
+  "domain": "wall-site.nl",
+  "category": "Entertainment",
+  "region": "NL",
+  "rank": 661,
+  "crawl_timestamp": "2026-03-01T11:36:08.941309+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": null,
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div class=\"cookie-wall-overlay\"\n     style=\"position:fixed; top:0; left:0; width:100%; height:100%;\n            background:rgba(0,0,0,0.8); z-index:9999;\">\n  <div class=\"wall-content\" style=\"background:#fff; padding:40px; margin:10% auto; max-width:600px;\">\n    <h2>You must accept cookies to continue</h2>\n    <p>wall-site.nl requires cookies to function. Accept to proceed.</p>\n    <button id=\"accept\" class=\"accept-wall\"\n            style=\"width:250px; height:48px; font-size:16px; font-weight:600;\n                   background-color:#059669; color:#fff;\">\n      Accept All Cookies\n    </button>\n  </div>\n</div>",
+    "text_content": "You must accept cookies to continue \n     wall-site.nl requires cookies to function. Accept to proceed. \n     \n      Accept All Cookies",
+    "buttons": [
+      {
+        "text": "Accept All Cookies",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept",
+        "computed_styles": {
+          "width": "250px",
+          "height": "48px",
+          "background_color": "#059669",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "600",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": false,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 999
+  },
+  "screenshot_path": "data/raw/screenshots/wall-site.nl.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "0b200eb836d0a52383be826c2cc0786dced28ee8ea",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1801989210,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "remember_me",
+        "value": "6b8aefecc2738f1f3ac339188f52bb17bcf0f76a6a590e",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1790428444,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "3129f1eb59983b57b0bbb6bd8c95d2748",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1791343746,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_742d",
+        "value": "7a296f4c9600c7a78",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1795372947,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_44f3",
+        "value": "d1747f569c16c845c2ace52df2276490d2848c0e93a07a83",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1792333602,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4df8",
+        "value": "f32fce03abc69d9a0f548c378df6987b0176a01c6e",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1776491577,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_44f4",
+        "value": "6456e6e2f6c2559d2e",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1798142344,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_f295",
+        "value": "ea4c44e44c5362dd85712551bd903",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1776654334,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_fe1b",
+        "value": "3c2f764ab98b552a2d2d1187970e8a59474353c4dbd4dd",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1776364313,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://wall-site.nl/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "wall-site.nl"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "adnxs.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "adsrvr.org",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "chartbeat.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "cloudflare.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "hotjar.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "moatads.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "pubmatic.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "quantserve.com",
+        "referer": "https://wall-site.nl/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "adsrvr.org",
+      "chartbeat.com",
+      "cloudflare.com",
+      "hotjar.com",
+      "moatads.com",
+      "pubmatic.com",
+      "quantserve.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 9,
+    "total_third_party_domains": 8,
+    "total_requests": 9
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "b3aef60782e1c770d651",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1778460015,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "6d353cc08d5a34617be96ef3d2946c4e099",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1773341416,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "09530eda5119a44a6b889fd",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1793006964,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "78ede5b58fbd0279b9eddd48ae710594feccc37",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1801690062,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "f12308568c99fd1f50db9efba217058663d5aab80",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1796591926,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "user_pref",
+        "value": "ca3a0b1390f8df4a",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1782943217,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_4023",
+        "value": "315bc766e1b899339ba8ffd65f73add3725e146a02837",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1787700787,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_86c6",
+        "value": "5321c4da1e9bf5e5",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1801634488,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_64ff",
+        "value": "380734732dd4441c35",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1779462465,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_6c66",
+        "value": "928df8cdc5d3d5b7",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1800750862,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_7e0f",
+        "value": "ccddcc043881787bf336c7d",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1775532519,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_00ef",
+        "value": "3ddf2224204a2de9b570c10bbd4925cda0791a",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1777215266,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_879b",
+        "value": "264e625fdc20dba2189048160087a0ec05c6cb15680575",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1774379568,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_35cf",
+        "value": "c373ca213d9b71621",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1799355222,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_db46",
+        "value": "f12cf70430fdc4ce22a0539",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1797713197,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_fea0",
+        "value": "4dc72932a51e717db0f2fd5810191f8e1",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1799394085,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_efbb",
+        "value": "48ce86360084483d81997991409b8def6fadcf4467",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1773679630,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_1985",
+        "value": "2b012b7f20e03300834b631089cf11c0fd6cad27eb9",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1790217262,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://wall-site.nl/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "wall-site.nl"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adsrvr.org",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "chartbeat.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "doubleclick.net",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "google-analytics.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "hotjar.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "moatads.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "openx.net",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "optimizely.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "outbrain.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "quantserve.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.scorecardresearch.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "scorecardresearch.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "segment.io",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "taboola.com",
+        "referer": "https://wall-site.nl/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "chartbeat.com",
+      "doubleclick.net",
+      "google-analytics.com",
+      "hotjar.com",
+      "moatads.com",
+      "openx.net",
+      "optimizely.com",
+      "outbrain.com",
+      "quantserve.com",
+      "scorecardresearch.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 18,
+    "total_third_party_domains": 13,
+    "total_requests": 14,
+    "new_cookies_after_interaction": [
+      {
+        "name": "session_id",
+        "value": "6d353cc08d5a34617be96ef3d2946c4e099",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1773341416,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "consent_given",
+        "value": "09530eda5119a44a6b889fd",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1793006964,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "78ede5b58fbd0279b9eddd48ae710594feccc37",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1801690062,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_4023",
+        "value": "315bc766e1b899339ba8ffd65f73add3725e146a02837",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1787700787,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_86c6",
+        "value": "5321c4da1e9bf5e5",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1801634488,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_64ff",
+        "value": "380734732dd4441c35",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1779462465,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_6c66",
+        "value": "928df8cdc5d3d5b7",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1800750862,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_7e0f",
+        "value": "ccddcc043881787bf336c7d",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1775532519,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_00ef",
+        "value": "3ddf2224204a2de9b570c10bbd4925cda0791a",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1777215266,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_879b",
+        "value": "264e625fdc20dba2189048160087a0ec05c6cb15680575",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1774379568,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_35cf",
+        "value": "c373ca213d9b71621",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1799355222,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_db46",
+        "value": "f12cf70430fdc4ce22a0539",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1797713197,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_fea0",
+        "value": "4dc72932a51e717db0f2fd5810191f8e1",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1799394085,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_efbb",
+        "value": "48ce86360084483d81997991409b8def6fadcf4467",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1773679630,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_1985",
+        "value": "2b012b7f20e03300834b631089cf11c0fd6cad27eb9",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1790217262,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "doubleclick.net",
+      "google-analytics.com",
+      "openx.net",
+      "optimizely.com",
+      "outbrain.com",
+      "scorecardresearch.com",
+      "segment.io",
+      "taboola.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "eb37e8119ab529c20aca13c",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1781687777,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "76994e467b184a02c",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1802911484,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "2237e40f605e7be7c5f62e57019f82b11612a594d6e09346",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1774173196,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_0bb2",
+        "value": "9fa110efb0b65fcbf460eaef",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1786426597,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_4d09",
+        "value": "35bcff4d45f1f8251ada27066ceecfd41eee6",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1790681825,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d497",
+        "value": "a9a50f1887423dc446b62",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1776075086,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_5ad9",
+        "value": "24c06bca11a9c8123d64594d821896064c5110",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1775425646,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4a4c",
+        "value": "30b09f6d32ba8002f39899f1c00",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1782361548,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3c71",
+        "value": "c80bece2f5bffb494f78dea1f5521728d7b7c90316688",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1798514088,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://wall-site.nl/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "wall-site.nl"
+      },
+      {
+        "url": "https://cdn.adnxs.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "adnxs.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "cloudflare.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "facebook.net",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "hotjar.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "openx.net",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "pubmatic.com",
+        "referer": "https://wall-site.nl/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "taboola.com",
+        "referer": "https://wall-site.nl/"
+      }
+    ],
+    "third_party_domains": [
+      "adnxs.com",
+      "casalemedia.com",
+      "cloudflare.com",
+      "facebook.net",
+      "hotjar.com",
+      "openx.net",
+      "pubmatic.com",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 9,
+    "total_third_party_domains": 8,
+    "total_requests": 9,
+    "new_cookies_after_interaction": [
+      {
+        "name": "csrf_token",
+        "value": "76994e467b184a02c",
+        "domain": ".wall-site.nl",
+        "path": "/",
+        "expires": 1802911484,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_0bb2",
+        "value": "9fa110efb0b65fcbf460eaef",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1786426597,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_4d09",
+        "value": "35bcff4d45f1f8251ada27066ceecfd41eee6",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1790681825,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_d497",
+        "value": "a9a50f1887423dc446b62",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1776075086,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_5ad9",
+        "value": "24c06bca11a9c8123d64594d821896064c5110",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1775425646,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4a4c",
+        "value": "30b09f6d32ba8002f39899f1c00",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1782361548,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3c71",
+        "value": "c80bece2f5bffb494f78dea1f5521728d7b7c90316688",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1798514088,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "casalemedia.com",
+      "facebook.net",
+      "openx.net",
+      "taboola.com"
+    ],
+    "reject_button_found": false,
+    "reject_successful": false
+  }
+}

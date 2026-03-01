@@ -1,0 +1,59 @@
+{
+  "domain": "adtracker-news.com",
+  "banner_found": true,
+  "dark_patterns_detected": [
+    "hidden_reject"
+  ],
+  "dark_pattern_count": 1,
+  "details": {
+    "asymmetric_buttons": {
+      "detected": false,
+      "accept_button": {
+        "text": "Accept All",
+        "width": 250.0,
+        "height": 48.0,
+        "font_size": 16.0,
+        "font_weight": 600,
+        "bg_color": "#1d4ed8"
+      },
+      "reject_button": {
+        "text": "Reject All",
+        "width": 250.0,
+        "height": 48.0,
+        "font_size": 16.0,
+        "font_weight": 600,
+        "bg_color": "#ef4444"
+      },
+      "size_ratio": 1.0,
+      "font_size_ratio": 1.0,
+      "contrast_issue": false
+    },
+    "hidden_reject": {
+      "detected": true,
+      "description": "Reject button hidden: display:none, visibility:hidden"
+    },
+    "missing_reject": {
+      "detected": false,
+      "description": null
+    },
+    "preselected_checkboxes": {
+      "detected": false,
+      "checkbox_count": 0,
+      "preselected_count": 0
+    },
+    "forced_action": {
+      "detected": false,
+      "is_cookie_wall": false
+    },
+    "multi_layer_rejection": {
+      "detected": false,
+      "accept_clicks": 1,
+      "reject_clicks": 1,
+      "click_ratio": 1.0
+    },
+    "confusing_language": {
+      "detected": false,
+      "suspicious_phrases": []
+    }
+  }
+}

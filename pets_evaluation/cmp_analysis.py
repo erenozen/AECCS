@@ -23,19 +23,32 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import PROCESSED_DIR, RAW_DIR
+from config import (
+    DEFAULT_SOURCE_MODE,
+    PROCESSED_DIR,
+    RAW_DIR,
+    build_provenance,
+    get_dataset_layout,
+    infer_common_field,
+    infer_common_value,
+    unwrap_payload,
+)
 
 
 # ── Group sites by CMP ───────────────────────────────────────────────────────
 
 
-def group_sites_by_cmp(raw_dir: str | None = None) -> dict[str, list[str]]:
+def group_sites_by_cmp(
+    raw_dir: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+) -> dict[str, list[str]]:
     """Group crawled sites by their detected CMP provider.
 
     Returns:
         ``{"OneTrust": ["site1.com", ...], "No CMP Detected": [...], ...}``
     """
-    r_dir = Path(raw_dir) if raw_dir else RAW_DIR
+    layout = get_dataset_layout(source_mode)
+    r_dir = Path(raw_dir) if raw_dir else layout.raw_dir
     groups: dict[str, list[str]] = {}
 
     for f in sorted(r_dir.glob("*.json")):
@@ -58,6 +71,7 @@ def evaluate_cmp_effectiveness(
     scores_path: str | None = None,
     raw_dir: str | None = None,
     processed_dir: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
 ) -> dict:
     """Compute per-CMP compliance statistics.
 
@@ -65,9 +79,10 @@ def evaluate_cmp_effectiveness(
     dark-pattern rates, pre-consent tracker rates, reject effectiveness,
     and other metrics.
     """
-    s_path = Path(scores_path) if scores_path else PROCESSED_DIR / "compliance_scores.csv"
-    r_dir = Path(raw_dir) if raw_dir else RAW_DIR
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    s_path = Path(scores_path) if scores_path else layout.processed_dir / "compliance_scores.csv"
+    r_dir = Path(raw_dir) if raw_dir else layout.raw_dir
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
 
     # Load compliance scores
     scores_df = pd.read_csv(s_path) if s_path.exists() else pd.DataFrame()
@@ -98,7 +113,8 @@ def evaluate_cmp_effectiveness(
     for f in sorted(p_dir.glob("*_classified.json")):
         try:
             domain_key = f.stem.replace("_classified", "")
-            classified_cache[domain_key] = json.loads(f.read_text(encoding="utf-8"))
+            classified_doc = json.loads(f.read_text(encoding="utf-8"))
+            classified_cache[domain_key] = unwrap_payload(classified_doc, "cookies")
         except Exception:
             pass
 
@@ -364,27 +380,54 @@ def run_cmp_analysis(
     processed_dir: str | None = None,
     scores_path: str | None = None,
     output_path: str | None = None,
+    source_mode: str = DEFAULT_SOURCE_MODE,
+    run_id: str | None = None,
 ) -> None:
     """Run the full CMP analysis pipeline."""
-    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
+    layout = get_dataset_layout(source_mode)
+    p_dir = Path(processed_dir) if processed_dir else layout.processed_dir
+    r_dir = Path(raw_dir) if raw_dir else layout.raw_dir
+    s_path = Path(scores_path) if scores_path else p_dir / "compliance_scores.csv"
     out_csv = Path(output_path) if output_path else p_dir / "cmp_comparison.csv"
     out_json = p_dir / "cmp_comparison_detailed.json"
     p_dir.mkdir(parents=True, exist_ok=True)
 
+    raw_docs: list[dict] = []
+    for path in sorted(r_dir.glob("*.json")):
+        try:
+            raw_docs.append(json.loads(path.read_text(encoding="utf-8")))
+        except Exception:
+            continue
+
+    score_run_id = None
+    if s_path.exists():
+        scores_df = pd.read_csv(s_path)
+        if not scores_df.empty and "run_id" in scores_df.columns:
+            score_run_id = infer_common_value(scores_df["run_id"].tolist())
+
+    effective_run_id = run_id or score_run_id or infer_common_field(raw_docs, "run_id")
+    effective_site_list_source = infer_common_field(raw_docs, "site_list_source")
+
     print("Grouping sites by CMP …")
-    groups = group_sites_by_cmp(raw_dir)
+    groups = group_sites_by_cmp(str(r_dir), source_mode=source_mode)
     for cmp, sites in sorted(groups.items()):
         print(f"  {cmp}: {len(sites)} sites")
 
     print("\nEvaluating CMP effectiveness …")
-    effectiveness = evaluate_cmp_effectiveness(groups, scores_path, raw_dir, processed_dir)
+    effectiveness = evaluate_cmp_effectiveness(
+        groups,
+        scores_path,
+        raw_dir,
+        processed_dir,
+        source_mode=source_mode,
+    )
 
     print("Ranking CMPs …")
     rankings = rank_cmps(effectiveness)
 
     # ── Save CSV ──────────────────────────────────────────────────────────
     csv_fields = [
-        "cmp_name", "site_count", "avg_compliance_score", "median_compliance_score",
+        "source_mode", "run_id", "cmp_name", "site_count", "avg_compliance_score", "median_compliance_score",
         "pct_with_reject_button", "pct_reject_works", "avg_tracker_reduction",
         "pct_with_dark_patterns", "pet_score", "rank",
     ]
@@ -397,6 +440,8 @@ def run_cmp_analysis(
             pr = effectiveness[r["cmp"]]["post_reject_effectiveness"]
             dp = effectiveness[r["cmp"]]["dark_patterns"]
             writer.writerow({
+                "source_mode": source_mode,
+                "run_id": effective_run_id or "",
                 "cmp_name": r["cmp"],
                 "site_count": effectiveness[r["cmp"]]["site_count"],
                 "avg_compliance_score": comp.get("avg_score", 0),
@@ -414,6 +459,11 @@ def run_cmp_analysis(
     full_report = {
         "cmp_effectiveness": effectiveness,
         "rankings": rankings,
+        **build_provenance(
+            source_mode=source_mode,
+            run_id=effective_run_id,
+            site_list_source=effective_site_list_source,
+        ),
     }
     out_json.write_text(json.dumps(full_report, indent=2, default=str), encoding="utf-8")
     print(f"Detailed results saved to {out_json}")
@@ -476,6 +526,18 @@ def main() -> None:
     parser.add_argument("--processed-dir", type=str, default=None, help="Processed data directory")
     parser.add_argument("--scores", type=str, default=None, help="Compliance scores CSV path")
     parser.add_argument("--output", type=str, default=None, help="Output CSV path")
+    parser.add_argument(
+        "--source-mode",
+        choices=["real", "mock"],
+        default=DEFAULT_SOURCE_MODE,
+        help="Dataset/output mode to use (default: real)",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Optional run identifier to stamp onto generated artifacts",
+    )
     args = parser.parse_args()
 
     run_cmp_analysis(
@@ -483,6 +545,8 @@ def main() -> None:
         processed_dir=args.processed_dir,
         scores_path=args.scores,
         output_path=args.output,
+        source_mode=args.source_mode,
+        run_id=args.run_id,
     )
 
 

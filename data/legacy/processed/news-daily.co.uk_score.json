@@ -1,0 +1,44 @@
+{
+  "domain": "news-daily.co.uk",
+  "category": "News",
+  "overall_score": 40.0,
+  "criterion_scores": {
+    "no_pre_consent_trackers": {
+      "score": 10,
+      "weight": 0.25,
+      "weighted_score": 2.5,
+      "details": "7 pre-consent trackers found"
+    },
+    "reject_option_available": {
+      "score": 50,
+      "weight": 0.2,
+      "weighted_score": 10.0,
+      "details": "Reject available via 3 clicks (through settings)"
+    },
+    "equal_accept_reject_effort": {
+      "score": 20,
+      "weight": 0.15,
+      "weighted_score": 3.0,
+      "details": "Reject requires 2 extra clicks (1 vs 3)"
+    },
+    "no_dark_patterns": {
+      "score": 60,
+      "weight": 0.15,
+      "weighted_score": 9.0,
+      "details": "1 dark pattern detected: multi_layer_rejection"
+    },
+    "post_reject_compliance": {
+      "score": 50,
+      "weight": 0.15,
+      "weighted_score": 7.5,
+      "details": "Some new trackers after reject, but fewer than accept"
+    },
+    "transparent_information": {
+      "score": 80,
+      "weight": 0.1,
+      "weighted_score": 8.0,
+      "details": "mentions purposes; mentions vendors; clear language"
+    }
+  },
+  "grade": "D"
+}

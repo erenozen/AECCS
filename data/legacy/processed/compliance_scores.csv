@@ -1,0 +1,23 @@
+domain,category,region,rank,overall_score,grade,no_pre_consent_trackers,reject_option_available,equal_accept_reject_effort,no_dark_patterns,post_reject_compliance,transparent_information,cmp_detected,dark_pattern_count,pre_consent_tracker_count,total_pre_consent_cookies
+adtracker-news.com,News,US,1195,53.5,D,0,100,100,60,50,20,TrustArc,1,12,14
+bbc.co.uk,,,0,9.0,F,0,0,0,60,0,0,TrustArc,1,25,31
+cleansite.de,Government,DE,7754,76.5,B,60,100,100,100,50,40,Cookiebot,0,1,3
+clickbait.io,News,US,1104,59.5,D,0,100,100,60,50,80,,1,16,17
+dark-patterns.shop,E-Commerce,EU,3603,53.5,D,0,100,100,60,50,20,,1,11,13
+edu-portal.fr,Education,FR,9762,69.0,C,30,100,100,100,50,40,Didomi,0,2,5
+example.com,,,0,34.0,F,100,0,0,60,0,0,,1,0,0
+fintech.eu,Finance,EU,3319,67.0,C,30,100,100,60,50,80,Usercentrics,1,3,8
+freestream.tv,Entertainment,EU,9835,2.0,F,0,0,0,0,0,20,,3,14,15
+goodbank.eu,Finance,EU,3497,86.5,B,100,100,100,100,50,40,Usercentrics,0,0,5
+lemonde.fr,,,0,11.5,F,0,0,0,30,0,70,,2,4,7
+minimal.org,Education,EU,6248,34.0,F,100,0,0,60,0,0,,1,0,2
+news-daily.co.uk,News,UK,5433,40.0,D,10,50,20,60,50,80,OneTrust,1,4,8
+open-data.gov.uk,Government,UK,3758,76.5,B,60,100,100,100,50,40,OneTrust,0,1,3
+privacy-first.nl,Government,NL,1100,86.5,B,100,100,100,100,50,40,OneTrust,0,0,2
+shady-shop.eu,E-Commerce,EU,9019,6.5,F,0,0,0,30,0,20,,2,10,13
+shopmore.de,E-Commerce,DE,5955,67.0,C,30,100,100,60,50,80,Cookiebot,1,3,8
+socialnet.fr,Social Media,FR,1504,59.5,D,0,100,100,60,50,80,Didomi,1,6,8
+techblog.com,Technology,US,3249,56.0,D,10,100,100,60,50,20,Quantcast,1,5,8
+tracker-heavy.de,News,DE,935,31.5,F,0,50,50,30,50,20,OneTrust,2,10,12
+vidshare.com,Entertainment,US,719,37.5,F,0,50,20,60,50,80,TrustArc,1,8,11
+wall-site.nl,Entertainment,NL,661,2.0,F,0,0,0,0,0,20,,3,8,9

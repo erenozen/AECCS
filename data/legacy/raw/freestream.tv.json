@@ -1,0 +1,1376 @@
+{
+  "domain": "freestream.tv",
+  "category": "Entertainment",
+  "region": "EU",
+  "rank": 9835,
+  "crawl_timestamp": "2026-03-01T11:36:08.938945+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": null,
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div class=\"cookie-wall-overlay\"\n     style=\"position:fixed; top:0; left:0; width:100%; height:100%;\n            background:rgba(0,0,0,0.8); z-index:9999;\">\n  <div class=\"wall-content\" style=\"background:#fff; padding:40px; margin:10% auto; max-width:600px;\">\n    <h2>You must accept cookies to continue</h2>\n    <p>freestream.tv requires cookies to function. Accept to proceed.</p>\n    <button id=\"accept\" class=\"accept-wall\"\n            style=\"width:250px; height:48px; font-size:16px; font-weight:600;\n                   background-color:#059669; color:#fff;\">\n      Accept All Cookies\n    </button>\n  </div>\n</div>",
+    "text_content": "You must accept cookies to continue \n     freestream.tv requires cookies to function. Accept to proceed. \n     \n      Accept All Cookies",
+    "buttons": [
+      {
+        "text": "Accept All Cookies",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept",
+        "computed_styles": {
+          "width": "250px",
+          "height": "48px",
+          "background_color": "#059669",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "600",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": false,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 999
+  },
+  "screenshot_path": "data/raw/screenshots/freestream.tv.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "consent_given",
+        "value": "78fff2de82ac3b8c98088bf22aad3eb8f63",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1774009788,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "csrf_token",
+        "value": "efe72f0484e9f062dccf3ca63d1f4e1bf27ac014",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1775811662,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "37d892ecbef0d4a62bd7481bfd3d7b601cdbea5a450b79",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1779797121,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_1c5a",
+        "value": "db0a77d06cb6e32a54607e5a5f4c5bac28dabcc271",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1784173174,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_bd3d",
+        "value": "e169ac3d7575220348a482",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1793121010,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_319e",
+        "value": "d25526dbec9f53d32f03b3e7c24fd778f32869e64",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1799104649,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_65e3",
+        "value": "1b5dbc91efb81d35bfd34d7791f07ae7b15f44",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1802451087,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_b7bf",
+        "value": "378a59ef28a509b51f98bb39c22a711f9f66b2515",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1796100374,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7263",
+        "value": "5c809f052f8060e9df392",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1779695978,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_de99",
+        "value": "be22d008ffc44528e79fefe86718553d365eecebd18a",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1783124543,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_9868",
+        "value": "42c4a66775767c4a0d31eb92500f",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1785283715,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_f0dd",
+        "value": "825be1feb133a0e3be03ddffd5d023ae69da3eb4b664ed79",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1793391664,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0c2b",
+        "value": "a1e725f4ae684911def8",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1789077575,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_8071",
+        "value": "d2cc397290ec3359f5",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1780784092,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7e06",
+        "value": "83a5b07d942851180bb50ea00069dc080d",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1788354846,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://freestream.tv/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "freestream.tv"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "casalemedia.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "chartbeat.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "cloudflare.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "googlesyndication.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "hotjar.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "newrelic.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "openx.net",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "optimizely.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "outbrain.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "pubmatic.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "quantserve.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "rubiconproject.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "taboola.com",
+        "referer": "https://freestream.tv/"
+      }
+    ],
+    "third_party_domains": [
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "cloudflare.com",
+      "googlesyndication.com",
+      "hotjar.com",
+      "newrelic.com",
+      "openx.net",
+      "optimizely.com",
+      "outbrain.com",
+      "pubmatic.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 15,
+    "total_third_party_domains": 14,
+    "total_requests": 15
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "session_id",
+        "value": "b836d5f66b76556b3333da9e8c6a321a4dc9038268",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1778418943,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "6a4b926c367d2e5e9beac10d0d5e3",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1777421963,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "5e9d7b418e2689287fbe",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1776172313,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "10e77c9f579707a551529ae1ef3a4cc5f799f548fe05",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1777968196,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "b4f54faa50de094376b4658f6b25434",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1775163857,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "consent_given",
+        "value": "cede02c3219311bb5e19f",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1787829208,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_b6a3",
+        "value": "b7b7b9d781f4e931c3dc36d46a34",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1783936761,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_8af4",
+        "value": "115b9d1cb0b19e5aa14d7b77c5",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1797365591,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_9057",
+        "value": "5cf6d72b6fdc6d256de2f3074372dd43976d7a51fb928",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1788952228,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7fa5",
+        "value": "a6124bcd5f176353d5efc895325af393d77",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1773019433,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_e625",
+        "value": "7efb163cb5c730598cf75e3c3e940e8836bd4340a65cf76",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1777635889,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c144",
+        "value": "49500572d606529ca5c08bb7e212b155151606cb8132c",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1801516130,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3a80",
+        "value": "70cff256a6840b61303751e8d620a9",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1781282192,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8239",
+        "value": "3e6a77fac3161e3cb4b3947a3ed300dd3f65f",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1792562060,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_79ca",
+        "value": "110000407bf15afb54a40127efe1afc",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1801906217,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_013d",
+        "value": "4b7b21a07d6f901c447c04d370add6f73",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1800838046,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_415d",
+        "value": "5eb85a695fc2aea6f142ea78ae",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1783892963,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_25ab",
+        "value": "fcd6def88948fbac75d5e8d3",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1784150681,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_bf3a",
+        "value": "de30c8121f36d81d0012c14f6",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1784364756,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0955",
+        "value": "697907050bd681b95f7007e781bbe7b3f04",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1798445856,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3602",
+        "value": "e787b6ea09b7e4245",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1776048635,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_f173",
+        "value": "ccec025ad37be12bf975b08ba1748614f56eee12",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1791508708,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_3a88",
+        "value": "1c268322b00c1a90e2edc37716a8c228d18f93cd53406d",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1798562231,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3b57",
+        "value": "b29ceac294c6011e2a567ce4854f86",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1801599815,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://freestream.tv/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "freestream.tv"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adsrvr.org",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "chartbeat.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "cloudflare.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.criteo.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "criteo.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.facebook.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "facebook.net",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "google-analytics.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.googlesyndication.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "googlesyndication.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "hotjar.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "moatads.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "newrelic.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "openx.net",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "optimizely.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "pubmatic.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.quantserve.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "quantserve.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "rubiconproject.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "segment.io",
+        "referer": "https://freestream.tv/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "chartbeat.com",
+      "cloudflare.com",
+      "criteo.com",
+      "facebook.net",
+      "google-analytics.com",
+      "googlesyndication.com",
+      "hotjar.com",
+      "moatads.com",
+      "newrelic.com",
+      "openx.net",
+      "optimizely.com",
+      "pubmatic.com",
+      "quantserve.com",
+      "rubiconproject.com",
+      "segment.io"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 24,
+    "total_third_party_domains": 18,
+    "total_requests": 19,
+    "new_cookies_after_interaction": [
+      {
+        "name": "session_id",
+        "value": "b836d5f66b76556b3333da9e8c6a321a4dc9038268",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1778418943,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "theme",
+        "value": "6a4b926c367d2e5e9beac10d0d5e3",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1777421963,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "remember_me",
+        "value": "b4f54faa50de094376b4658f6b25434",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1775163857,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_b6a3",
+        "value": "b7b7b9d781f4e931c3dc36d46a34",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1783936761,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_8af4",
+        "value": "115b9d1cb0b19e5aa14d7b77c5",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1797365591,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_9057",
+        "value": "5cf6d72b6fdc6d256de2f3074372dd43976d7a51fb928",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1788952228,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7fa5",
+        "value": "a6124bcd5f176353d5efc895325af393d77",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1773019433,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_e625",
+        "value": "7efb163cb5c730598cf75e3c3e940e8836bd4340a65cf76",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1777635889,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_c144",
+        "value": "49500572d606529ca5c08bb7e212b155151606cb8132c",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1801516130,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3a80",
+        "value": "70cff256a6840b61303751e8d620a9",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1781282192,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8239",
+        "value": "3e6a77fac3161e3cb4b3947a3ed300dd3f65f",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1792562060,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_79ca",
+        "value": "110000407bf15afb54a40127efe1afc",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1801906217,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_013d",
+        "value": "4b7b21a07d6f901c447c04d370add6f73",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1800838046,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_415d",
+        "value": "5eb85a695fc2aea6f142ea78ae",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1783892963,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_25ab",
+        "value": "fcd6def88948fbac75d5e8d3",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1784150681,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_bf3a",
+        "value": "de30c8121f36d81d0012c14f6",
+        "domain": ".newrelic.com",
+        "path": "/",
+        "expires": 1784364756,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0955",
+        "value": "697907050bd681b95f7007e781bbe7b3f04",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1798445856,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_3602",
+        "value": "e787b6ea09b7e4245",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1776048635,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_f173",
+        "value": "ccec025ad37be12bf975b08ba1748614f56eee12",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1791508708,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_3a88",
+        "value": "1c268322b00c1a90e2edc37716a8c228d18f93cd53406d",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1798562231,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_3b57",
+        "value": "b29ceac294c6011e2a567ce4854f86",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1801599815,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adsrvr.org",
+      "criteo.com",
+      "facebook.net",
+      "google-analytics.com",
+      "moatads.com",
+      "segment.io"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "user_pref",
+        "value": "a39ccb3ab83781b439a5ec56be754116861c47e8d86",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1781284021,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "976125c0d484cea3e90594639948d2853cd39f1bf471d37",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1777926609,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "remember_me",
+        "value": "134996311b7b69684e7c8579d95b9b6c3",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1782911765,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7c65",
+        "value": "0676654e42398830603b298484226d2621d99cdd",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1797235587,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8fe3",
+        "value": "91c4c8c85282c524d8e627d395c7",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1787633960,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_13ac",
+        "value": "f2487c8be7a8c9d64e2d",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1776604474,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_1fd1",
+        "value": "6407c3cc79c2c62ee46b532f32a155eed14d80fd15",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1782781909,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_01b8",
+        "value": "03806c79408177c0cb9",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1774626418,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_5bba",
+        "value": "2e16604f396d284e01d4717fe",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1788927084,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ac5b",
+        "value": "df48ed5a8ad9acc3d64f4ff09c4d8d3f72185b6",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1783482236,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_39fa",
+        "value": "e0666f5547fe63633c599d11b26eecb20704",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1800674408,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_ad59",
+        "value": "241f100eced744d192",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1787882008,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_2c87",
+        "value": "b0dabc584b6c3f453221911721cb9b",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1786975981,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_eaab",
+        "value": "e3702310d427a6b525f65e9b0cf67f2e39f",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1802812735,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_2005",
+        "value": "c507d835ab88ef996fc7b88c056ac7eee9359",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1787443612,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://freestream.tv/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "freestream.tv"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "adsrvr.org",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.casalemedia.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "casalemedia.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "doubleclick.net",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "facebook.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.google-analytics.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "google-analytics.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "hotjar.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.mixpanel.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "mixpanel.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "moatads.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "newrelic.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "openx.net",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "outbrain.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.pubmatic.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "pubmatic.com",
+        "referer": "https://freestream.tv/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "taboola.com",
+        "referer": "https://freestream.tv/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "amazon-adsystem.com",
+      "casalemedia.com",
+      "doubleclick.net",
+      "facebook.com",
+      "google-analytics.com",
+      "hotjar.com",
+      "mixpanel.com",
+      "moatads.com",
+      "newrelic.com",
+      "openx.net",
+      "outbrain.com",
+      "pubmatic.com",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 15,
+    "total_third_party_domains": 14,
+    "total_requests": 15,
+    "new_cookies_after_interaction": [
+      {
+        "name": "user_pref",
+        "value": "a39ccb3ab83781b439a5ec56be754116861c47e8d86",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1781284021,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "remember_me",
+        "value": "134996311b7b69684e7c8579d95b9b6c3",
+        "domain": ".freestream.tv",
+        "path": "/",
+        "expires": 1782911765,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7c65",
+        "value": "0676654e42398830603b298484226d2621d99cdd",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1797235587,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8fe3",
+        "value": "91c4c8c85282c524d8e627d395c7",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1787633960,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_13ac",
+        "value": "f2487c8be7a8c9d64e2d",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1776604474,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_1fd1",
+        "value": "6407c3cc79c2c62ee46b532f32a155eed14d80fd15",
+        "domain": ".pubmatic.com",
+        "path": "/",
+        "expires": 1782781909,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_01b8",
+        "value": "03806c79408177c0cb9",
+        "domain": ".taboola.com",
+        "path": "/",
+        "expires": 1774626418,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_5bba",
+        "value": "2e16604f396d284e01d4717fe",
+        "domain": ".segment.io",
+        "path": "/",
+        "expires": 1788927084,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ac5b",
+        "value": "df48ed5a8ad9acc3d64f4ff09c4d8d3f72185b6",
+        "domain": ".mixpanel.com",
+        "path": "/",
+        "expires": 1783482236,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_39fa",
+        "value": "e0666f5547fe63633c599d11b26eecb20704",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1800674408,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_ad59",
+        "value": "241f100eced744d192",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1787882008,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_2c87",
+        "value": "b0dabc584b6c3f453221911721cb9b",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1786975981,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_eaab",
+        "value": "e3702310d427a6b525f65e9b0cf67f2e39f",
+        "domain": ".facebook.com",
+        "path": "/",
+        "expires": 1802812735,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_2005",
+        "value": "c507d835ab88ef996fc7b88c056ac7eee9359",
+        "domain": ".google-analytics.com",
+        "path": "/",
+        "expires": 1787443612,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adsrvr.org",
+      "doubleclick.net",
+      "facebook.com",
+      "google-analytics.com",
+      "mixpanel.com",
+      "moatads.com"
+    ],
+    "reject_button_found": false,
+    "reject_successful": false
+  }
+}

@@ -1,0 +1,771 @@
+{
+  "domain": "news-daily.co.uk",
+  "category": "News",
+  "region": "UK",
+  "rank": 5433,
+  "crawl_timestamp": "2026-03-01T11:36:08.935350+00:00",
+  "success": true,
+  "error": null,
+  "cmp_detected": "OneTrust",
+  "consent_banner": {
+    "found": true,
+    "selector": "[id*='cookie'], [id*='consent'], [class*='cookie'], [class*='consent'], [class*='gdpr']",
+    "html": "<div class=\"consent-layer\" role=\"dialog\">\n  <h3>news-daily.co.uk \u2014 Cookie Consent</h3>\n  <p>We use cookies for essential functions and with your consent for analytics and ads.</p>\n  <button id=\"accept\" class=\"btn primary\"\n          style=\"width:250px; height:44px; font-size:16px; font-weight:500;\n                 background-color:#2563eb; color:#fff;\">\n    Accept All\n  </button>\n  <a href=\"/cookie-settings\" class=\"settings-link\"\n     style=\"font-size:13px; color:#6b7280;\">\n    Manage cookie settings\n  </a>\n</div>",
+    "text_content": "news-daily.co.uk \u2014 Cookie Consent \n   We use cookies for essential functions and with your consent for analytics and ads. \n   \n    Accept All\n   \n   \n    Manage cookie settings",
+    "buttons": [
+      {
+        "text": "Accept All",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button#accept",
+        "computed_styles": {
+          "width": "250px",
+          "height": "44px",
+          "background_color": "#2563eb",
+          "color": "#fff",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "block",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": true,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 3
+  },
+  "screenshot_path": "data/raw/screenshots/news-daily.co.uk.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "remember_me",
+        "value": "0bdf6216b15e2cc2f280a7ba26ad11c96f5241899cbd",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1794460986,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "session_id",
+        "value": "36acc363a1e0556d6827f1903ef64bc66a8211ef259caa46",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1800771324,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "16794bb1bb2f8cb22c4ec0c41b91757",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1791390110,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "consent_given",
+        "value": "419b380d3762ed8eb656b4158e",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1778386365,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "__cfduid",
+        "value": "f174d5803949797c3e",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1797886116,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_35de",
+        "value": "0adb18370fb1ee8b5f112d196f345cbb5413c",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1791988114,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_1751",
+        "value": "f34412adb0d51358a4f067b37c20df2d5aa94d",
+        "domain": ".outbrain.com",
+        "path": "/",
+        "expires": 1773100060,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_e72e",
+        "value": "1f0e6b7665e47299a7e7166ac3f806b7c5954",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1773243096,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://news-daily.co.uk/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "news-daily.co.uk"
+      },
+      {
+        "url": "https://cdn.amazon-adsystem.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "amazon-adsystem.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.cloudflare.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "cloudflare.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "doubleclick.net",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "hotjar.com",
+        "referer": "https://news-daily.co.uk/"
+      }
+    ],
+    "third_party_domains": [
+      "amazon-adsystem.com",
+      "cloudflare.com",
+      "doubleclick.net",
+      "hotjar.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 8,
+    "total_third_party_domains": 4,
+    "total_requests": 5
+  },
+  "post_consent_accept": {
+    "cookies": [
+      {
+        "name": "theme",
+        "value": "5dd29cbe0bf993fe74713380e32bed509ecddf5f",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1785642552,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "csrf_token",
+        "value": "422fcfa2fbec3924b2bff6ff09ef39e2b3f2e",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1775345718,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "session_id",
+        "value": "74314106bfe76817daa21d45f126b8e19970f",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1777904955,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "user_pref",
+        "value": "05f68e8a41687001da713af71c",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1788170841,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "consent_given",
+        "value": "182e5747340ca158f98dd68d7e71eb8e",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1799227224,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "remember_me",
+        "value": "1c2ffc26f6fad4ee166547dc9",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1789902839,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "__cfduid",
+        "value": "299f11ccdee4a97269a66eb07455c4ddaf34bc5b91",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1787190117,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lang",
+        "value": "cdd82482de03dd37eb4d8a10592d952ebb4629fdaa460cc",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1772667134,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ed73",
+        "value": "ad618ad5a9411fad4be42cecc9aabaf4660",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1796127419,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_5baa",
+        "value": "ea8dde2124cc2a515b4c544d7d9f1e8d640d2369e75bc7",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1793542514,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_a04c",
+        "value": "92cc2666708bfec800b3e41841",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1773902621,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7886",
+        "value": "5e53fe63b2b925a0e480faa0",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1795512729,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_714b",
+        "value": "ba4aa492d1b11133483b4073e50ae",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1800394308,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_7fc1",
+        "value": "ea7f40ddd5a61de02a5ef4",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1796966246,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d26f",
+        "value": "db76e22bfd1e7979c9debe77e71a0d8bb",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1779884254,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8b96",
+        "value": "7aa2de90e8772c554886d179175fb06",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1773570888,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_0199",
+        "value": "e8a75ddd5c9b571a05ac851e7db6431d3d3",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1783707736,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0aa1",
+        "value": "798f0b869eceb2d1a95e69b3654c29e8d85b833bae2b",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1778334972,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://news-daily.co.uk/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "news-daily.co.uk"
+      },
+      {
+        "url": "https://cdn.adsrvr.org/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "adsrvr.org",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.chartbeat.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "chartbeat.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.doubleclick.net/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "doubleclick.net",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.facebook.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "facebook.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.moatads.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "moatads.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.newrelic.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "newrelic.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.openx.net/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "openx.net",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.optimizely.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "optimizely.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "outbrain.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "rubiconproject.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.segment.io/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "segment.io",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.taboola.com/script.js",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "taboola.com",
+        "referer": "https://news-daily.co.uk/"
+      }
+    ],
+    "third_party_domains": [
+      "adsrvr.org",
+      "chartbeat.com",
+      "doubleclick.net",
+      "facebook.com",
+      "moatads.com",
+      "newrelic.com",
+      "openx.net",
+      "optimizely.com",
+      "outbrain.com",
+      "rubiconproject.com",
+      "segment.io",
+      "taboola.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 18,
+    "total_third_party_domains": 12,
+    "total_requests": 13,
+    "new_cookies_after_interaction": [
+      {
+        "name": "theme",
+        "value": "5dd29cbe0bf993fe74713380e32bed509ecddf5f",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1785642552,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "05f68e8a41687001da713af71c",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1788170841,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "cdd82482de03dd37eb4d8a10592d952ebb4629fdaa460cc",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1772667134,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_ed73",
+        "value": "ad618ad5a9411fad4be42cecc9aabaf4660",
+        "domain": ".criteo.com",
+        "path": "/",
+        "expires": 1796127419,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_5baa",
+        "value": "ea8dde2124cc2a515b4c544d7d9f1e8d640d2369e75bc7",
+        "domain": ".doubleclick.net",
+        "path": "/",
+        "expires": 1793542514,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_a04c",
+        "value": "92cc2666708bfec800b3e41841",
+        "domain": ".amazon-adsystem.com",
+        "path": "/",
+        "expires": 1773902621,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_7886",
+        "value": "5e53fe63b2b925a0e480faa0",
+        "domain": ".hotjar.com",
+        "path": "/",
+        "expires": 1795512729,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_714b",
+        "value": "ba4aa492d1b11133483b4073e50ae",
+        "domain": ".chartbeat.com",
+        "path": "/",
+        "expires": 1800394308,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_7fc1",
+        "value": "ea7f40ddd5a61de02a5ef4",
+        "domain": ".rubiconproject.com",
+        "path": "/",
+        "expires": 1796966246,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_d26f",
+        "value": "db76e22bfd1e7979c9debe77e71a0d8bb",
+        "domain": ".quantserve.com",
+        "path": "/",
+        "expires": 1779884254,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_8b96",
+        "value": "7aa2de90e8772c554886d179175fb06",
+        "domain": ".optimizely.com",
+        "path": "/",
+        "expires": 1773570888,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_0199",
+        "value": "e8a75ddd5c9b571a05ac851e7db6431d3d3",
+        "domain": ".facebook.net",
+        "path": "/",
+        "expires": 1783707736,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "_0aa1",
+        "value": "798f0b869eceb2d1a95e69b3654c29e8d85b833bae2b",
+        "domain": ".adnxs.com",
+        "path": "/",
+        "expires": 1778334972,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "adsrvr.org",
+      "chartbeat.com",
+      "facebook.com",
+      "moatads.com",
+      "newrelic.com",
+      "openx.net",
+      "optimizely.com",
+      "outbrain.com",
+      "rubiconproject.com",
+      "segment.io",
+      "taboola.com"
+    ]
+  },
+  "post_consent_reject": {
+    "cookies": [
+      {
+        "name": "consent_given",
+        "value": "579a83a68cbb066caf",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1774173870,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "csrf_token",
+        "value": "3dd73ab59b3b37f1fb10442d07e0e9ca",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1800659651,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "session_id",
+        "value": "c81b8f8c2865ea54f978ca153ae30e6c14b08c8874a511f",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1798316831,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "lang",
+        "value": "a3a3ad3deb6d1a0b",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1773639821,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "241de6765610b1b0d58",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1782093870,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4e6d",
+        "value": "7826c8f2aecb5f881",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1772537341,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_6813",
+        "value": "3ed22941a90cf8a1a439f5a341375ab29cf25c",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1796266005,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://news-daily.co.uk/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "news-daily.co.uk"
+      },
+      {
+        "url": "https://cdn.hotjar.com/script.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "hotjar.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.outbrain.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "outbrain.com",
+        "referer": "https://news-daily.co.uk/"
+      },
+      {
+        "url": "https://cdn.rubiconproject.com/script.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "rubiconproject.com",
+        "referer": "https://news-daily.co.uk/"
+      }
+    ],
+    "third_party_domains": [
+      "hotjar.com",
+      "outbrain.com",
+      "rubiconproject.com"
+    ],
+    "local_storage": {},
+    "session_storage": {},
+    "total_cookies": 7,
+    "total_third_party_domains": 3,
+    "total_requests": 4,
+    "new_cookies_after_interaction": [
+      {
+        "name": "lang",
+        "value": "a3a3ad3deb6d1a0b",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1773639821,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "user_pref",
+        "value": "241de6765610b1b0d58",
+        "domain": ".news-daily.co.uk",
+        "path": "/",
+        "expires": 1782093870,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "None"
+      },
+      {
+        "name": "_4e6d",
+        "value": "7826c8f2aecb5f881",
+        "domain": ".openx.net",
+        "path": "/",
+        "expires": 1772537341,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      },
+      {
+        "name": "_6813",
+        "value": "3ed22941a90cf8a1a439f5a341375ab29cf25c",
+        "domain": ".googlesyndication.com",
+        "path": "/",
+        "expires": 1796266005,
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Strict"
+      }
+    ],
+    "new_third_party_domains_after_interaction": [
+      "outbrain.com",
+      "rubiconproject.com"
+    ],
+    "reject_button_found": true,
+    "reject_successful": true
+  }
+}

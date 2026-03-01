@@ -1,0 +1,481 @@
+{
+  "domain": "lemonde.fr",
+  "crawl_timestamp": "2026-03-01T10:46:42.811043+00:00",
+  "success": true,
+  "error": null,
+  "interaction": "none",
+  "cmp_detected": null,
+  "consent_banner": {
+    "found": true,
+    "selector": "[class*='gdpr']",
+    "html": "<div class=\"gdpr-lmd-wall gdpr-lmd-wall--no-blur\">\n    <div class=\"gdpr-lmd-wall__wrapper\">\n        <header class=\"gdpr-lmd-wall__header\">\n            <div class=\"gdpr-lmd-wall__title\">\n                Soutenez un journalisme fiable\n            </div>\n        </header>\n\n        <div class=\"gdpr-lmd-wall__content\">\n            <div class=\"c-explanation\">\n                <p class=\"c-explanation__title\">Acc\u00e9der gratuitement en acceptant l\u2019utilisation de vos donn\u00e9es.</p>\n                <div class=\"c-explanation__block\">\n                    <p class=\"c-explanation__answer\">\n    L\u2019acc\u00e8s gratuit au site (hors contenus exclusifs abonn\u00e9s) est subordonn\u00e9 \u00e0 votre consentement sur l\u2019utilisation de vos donn\u00e9es personnelles (telles que : adresse IP, donn\u00e9es de navigation, informations renseign\u00e9es \u00e0 la cr\u00e9ation de votre compte utilisateur) \u00e0 des fins de personnalisation des communications et pour am\u00e9liorer et d\u00e9velopper nos produits et services.\n  </p>\n                </div>\n                <div class=\"c-explanation__block\">\n                    <p class=\"c-explanation__answer\">\n    <em>Le Monde</em> et ses <a data-gdpr-action=\"partners\">partenaires (240)</a> traitent et associent des donn\u00e9es vous concernant, collect\u00e9es via des cookies et technologies similaires, pour stocker et/ou acc\u00e9der \u00e0 des informations stock\u00e9es sur un terminal, proposer des publicit\u00e9s et contenu personnalis\u00e9s, mesurer la performance des publicit\u00e9s et du contenu et conduire des \u00e9tudes d\u2019audience. Des informations de g\u00e9olocalisation pr\u00e9cises et des informations sur les caract\u00e9ristiques de l\u2018appareil peuvent \u00eatre utilis\u00e9es.\n  </p>\n                </div>\n                <div class=\"c-explanation__block\">\n                    <p class=\"c-explanation__answer\">Vous pouvez retirer votre consentement \u00e0 tout moment en cliquant sur \u00ab Gestion des cookies \u00bb en bas des pages de ce site.</p>\n                </div>\n            </div>\n            <div class=\"c-explanation\">\n                <p class=\"c-explanation__title\">\n    ...ou s\u2019abonner au <em>Monde</em> pour profiter de tous les contenus.\n  </p>\n                <div class=\"c-explanation__block\">\n                    <p class=\"c-explanation__answer\">\n    L\u2019acc\u00e8s au site avec abonnement vous permet de consulter tous les contenus et archives du <em>Monde</em> depuis notre site et nos applications mobiles. En cliquant sur le bouton \u00ab S\u2019abonner \u00bb, vous pourrez refuser les cookies ou param\u00e9trer vos choix (hors cookies de fonctionnement et de mesure d\u2019audience).\n  </p>\n                </div>\n            </div>\n\n            <div class=\"c-explanation__block c-explanation__block--question\">\n                <button class=\"c-explanation__question\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".c-explanation__answer\">\u00c0 quoi servent les cookies ?</button>\n                <p class=\"c-explanation__answer\">\n                    <strong>Assurer le bon fonctionnement technique du Site et g\u00e9rer les droits d\u2019acc\u00e8s aux produits et services qu\u2019il propose</strong><br>\n                    \n    Des traitements de vos donn\u00e9es servent \u00e0 garantir le bon fonctionnement du site du <em>Monde</em> et permettent son optimisation. Le site ne peut pas fonctionner correctement sans eux. Ils permettent \u00e9galement d\u2019assurer que les acc\u00e8s et les utilisations des contenus du site se font conform\u00e9ment \u00e0 <a href=\"https://moncompte.lemonde.fr/cgv\">nos conditions g\u00e9n\u00e9rales de vente et d\u2019utilisation.</a>\n    <br><br>\n    Votre choix de consentement est enregistr\u00e9 et stock\u00e9 dans des cookies d\u00e9di\u00e9s d\u2019une dur\u00e9e de vie maximale de 13 mois.\n  \n                    <br><br>\n\n                    <strong>Mesurer l\u2019audience du Site</strong><br>\n                    \n    Des traitements de vos donn\u00e9es, exempt\u00e9s de consentement, nous permettent de mesurer de mani\u00e8re anonyme l\u2019audience de notre site.\n  \n\n                    \n                    <br>\n                        \n    Les donn\u00e9es ainsi trait\u00e9es sont notamment collect\u00e9es par des cookies d\u00e9pos\u00e9s par nous m\u00eame et/ou par des prestataires :\n  \n                        <br>\n                        \n                            - Forecast<br>\n                        \n                            - Piano Analytics<br>\n                              \n                    \n                    <br>\n    \n                    <strong>Analyser l\u2019audience et les usages de notre Site, de nos produits et/ou services</strong><br>\n                    \n    Des traitements de vos donn\u00e9es nous permettent d\u2019obtenir des mesures et analyses fines sur l\u2019audience de notre site, votre exp\u00e9rience utilisateur et votre int\u00e9r\u00eat pour notre offre de contenus et services.\n  \n\n                    \n                    <br>\n                        \n    Les donn\u00e9es ainsi trait\u00e9es sont notamment collect\u00e9es par les cookies et/ou technologies similaires sont d\u00e9pos\u00e9s par le <em>Monde</em> et/ou les prestataires suivants :\n  \n                        <br>\n                        \n                            - Amplitude<br>\n                        \n                            - Chartbeat<br>\n                        \n                            - Contentsquare<br>\n                        \n                            - Forecast<br>\n                        \n                            - Piano Analytics<br>\n                        \n                    <br>      \n                    \n\n                    \n    Il peut \u00e9galement s\u2019agir de donn\u00e9es collect\u00e9es ou suppos\u00e9es \u00e0 l\u2019occasion de la cr\u00e9ation d\u2019un compte en ligne et/ou de votre utilisation de certains produits et/ou services \u00e9dit\u00e9s par le <em>Monde</em> ou par un tiers.\n    Ces donn\u00e9es peuvent \u00e9galement \u00eatre utilis\u00e9es \u00e0 des fins de recherches scientifiques et universitaires.\n  \n                    <br><br>\n    \n                    <strong>Proposer sur le site des contenus issus de tiers</strong><br>\n                    \n    La r\u00e9daction du <em>Monde</em> illustre r\u00e9guli\u00e8rement des articles avec des contenus publi\u00e9s ou h\u00e9berg\u00e9s par les r\u00e9seaux sociaux. Par ailleurs, les vid\u00e9os et les podcasts pr\u00e9sents sur le site sont diffus\u00e9s en utilisant des plateformes tierces. La consultation de ces contenus est susceptible d\u2019entra\u00eener un d\u00e9p\u00f4t de cookie, une collecte de donn\u00e9es et un traitement de celles-ci de la part de ces tiers.\n  \n\n                    \n                        \n    <br>\n    Pour en savoir plus sur l\u2019utilisation de vos donn\u00e9es par ces tiers :\n    <br>\n     - Collective Audience : <a href=\"https://beop.collectiveaudience.co/fr/privacy-policy\">https://beop.collectiveaudience.co/fr/privacy-policy</a><br>- Dailymotion : <a href=\"https://legal.dailymotion.com/fr/politique-de-confidentialite/\">https://legal.dailymotion.com/fr/politique-de-confidentialite/</a><br>- Facebook : <a href=\"https://www.facebook.com/privacy/policy/version/20220104\">https://www.facebook.com/privacy/policy/version/20220104</a><br>- Instagram : <a href=\"https://help.instagram.com/519522125107875/?helpref=uf_share\">https://help.instagram.com/519522125107875/?helpref=uf_share</a><br>- Linkedin : <a href=\"https://fr.linkedin.com/legal/privacy-policy/\">https://fr.linkedin.com/legal/privacy-policy/</a><br>- Snapchat : <a href=\"https://snap.com/fr-FR/privacy/privacy-policy\">https://snap.com/fr-FR/privacy/privacy-policy</a><br>- Sparteo : <a href=\"https://corporate.sparteo.com/privacy-policy\">https://corporate.sparteo.com/privacy-policy</a><br>- Spotify : <a href=\"https://www.spotify.com/fr/legal/privacy-policy/\">https://www.spotify.com/fr/legal/privacy-policy/</a><br>- X : <a href=\"https://twitter.com/fr/privacy\">https://twitter.com/fr/privacy</a><br>- Youtube : <a href=\"https://policies.google.com/privacy\">https://policies.google.com/privacy</a>\n  \n                    \n                    <br><br>\n    \n                    <strong>Personnaliser votre parcours sur notre Site et/ou nos applications, ainsi que nos communications \u00e9lectroniques</strong><br>\n                    \n    Des traitements de vos donn\u00e9es nous permettent, en fonction de votre navigation, de vous proposer les contenus et/ou les offres de produits et services suppos\u00e9s pertinents et susceptibles de vous int\u00e9resser.\n  \n\n                    \n                    <br>\n                        \n    Les donn\u00e9es ainsi trait\u00e9es sont notamment collect\u00e9es par les cookies et/ou technologies similaires d\u00e9pos\u00e9s par le <em>Monde</em> et/ou les prestataires suivants :\n  \n                        <br>\n                        \n                            - AppsFlyer<br>\n                        \n                            - Batch<br>\n                        \n                            - Chartbeat (Headline testing)<br>\n                        \n                            - Forecast<br>\n                         \n                    <br>     \n                    \n\n                    \n    Il peut \u00e9galement s\u2019agir de donn\u00e9es collect\u00e9es ou suppos\u00e9es \u00e0 l\u2019occasion de la cr\u00e9ation d\u2019un compte en ligne et/ou de votre utilisation de certains produits et/ou services \u00e9dit\u00e9s par le <em>Monde</em> ou par un tiers.\n  \n                    <br><br>\n    \n                    <strong>Personnaliser et cibler nos campagnes publicitaires et/ou celles de nos partenaires</strong><br>\n                    \n    Des traitements de vos donn\u00e9es permettent au <em>Monde</em> et/ou \u00e0 ses prestataires et/ou \u00e0 ses <a data-gdpr-action=\"partners2\">partenaires publicitaires</a>, en vous attribuant ou non un identifiant unique, d\u2019afficher des publicit\u00e9s personnalis\u00e9es, que nous esp\u00e9rons les plus pertinentes et/ou les plus adapt\u00e9es \u00e0 vos centres d\u2019int\u00e9r\u00eat. Ils permettent \u00e9galement au <em>Monde</em>, lorsque vous naviguez sur d'autres sites, de vous pr\u00e9senter des publicit\u00e9s personnalis\u00e9es pour ses propres produits et services ou au contraire, de ne pas vous pr\u00e9senter ces publicit\u00e9s. Ces traitements de donn\u00e9es nous permettent enfin de r\u00e9aliser des mesures de performance et d\u2019attractivit\u00e9 des publicit\u00e9s diffus\u00e9es sur notre site.\n    <br><br>\n    Les donn\u00e9es ainsi trait\u00e9es sont notamment collect\u00e9es par des cookies et/ou technologies similaires lors de votre navigation sur le site du <em>Monde</em> et/ou d'autres services de communication au public en ligne. Il peut \u00e9galement s\u2019agir de donn\u00e9es collect\u00e9es ou suppos\u00e9es \u00e0 l\u2019occasion de la cr\u00e9ation d\u2019un compte en ligne et/ou de votre utilisation de certains produits et/ou services \u00e9dit\u00e9s par le <em>Monde</em> ou par un tiers.\n    <br><br>\n    Pour transmettre votre choix concernant les cookies de ciblage publicitaire, nous utilisons une technologie compatible avec <a target=\"_blank\" href=\"https://iabeurope.eu/transparency-consent-framework/\">le cadre de transparence et de consentement de l\u2019IAB.</a>\n  \n\n                    \n                    <br><br>\n                        \n    Outre les technologies compatibles avec ce cadre, des cookies et traceurs publicitaires peuvent \u00eatre utilis\u00e9s par ces prestataires :\n  \n                        <br>\n                        \n                            - AppsFlyer<br>\n                        \n                            - Forecast<br>\n                        \n                            - Keywee<br>\n                        \n                            - Meta<br>\n                        \n                            - Microsoft Ads<br>\n                        \n                            - Pinterest<br>\n                        \n                            - Pubstack<br>\n                        \n                            - Reddit<br>\n                        \n                            - Snapchat<br>\n                        \n                            - Spotify<br>\n                        \n                            - TikTok<br>\n                        \n                    \n                    <br>\n    \n                    <button class=\"gdpr-lmd-wall__tcfbutton c-explanation__question\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".c-explanation__answer\">En savoir plus sur les finalit\u00e9s publicitaires&nbsp;?</button>\n                    <span class=\"gdpr-lmd-wall__tcf c-explanation__answer ui-collapse--shown\">\n                        \n    En donnant votre consentement \u00e0 la finalit\u00e9 de personnalisation et de Cookie de ciblage publicitaire, vous autorisez \u00e9galement le <em>Monde</em> et ses partenaires \u00e0 r\u00e9aliser les traitements de donn\u00e9es suivants (NB: nous sollicitons votre consentement dans tous les cas, y compris lorsque le responsable de traitement a choisi une autre base l\u00e9gale \u00e0 celui-ci, comme l\u2019int\u00e9r\u00eat l\u00e9gitime, auquel vous pouvez vous opposer <a data-gdpr-action=\"partners\">ici</a>)&nbsp;:\n  \n                        <br><br>\n                        <!-- Purposes -->\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Stocker et/ou acc\u00e9der \u00e0 des informations sur un appareil (224)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les cookies, appareils ou identifiants en ligne similaires (par ex. identifiants de connexion, identifiants assign\u00e9s de fa\u00e7on al\u00e9atoire, identifiants r\u00e9seau) ainsi que toutes autres informations (par ex. type et informations de navigateur, langue, taille d\u2019\u00e9cran, technologies prises en charge, etc.) peuvent \u00eatre conserv\u00e9s ou lus sur votre appareil pour reconna\u00eetre celui-ci \u00e0 chacune de ses connexions \u00e0 une application ou \u00e0 un site Web, pour une ou plusieurs des finalit\u00e9s pr\u00e9sent\u00e9es ici. \n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    La plupart des finalit\u00e9s expliqu\u00e9es dans le pr\u00e9sent avis d\u00e9pendent du stockage ou de l\u2019acc\u00e8s aux informations \u00e0 partir de votre appareil lorsque vous utilisez une application ou consultez un site Web. Par exemple, un fournisseur ou un \u00e9diteur peut avoir besoin de m\u00e9moriser un cookie sur votre appareil lors de votre premi\u00e8re consultation sur un site Web afin de pouvoir reconna\u00eetre votre appareil lors de vos prochaines visites (en acc\u00e9dant \u00e0 ce cookie \u00e0 chaque connexion). \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Utiliser des donn\u00e9es limit\u00e9es pour s\u00e9lectionner la publicit\u00e9 (142)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">La publicit\u00e9 qui vous est pr\u00e9sent\u00e9e sur ce service peut \u00eatre bas\u00e9e sur des donn\u00e9es limit\u00e9es, telles que le site Web ou l\u2019application que vous utilisez, votre emplacement approximatif, votre type d\u2019appareil ou les contenus avec lesquels vous interagissez (ou avez interagi) (par exemple, pour limiter le nombre de fois o\u00f9 une publicit\u00e9 donn\u00e9e vous est diffus\u00e9e).\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info-2\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info gdpr-lmd-wall__tcfpurposes-info-2\">\n                                    Un constructeur automobile souhaite promouvoir ses v\u00e9hicules \u00e9lectriques aupr\u00e8s d\u2019utilisateurs soucieux de l\u2019environnement vivant en ville apr\u00e8s les heures de bureau. La publicit\u00e9 est pr\u00e9sent\u00e9e sur une page avec du contenu connexe (tel qu\u2019un article sur les actions de changement climatique) apr\u00e8s 18 h 30 aux utilisateurs dont l\u2019emplacement approximatif sugg\u00e8re qu\u2019ils se trouvent en zone urbaine.<br><br>Un grand producteur de peintures aquarelles souhaite diffuser une campagne de publicit\u00e9 en ligne pour sa derni\u00e8re gamme d\u2019aquarelles, en diversifiant son public pour atteindre autant d\u2019artistes amateurs et professionnels que possible et en \u00e9vitant de diffuser cette publicit\u00e9 aux c\u00f4t\u00e9s de contenus sans rapport (par exemple, des articles sur des m\u00e9thodes de peinture pour une maison). Le nombre de fois o\u00f9 la publicit\u00e9 vous est pr\u00e9sent\u00e9e est d\u00e9tect\u00e9 et limit\u00e9 afin d\u2019\u00e9viter de vous la pr\u00e9senter trop fr\u00e9quemment. \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Cr\u00e9er des profils pour la publicit\u00e9 personnalis\u00e9e (183)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les informations sur votre activit\u00e9 sur ce service (comme les formulaires que vous soumettez, les contenus que vous consultez) peuvent \u00eatre conserv\u00e9es et conjugu\u00e9es \u00e0 d\u2019autres informations vous concernant (par exemple, les informations de votre activit\u00e9 pr\u00e9c\u00e9dente sur ce service et d\u2019autres sites Web ou applications) ou concernant des utilisateurs similaires. Ces informations servent ensuite \u00e0 cr\u00e9er ou \u00e0 am\u00e9liorer un profil vous concernant (qui peut comporter d\u2019\u00e9ventuels centres d\u2019int\u00e9r\u00eat et renseignements personnels). Votre profil peut \u00eatre utilis\u00e9 (\u00e9galement ult\u00e9rieurement) pour pr\u00e9senter des publicit\u00e9s qui semblent plus pertinentes en fonction de vos centres d\u2019int\u00e9r\u00eat \u00e9ventuels par cette entit\u00e9 et d\u2019autres entit\u00e9s.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Si vous lisez plusieurs articles sur les meilleurs accessoires de v\u00e9lo \u00e0 acheter, ces informations pourraient servir \u00e0 cr\u00e9er un profil sur votre centre d\u2019int\u00e9r\u00eat pour les accessoires de v\u00e9lo. Un tel profil peut \u00eatre utilis\u00e9 ou am\u00e9lior\u00e9 ult\u00e9rieurement, sur le m\u00eame site Web ou toute autre application pour vous pr\u00e9senter des publicit\u00e9s d\u2019une marque d\u2019accessoires de v\u00e9lo sp\u00e9cifique. Si vous regardez \u00e9galement un outil de configuration pour un v\u00e9hicule sur le site Web d\u2019un constructeur automobile de luxe, ces informations pourraient \u00eatre conjugu\u00e9es \u00e0 votre centre d\u2019int\u00e9r\u00eat pour les v\u00e9los afin d\u2019affiner votre profil et de supposer que vous portez un int\u00e9r\u00eat particulier pour des \u00e9quipements de cyclisme de luxe.<br><br>Une entreprise de v\u00eatements souhaite promouvoir sa nouvelle gamme de v\u00eatements haut de gamme pour b\u00e9b\u00e9s. Elle contacte une agence qui dispose d\u2019un r\u00e9seau de clients \u00e0 revenus \u00e9lev\u00e9s (comme les supermarch\u00e9s haut de gamme) et demande \u00e0 l\u2019agence de cr\u00e9er des profils de jeunes parents ou couples, dont on peut supposer qu\u2019ils sont ais\u00e9s financi\u00e8rement et qu\u2019ils vont avoir un nouvel enfant. Ces profils pourront \u00eatre utilis\u00e9s ult\u00e9rieurement pour pr\u00e9senter de la publicit\u00e9 dans des applications partenaires. \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Utiliser des profils pour s\u00e9lectionner des publicit\u00e9s personnalis\u00e9es (180)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">La publicit\u00e9 qui vous est pr\u00e9sent\u00e9e sur ce service peut \u00eatre bas\u00e9e sur vos profils publicitaires, qui peuvent \u00eatre cr\u00e9\u00e9s en fonction de votre activit\u00e9 sur ce service ou d\u2019autres sites Web ou applications (comme les formulaires que vous soumettez, les contenus que vous consultez), ainsi que sur vos \u00e9ventuels centres d\u2019int\u00e9r\u00eat et renseignements personnels.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Un d\u00e9taillant en ligne souhaite faire la publicit\u00e9 d\u2019une vente limit\u00e9e de chaussures de course. Il souhaite cibler la publicit\u00e9 pour les utilisateurs ayant d\u00e9j\u00e0 regard\u00e9 des chaussures de running sur son application mobile. Les technologies de suivi peuvent \u00eatre utilis\u00e9es pour reconna\u00eetre que vous avez d\u00e9j\u00e0 utilis\u00e9 l\u2019application mobile pour consulter des chaussures de course afin de vous pr\u00e9senter la publicit\u00e9 correspondante sur l\u2019application.<br><br>Un profil cr\u00e9\u00e9 pour la publicit\u00e9 personnalis\u00e9e en relation avec une personne ayant recherch\u00e9 des accessoires de v\u00e9lo sur un site Web peut \u00eatre utilis\u00e9 pour pr\u00e9senter la publicit\u00e9 pertinente pour les accessoires de v\u00e9lo sur une application mobile d\u2019une autre organisation. \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Cr\u00e9er des profils de contenus personnalis\u00e9s (67)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les informations concernant votre activit\u00e9 sur ce service (par exemple, les formulaires que vous soumettez, les contenus non publicitaires que vous consultez) peuvent \u00eatre m\u00e9moris\u00e9es et conjugu\u00e9es \u00e0 d\u2019autres informations vous concernant (tels que les informations de votre activit\u00e9 pr\u00e9c\u00e9dente sur ce service ou d\u2019autres sites Web ou applications) ou concernant des utilisateurs similaires. Ces informations servent ensuite \u00e0 cr\u00e9er ou \u00e0 am\u00e9liorer un profil vous concernant (qui peut comporter, par exemple, d\u2019\u00e9ventuels centres d\u2019int\u00e9r\u00eat et renseignements personnels). Votre profil peut servir (\u00e9galement \u00e0 toute date ult\u00e9rieure) \u00e0 pr\u00e9senter des contenus qui semblent plus pertinents par rapport \u00e0 vos \u00e9ventuels centres d\u2019int\u00e9r\u00eat, par exemple en adaptant l\u2019ordre dans lequel les contenus vous sont pr\u00e9sent\u00e9s afin qu\u2019il soit d\u2019autant plus facile pour vous de trouver des contenus correspondant \u00e0 vos centres d\u2019int\u00e9r\u00eat.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Ces informations peuvent \u00eatre ajout\u00e9es \u00e0 un profil pour consigner votre int\u00e9r\u00eat pour les contenus li\u00e9s aux activit\u00e9s en ext\u00e9rieur ainsi que pour les guides de bricolage (en vue de permettre la personnalisation des contenus afin que par exemple, vous receviez davantage de billets de blog et d\u2019articles sur les maisons dans les arbres et les cabanes en bois \u00e0 l\u2019avenir).<br><br>Vous avez visionn\u00e9 trois vid\u00e9os sur l\u2019exploration spatiale sur diverses applications TV. Une plateforme d\u2019actualit\u00e9s avec laquelle vous n\u2019avez pas eu de contact cr\u00e9e un profil bas\u00e9 sur ce comportement de visualisation, en consignant votre int\u00e9r\u00eat pour l\u2019exploration de l\u2019espace \u00e0 titre de centre d\u2019int\u00e9r\u00eat potentiel pour d\u2019autres vid\u00e9os. \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Utiliser des profils pour s\u00e9lectionner des contenus personnalis\u00e9s (58)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les contenus qui vous sont pr\u00e9sent\u00e9s sur ce service peuvent \u00eatre bas\u00e9s sur vos profils de personnalisation de contenu qui peuvent correspondre \u00e0 votre activit\u00e9 sur ce service ou d\u2019autres services (par exemple, les formulaires que vous soumettez, le contenu que vous consultez, les \u00e9ventuels centres d\u2019int\u00e9r\u00eat et renseignements personnels). Cela peut par exemple \u00eatre utilis\u00e9 en adaptant l\u2019ordre de pr\u00e9sentation des contenus afin qu\u2019il soit d\u2019autant plus facile pour vous de trouver (sans publicit\u00e9) des contenus correspondant \u00e0 vos centres d\u2019int\u00e9r\u00eat.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Vous lisez des articles sur la nourriture v\u00e9g\u00e9tarienne sur une plateforme de r\u00e9seaux sociaux, puis vous utilisez l\u2019application de cuisine d\u2019une entreprise ind\u00e9pendante. Le profil cr\u00e9\u00e9 \u00e0 votre sujet sur la plateforme de r\u00e9seaux sociaux servira \u00e0 vous pr\u00e9senter des recettes v\u00e9g\u00e9tariennes sur l\u2019\u00e9cran d\u2019accueil de l\u2019application de cuisine.<br><br>Vous avez visionn\u00e9 trois vid\u00e9os sur l'aviron sur divers sites Web. Une plateforme de partage de vid\u00e9os non consult\u00e9e recommandera cinq autres vid\u00e9os sur l\u2019aviron susceptibles de vous int\u00e9resser lorsque vous utilisez votre application TV, en se basant sur un profil cr\u00e9\u00e9 \u00e0 votre sujet \u00e0 partir de vos visites sur divers sites Web pour consulter des vid\u00e9os en ligne. \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Mesurer la performance des publicit\u00e9s (148)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les informations concernant la publicit\u00e9 qui vous est pr\u00e9sent\u00e9e et la mani\u00e8re dont vous interagissez avec elles peuvent \u00eatre exploit\u00e9es pour d\u00e9terminer dans quelle mesure une publicit\u00e9 a \u00e9t\u00e9 efficace pour vous ou d\u2019autres utilisateurs et si les objectifs de la publicit\u00e9 ont \u00e9t\u00e9 atteints. Par exemple, si vous avez vu une publicit\u00e9, si vous avez cliqu\u00e9 dessus, si elle vous a conduit \u00e0 acheter un produit ou \u00e0 visiter un site Web, etc. Ces informations s\u2019av\u00e8rent tr\u00e8s utiles pour appr\u00e9hender la pertinence des campagnes publicitaires.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Vous avez cliqu\u00e9 sur une publicit\u00e9 concernant une remise \u00ab Black Friday \u00bb d\u2019une boutique en ligne sur un site Web et achet\u00e9 un produit. Votre clic sera li\u00e9 \u00e0 cet achat. Votre interaction ainsi que  celle des autres utilisateurs seront mesur\u00e9es pour d\u00e9terminer le nombre de clics effectu\u00e9s sur la publicit\u00e9 qui ont abouti \u00e0 un achat.<br><br>Vous \u00eates l\u2019une des rares personnes \u00e0 avoir cliqu\u00e9 sur une publicit\u00e9 concernant une remise \u00ab Journ\u00e9e internationale\u00bb d\u2019une boutique de cadeaux en ligne dans l\u2019application d\u2019un \u00e9diteur. L\u2019\u00e9diteur souhaite disposer de rapports pour comprendre \u00e0 quelle fr\u00e9quence un placement publicitaire sp\u00e9cifique au sein de l\u2019application, et notamment la publicit\u00e9 \u00ab Journ\u00e9e internationale d\u2019appr\u00e9ciation \u00bb, a \u00e9t\u00e9 consult\u00e9e ou fait l\u2019objet de clics de votre part et d\u2019autres utilisateurs pour permettre \u00e0 l\u2019\u00e9diteur et \u00e0 ses partenaires (comme les agences) d\u2019optimiser leurs placements publicitaires. \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Mesurer la performance des contenus (68)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les informations concernant les contenus qui vous sont pr\u00e9sent\u00e9s et la mani\u00e8re dont vous interagissez avec ceux-ci peuvent servir \u00e0 d\u00e9terminer si des contenus (non publicitaires), par exemple, ont atteint leur public cible et correspondent \u00e0 vos centres d\u2019int\u00e9r\u00eat. Par exemple, si vous lisez un article, visionnez une vid\u00e9o, \u00e9coutez un podcast ou consultez une description de produit, combien de temps avez-vous pass\u00e9 sur ce service et les pages Web que vous visitez, etc. Ces informations s\u2019av\u00e8rent tr\u00e8s utiles pour comprendre la pertinence des contenus (non publicitaires) qui vous sont pr\u00e9sent\u00e9s.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Vous avez lu un article de blog sur la randonn\u00e9e sur une application mobile d\u2019un \u00e9diteur et suivi un lien vers un article recommand\u00e9 et connexe. Vos interactions seront enregistr\u00e9es de sorte \u00e0 pr\u00e9ciser que la publication initiale sur la randonn\u00e9e vous a \u00e9t\u00e9 utile et qu'elle a r\u00e9ussi \u00e0 susciter votre int\u00e9r\u00eat pour la publication li\u00e9e. Cela sera mesur\u00e9 pour savoir s\u2019il faut produire davantage de publications sur la randonn\u00e9e \u00e0 l\u2019avenir et o\u00f9 les placer sur l\u2019\u00e9cran d\u2019accueil de l\u2019application mobile.<br><br>On vous a pr\u00e9sent\u00e9 une vid\u00e9o sur les tendances de la mode, mais vous et plusieurs autres utilisateurs avez cess\u00e9 de regarder au bout de 30 secondes. Ces informations servent ensuite \u00e0 \u00e9valuer la bonne longueur de vid\u00e9os futures sur les tendances de la mode. \n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Comprendre les publics par le biais de statistiques ou de combinaisons de donn\u00e9es provenant de diff\u00e9rentes sources (113)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Des rapports peuvent \u00eatre g\u00e9n\u00e9r\u00e9s en fonction de la combinaison d\u2019ensembles de donn\u00e9es (comme les profils d\u2019utilisateurs, les statistiques, les \u00e9tudes de march\u00e9, les donn\u00e9es analytiques) concernant vos interactions et celles d\u2019autres utilisateurs avec des contenus publicitaires ou (non publicitaires) afin d\u2019identifier les caract\u00e9ristiques communes (par exemple, pour d\u00e9terminer quels publics cibles sont les plus r\u00e9ceptifs \u00e0 une campagne publicitaire ou \u00e0 certains contenus).\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Le propri\u00e9taire d\u2019une librairie en ligne souhaite obtenir des rapports commerciaux montrant la proportion de visiteurs ayant consult\u00e9 et quitt\u00e9 son site sans acheter, ou ayant consult\u00e9 et achet\u00e9 la derni\u00e8re autobiographie du mois, ainsi que l\u2019\u00e2ge moyen et la r\u00e9partition hommes/femmes pour chaque cat\u00e9gorie. Les donn\u00e9es relatives \u00e0 votre navigation sur son site et \u00e0 vos caract\u00e9ristiques personnelles sont ensuite utilis\u00e9es et combin\u00e9es avec d\u2019autres donn\u00e9es de ce type pour produire ces statistiques.<br><br>Un annonceur souhaite mieux comprendre le type d\u2019audience interagissant avec ses publicit\u00e9s. Il est fait appel \u00e0 un institut de recherche pour comparer les caract\u00e9ristiques des utilisateurs qui ont interagi avec la publicit\u00e9 avec les attributs typiques des utilisateurs de plateformes similaires, sur diff\u00e9rents appareils. Cette comparaison indique \u00e0 l\u2019annonceur que son public publicitaire acc\u00e8de principalement aux publicit\u00e9s par le biais d\u2019appareils mobiles et se trouve probablement dans la tranche d\u2019\u00e2ge de 45 \u00e0 60 ans.\n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">D\u00e9velopper et am\u00e9liorer les services (124)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les informations sur votre activit\u00e9 sur ce service, telles que vos interactions avec des publicit\u00e9s ou du contenu, peuvent \u00eatre tr\u00e8s utiles pour am\u00e9liorer les produits et services et pour cr\u00e9er de nouveaux produits et services en fonction des interactions des utilisateurs, du type d\u2019audience, etc. Cette finalit\u00e9 sp\u00e9cifique n\u2019inclut pas le d\u00e9veloppement ou l\u2019am\u00e9lioration des profils et des identifiants des utilisateurs.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Une plateforme technologique travaillant avec un fournisseur de r\u00e9seaux sociaux constate une croissance des utilisateurs d\u2019applications mobiles, et voit en fonction de leurs profils que beaucoup d\u2019entre eux se connectent via des connexions mobiles. Il utilise une nouvelle technologie pour diffuser des publicit\u00e9s format\u00e9es pour les appareils mobiles et \u00e0 faible bande passante afin d\u2019am\u00e9liorer leurs performances.<br><br>Un annonceur cherche un moyen d\u2019afficher des publicit\u00e9s sur un nouveau type d\u2019appareil grand public. Il collecte des informations sur la fa\u00e7on dont les utilisateurs interagissent avec ce nouveau type d\u2019appareil pour d\u00e9terminer s\u2019il peut cr\u00e9er un nouveau m\u00e9canisme pour afficher de la publicit\u00e9 sur ce type d\u2019appareil.\n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Utiliser des donn\u00e9es limit\u00e9es pour s\u00e9lectionner le contenu (24)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Le contenu qui vous est pr\u00e9sent\u00e9 sur ce service peut \u00eatre bas\u00e9 sur des donn\u00e9es limit\u00e9es, telles que le site Web ou l\u2019application que vous utilisez, votre emplacement non pr\u00e9cis, votre type d\u2019appareil ou le contenu avec lequel vous interagissez (ou avez interagi) (par exemple, pour limiter le nombre de diffusions d\u2019une vid\u00e9o ou d\u2019un article \u00e0 votre attention).\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Un magazine de voyage a publi\u00e9 un article sur son site Web sur les nouveaux cours en ligne propos\u00e9s par une \u00e9cole de langues, afin d\u2019am\u00e9liorer les exp\u00e9riences de voyage \u00e0 l\u2019\u00e9tranger. Les articles de blog de l\u2019\u00e9cole sont ins\u00e9r\u00e9s directement au bas de la page et s\u00e9lectionn\u00e9s en fonction de votre emplacement non pr\u00e9cis (par exemple, les articles de blog expliquant le programme du cours pour diff\u00e9rentes langues que la langue du pays dans lequel vous vous trouvez).<br><br>Une application mobile d\u2019actualit\u00e9s sportives a lanc\u00e9 une nouvelle section d\u2019articles couvrant les matchs de football les plus r\u00e9cents. Chaque article comprend des vid\u00e9os h\u00e9berg\u00e9es par une plateforme de streaming distincte pr\u00e9sentant les moments forts de chaque rencontre. Si vous faites avancer rapidement une vid\u00e9o, ces informations peuvent \u00eatre utilis\u00e9es pour s\u00e9lectionner une vid\u00e9o plus courte \u00e0 lire ensuite.\n                                </span>\n                            </span>\n                        </span>\n\n                        <!-- special purposes -->\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Assurer la s\u00e9curit\u00e9, pr\u00e9venir et d\u00e9tecter la fraude et r\u00e9parer les erreurs (164)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Vos donn\u00e9es peuvent \u00eatre utilis\u00e9es pour surveiller et pr\u00e9venir les activit\u00e9s inhabituelles et potentiellement frauduleuses (par exemple, en ce qui concerne la publicit\u00e9, les clics publicitaires par des robots), et s\u2019assurer que les syst\u00e8mes et processus fonctionnent correctement et en toute s\u00e9curit\u00e9. Elles peuvent \u00e9galement \u00eatre utilis\u00e9es pour corriger les probl\u00e8mes que vous, l\u2019\u00e9diteur ou l\u2019annonceur pouvez rencontrer dans la diffusion de contenus et de publicit\u00e9s et dans votre interaction avec ceux-ci.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Un interm\u00e9diaire publicitaire diffuse des publicit\u00e9s de divers annonceurs sur son r\u00e9seau de sites Web partenaires. Il remarque une augmentation importante des clics sur les publicit\u00e9s relatives \u00e0 un annonceur, et utilise les donn\u00e9es concernant la source des clics pour \u00e9tablir que 80 % des clics proviennent de robots plut\u00f4t que d\u2019\u00eatres humains.\n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Fournir et pr\u00e9senter des publicit\u00e9s et du contenu (153)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Certaines informations (telles qu\u2019une adresse IP ou des capacit\u00e9s d\u2019appareil) sont utilis\u00e9es pour assurer la compatibilit\u00e9 technique du contenu ou de la publicit\u00e9, et pour faciliter la transmission du contenu ou de la publicit\u00e9 \u00e0 votre appareil.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Cliquer sur un lien dans un article peut normalement vous envoyer vers une autre page ou une autre partie de l\u2019article. Pour ce faire, 1\u00b0) votre navigateur envoie une demande \u00e0 un serveur li\u00e9 au site Web, 2\u00b0) le serveur r\u00e9pond (\u00ab voici l\u2019article que vous avez demand\u00e9 \u00bb), en utilisant les informations techniques automatiquement incluses dans la demande envoy\u00e9e par votre appareil, pour afficher convenablement les informations/images qui font partie de l\u2019article que vous avez demand\u00e9.Techniquement, un tel \u00e9change d\u2019informations est n\u00e9cessaire pour fournir le contenu qui appara\u00eet sur votre \u00e9cran.\n                                </span>\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Enregistrer et communiquer les choix en mati\u00e8re de confidentialit\u00e9 (145)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les choix que vous faites concernant les finalit\u00e9s et les entit\u00e9s \u00e9num\u00e9r\u00e9es dans le pr\u00e9sent avis sont enregistr\u00e9s et mis \u00e0 la disposition de ces entit\u00e9s sous forme de signaux num\u00e9riques (comme une cha\u00eene de caract\u00e8res). Cela est n\u00e9cessaire pour permettre \u00e0 la fois \u00e0 ce service et \u00e0 ces entit\u00e9s de respecter ces choix.\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info-btn\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".gdpr-lmd-wall__tcfpurposes-info\"></span>\n                                <span class=\"gdpr-lmd-wall__tcfpurposes-info\">\n                                    Lorsque vous consultez un site Internet et que vous avez le choix entre consentir \u00e0 l\u2019utilisation de profils pour une publicit\u00e9 personnalis\u00e9e ou ne pas consentir, le choix que vous faites est enregistr\u00e9 et mis \u00e0 la disposition des fournisseurs de publicit\u00e9 de sorte que la publicit\u00e9 qui vous est pr\u00e9sent\u00e9e respecte ce choix.\n                                </span>\n                            </span>\n                        </span>\n\n                        <!-- features -->\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Mettre en correspondance et combiner des donn\u00e9es \u00e0 partir d\u2019autres sources de donn\u00e9es (141)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les informations concernant votre activit\u00e9 sur ce service peuvent \u00eatre associ\u00e9es et combin\u00e9es \u00e0 d\u2019autres informations vous concernant et provenant de diverses sources (par exemple, votre activit\u00e9 sur un service en ligne distinct, votre utilisation d\u2019une carte de fid\u00e9lit\u00e9 en magasin ou vos r\u00e9ponses \u00e0 une enqu\u00eate), \u00e0 l\u2019appui des finalit\u00e9s expliqu\u00e9es dans le pr\u00e9sent avis. \n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Relier diff\u00e9rents appareils (136)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">\u00c0 l\u2019appui des finalit\u00e9s expliqu\u00e9es dans le pr\u00e9sent avis, votre appareil pourrait \u00eatre consid\u00e9r\u00e9 comme probablement li\u00e9 \u00e0 d\u2019autres appareils qui vous appartiennent ou appartiennent \u00e0 votre foyer (par exemple, parce que vous \u00eates connect\u00e9(e) au m\u00eame service sur votre t\u00e9l\u00e9phone et votre ordinateur, ou parce que vous pouvez utiliser la m\u00eame connexion Internet sur les deux appareils).\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Identifier les appareils en fonction des informations transmises automatiquement (158)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Votre appareil peut se distinguer d\u2019autres appareils en fonction des informations qu\u2019il envoie automatiquement lors de l\u2019acc\u00e8s \u00e0 Internet (par exemple, l\u2019adresse IP de votre connexion Internet ou le type de navigateur utilis\u00e9) \u00e0 l\u2019appui des finalit\u00e9s expos\u00e9es dans le pr\u00e9sent avis.\n                            </span>\n                        </span>\n\n                        <!-- special features -->\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Utiliser des donn\u00e9es de g\u00e9olocalisation pr\u00e9cises (84)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">\n                                Avec votre acceptation, votre emplacement pr\u00e9cis (dans un rayon inf\u00e9rieur \u00e0 500&nbsp;m\u00e8tres) peut \u00eatre utilis\u00e9 \u00e0 l\u2019appui des finalit\u00e9s expliqu\u00e9es dans le pr\u00e9sent avis.\n                            </span>\n                        </span>\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Analyser activement les caract\u00e9ristiques de l\u2019appareil pour l\u2019identification (33)</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">\n                                Avec votre acceptation, certaines caract\u00e9ristiques sp\u00e9cifiques \u00e0 votre appareil peuvent \u00eatre demand\u00e9es et utilis\u00e9es pour le distinguer d\u2019autres appareils (comme les polices ou plug-ins install\u00e9s, la r\u00e9solution de votre \u00e9cran) \u00e0 l\u2019appui des finalit\u00e9s expliqu\u00e9es dans le pr\u00e9sent avis.\n                            </span>\n                        </span>\n\n                        <!-- stacks id 42 -->\n                        <span class=\"gdpr-lmd-wall__tcfpurposes\">\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-title\">Publicit\u00e9s et contenu personnalis\u00e9s, mesure de performance des publicit\u00e9s et du contenu, \u00e9tudes d\u2019audience et d\u00e9veloppement de services</span>\n                            <span class=\"gdpr-lmd-wall__tcfpurposes-desc\">Les publicit\u00e9s et le contenu peuvent \u00eatre personnalis\u00e9s sur la base d\u2019un profil. Votre activit\u00e9 sur ce service peut \u00eatre utilis\u00e9e pour cr\u00e9er ou am\u00e9liorer un profil vous concernant pour une publicit\u00e9 et un contenu personnalis\u00e9s. La performance des publicit\u00e9s et du contenu peut \u00eatre mesur\u00e9e. Des rapports peuvent \u00eatre g\u00e9n\u00e9r\u00e9s en fonction de votre activit\u00e9 et de celles des autres. Votre activit\u00e9 sur ce service peut aider \u00e0 d\u00e9velopper et \u00e0 am\u00e9liorer des produits et services.\n                            </span>\n                        </span>\n                    </span>\n    \n                    <br>\n                    \n    Pour plus d\u2019information sur les cookies, nous vous invitons \u00e0 consulter notre <a href=\"https://www.lemonde.fr/confidentialite/\">politique de confidentialit\u00e9</a>.\n  \n                </p>\n            </div>\n    \n            <div class=\"c-explanation__block c-explanation__block--question\">\n                <button class=\"c-explanation__question\" data-popin-toggle=\"collapse\" data-popin-toggle-target=\".c-explanation__answer\">\n    Pourquoi le <em>Monde</em> vous demande d'accepter ces traitements de vos donn\u00e9es\n  \n                </button>\n                <p class=\"c-explanation__answer\">\n                    \n    Les traitements de donn\u00e9es d\u00e9crits ci-dessus constituent, directement ou indirectement, une juste r\u00e9mun\u00e9ration de la mise \u00e0 disposition sans abonnement d\u2019une partie du contenu du site du <em>Monde</em>.\n    <br><br>\n    Ainsi, l\u2019acceptation des traitement de donn\u00e9es \u00e0 des fins analytiques, en nous fournissant des informations pr\u00e9cieuses pour am\u00e9liorer la performance de notre site et l'exp\u00e9rience de ses utilisateurs, nous permet de mieux d\u00e9finir nos offres et nos services, et ainsi, de recruter de nouveaux abonn\u00e9s. Ces traitements de donn\u00e9es contribuent donc indirectement \u00e0 l\u2019augmentation de nos revenus issus de l\u2019abonnement.\n    <br><br>\n    L\u2019acceptation des traitements de donn\u00e9es associ\u00e9s aux contenus issus de tiers permet de garantir \u00e0 notre r\u00e9daction une enti\u00e8re libert\u00e9 \u00e9ditoriale sur les contenus issus de plateformes tierces qu\u2019elle souhaite utiliser pour illustrer ses articles. Elle nous permet \u00e9galement de proposer un contenu riche, une lecture fluide, et ainsi de convaincre de nouveaux lecteurs de s\u2019abonner \u00e0 nos publications. Ces traitements de donn\u00e9es contribuent donc indirectement \u00e0 l\u2019augmentation de nos revenus issus de l\u2019abonnement.\n    <br><br>\n    L\u2019acceptation des traitements de donn\u00e9es li\u00e9s \u00e0 la personnalisation du parcours de lecteur, en nous donnant la possibilit\u00e9 de vous proposer des contenus et des services susceptibles de vous int\u00e9resser, nous permet de d\u00e9velopper votre int\u00e9r\u00eat pour le site et ses contenus. Ces traitements de donn\u00e9es contribuent donc indirectement \u00e0 l\u2019augmentation de nos revenus issus de l\u2019abonnement.\n    <br><br>\n    Enfin, l\u2019acceptation des traitements de donn\u00e9es li\u00e9s \u00e0 la personnalisation publicitaire nous permet de commercialiser de la publicit\u00e9 personnalis\u00e9e, qui est une source substantielle de revenus. Elle nous permet \u00e9galement de vous proposer des publicit\u00e9s personnalis\u00e9es sur nos produits et services.\n  \n                    <br>\n                </p>\n            </div>\n        </div>\n\n        <div class=\"gdpr-lmd-wall__separator\"></div>\n\n        <footer class=\"gdpr-lmd-wall__footer\">\n            <button class=\"gdpr-lmd-button gdpr-lmd-button--big gdpr-lmd-button--slate-darker\" data-gdpr-expression=\"acceptAll\">\n                Accepter et continuer\n            </button>\n\n            <a href=\"https://macommande.lemonde.fr/account/create/ESSADIMENS1299PRIO/ESS365J14199PRLVT1FPRIO?marketing=241RESSCMP\" class=\"gdpr-lmd-button gdpr-lmd-button--big gdpr-lmd-button--wide gdpr-lmd-button--white js-gdpr-deny-subscribe\">S\u2019abonner</a>\n\n            <p class=\"c-explanation__login js-gdpr-login\">D\u00e9j\u00e0 abonn\u00e9&nbsp;? <a href=\"https://secure.lemonde.fr/sfuser/connexion?redirectionUrl=https://www.lemonde.fr\">Se\n                connecter</a></p>\n        </footer>\n    </div>\n</div>",
+    "text_content": "Soutenez un journalisme fiable\n\nAcc\u00e9der gratuitement en acceptant l\u2019utilisation de vos donn\u00e9es.\n\nL\u2019acc\u00e8s gratuit au site (hors contenus exclusifs abonn\u00e9s) est subordonn\u00e9 \u00e0 votre consentement sur l\u2019utilisation de vos donn\u00e9es personnelles (telles que : adresse IP, donn\u00e9es de navigation, informations renseign\u00e9es \u00e0 la cr\u00e9ation de votre compte utilisateur) \u00e0 des fins de personnalisation des communications et pour am\u00e9liorer et d\u00e9velopper nos produits et services.\n\nLe Monde et ses partenaires (240) traitent et associent des donn\u00e9es vous concernant, collect\u00e9es via des cookies et technologies similaires, pour stocker et/ou acc\u00e9der \u00e0 des informations stock\u00e9es sur un terminal, proposer des publicit\u00e9s et contenu personnalis\u00e9s, mesurer la performance des publicit\u00e9s et du contenu et conduire des \u00e9tudes d\u2019audience. Des informations de g\u00e9olocalisation pr\u00e9cises et des informations sur les caract\u00e9ristiques de l\u2018appareil peuvent \u00eatre utilis\u00e9es.\n\nVous pouvez retirer votre consentement \u00e0 tout moment en cliquant sur \u00ab Gestion des cookies \u00bb en bas des pages de ce site.\n\n...ou s\u2019abonner au Monde pour profiter de tous les contenus.\n\nL\u2019acc\u00e8s au site avec abonnement vous permet de consulter tous les contenus et archives du Monde depuis notre site et nos applications mobiles. En cliquant sur le bouton \u00ab S\u2019abonner \u00bb, vous pourrez refuser les cookies ou param\u00e9trer vos choix (hors cookies de fonctionnement et de mesure d\u2019audience).\n\n\u00c0 quoi servent les cookies ?\nPourquoi le Monde vous demande d'accepter ces traitements de vos donn\u00e9es \nAccepter et continuer\nS\u2019abonner\n\nD\u00e9j\u00e0 abonn\u00e9\u00a0? Se connecter",
+    "buttons": [
+      {
+        "text": "\u00c0 quoi servent les cookies ?",
+        "tag": "button",
+        "type": "unknown",
+        "selector": "button:has-text('\u00c0 quoi servent les cookies ?')",
+        "computed_styles": {
+          "width": "205px",
+          "height": "20px",
+          "background_color": "rgba(0, 0, 0, 0)",
+          "color": "rgb(42, 48, 59)",
+          "font_size": "14px",
+          "font_weight": "600",
+          "display": "inline-block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "En savoir plus sur les finalit\u00e9s publicitaires\u00a0?",
+        "tag": "button",
+        "type": "unknown",
+        "selector": "button:has-text('En savoir plus sur les finalit\u00e9s publicitaires\u00a0?')",
+        "computed_styles": {
+          "width": "auto",
+          "height": "auto",
+          "background_color": "rgba(0, 0, 0, 0)",
+          "color": "rgb(42, 48, 59)",
+          "font_size": "14px",
+          "font_weight": "600",
+          "display": "inline-block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Pourquoi le Monde vous demande d'accepter ces traitements de vos donn\u00e9es",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button:has-text('Pourquoi le Monde vous demande d'accepter ces traitements de vos donn\u00e9es')",
+        "computed_styles": {
+          "width": "508px",
+          "height": "40px",
+          "background_color": "rgba(0, 0, 0, 0)",
+          "color": "rgb(42, 48, 59)",
+          "font_size": "14px",
+          "font_weight": "600",
+          "display": "inline-block",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "Accepter et continuer",
+        "tag": "button",
+        "type": "accept",
+        "selector": "button:has-text('Accepter et continuer')",
+        "computed_styles": {
+          "width": "508px",
+          "height": "42px",
+          "background_color": "rgb(42, 48, 59)",
+          "color": "rgb(255, 255, 255)",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "flex",
+          "visibility": "visible"
+        }
+      },
+      {
+        "text": "S\u2019abonner",
+        "tag": "a",
+        "type": "unknown",
+        "selector": "a:has-text('S\u2019abonner')",
+        "computed_styles": {
+          "width": "508px",
+          "height": "42px",
+          "background_color": "rgb(255, 255, 255)",
+          "color": "rgb(42, 48, 59)",
+          "font_size": "16px",
+          "font_weight": "500",
+          "display": "flex",
+          "visibility": "visible"
+        }
+      }
+    ],
+    "has_accept_button": true,
+    "has_reject_button": false,
+    "accept_clicks_required": 1,
+    "reject_clicks_required": 999
+  },
+  "screenshot_path": "/home/eren/AECCS/data/raw/screenshots/lemonde.fr.png",
+  "pre_consent": {
+    "cookies": [
+      {
+        "name": "atauthority",
+        "value": "%7B%22name%22%3A%22atauthority%22%2C%22val%22%3A%7B%22authority_name%22%3A%22cnil%22%2C%22visitor_mode%22%3A%22exempt%22%7D%2C%22options%22%3A%7B%22end%22%3A%222027-04-02T10%3A46%3A45.089Z%22%2C%22path%22%3A%22%2F%22%7D%7D",
+        "domain": ".lemonde.fr",
+        "path": "/",
+        "expires": 1806662805,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "pa_privacy",
+        "value": "%22exempt%22",
+        "domain": ".lemonde.fr",
+        "path": "/",
+        "expires": 1806490005,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "lmd_consent_tmp",
+        "value": "6c943eb1-8e63-456b-a918-cd1d86fe65e7",
+        "domain": ".lemonde.fr",
+        "path": "/",
+        "expires": 1803898005.185443,
+        "httpOnly": true,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "_pctx",
+        "value": "%7Bu%7DN4IgrgzgpgThIC4B2YA2qA05owMoBcBDfSREQpAeyRCwgEt8oBJAE0RXSwH18ykAjADcAXqwDMAIygAfALZyA7HIDWMGFBABfIA",
+        "domain": ".lemonde.fr",
+        "path": "/",
+        "expires": 1806486405,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "atidx",
+        "value": "019CA901-FBD7-7DD8-AB98-C31BD6A82071",
+        "domain": "www.lemonde.fr",
+        "path": "/",
+        "expires": 1806576405.50573,
+        "httpOnly": true,
+        "secure": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "atid",
+        "value": "019CA901-FBD7-7DD8-AB98-C31BD6A82071",
+        "domain": "www.lemonde.fr",
+        "path": "/",
+        "expires": 1806576405.505815,
+        "httpOnly": true,
+        "secure": true,
+        "sameSite": "None"
+      },
+      {
+        "name": "lmd_pa",
+        "value": "1772362005",
+        "domain": ".lemonde.fr",
+        "path": "/",
+        "expires": 1806576405.505856,
+        "httpOnly": false,
+        "secure": true,
+        "sameSite": "Lax"
+      }
+    ],
+    "http_requests": [
+      {
+        "url": "https://lemonde.fr/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "lemonde.fr"
+      },
+      {
+        "url": "https://www.lemonde.fr/",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "lemonde.fr"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/03/01/901/0/5406/2703/1400/700/75/0/1c6b120_ftp-1-6k8gow0impkv-2026-03-01t103724z-933634594-rc2lvja9bdso-rtrmadp-3-iran-crisis.JPG",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/marr-sans/MarrSans-Medium-Web.ac7bf37b26f16e97.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/marr-sans-cond/MarrSansCondensed-Medium-Web.133dea79c01db68e.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/variables/the-antiqua-b/TheAntiquaB-LeMonde.b353d5d190089f96.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://cmp.lemonde.fr/js/lemonde.min.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/css/home.50911ada02136e79.css",
+        "method": "GET",
+        "resource_type": "stylesheet",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/css/header.53fdc9cbaf6aa44a.css",
+        "method": "GET",
+        "resource_type": "stylesheet",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/js/vendor.3aee036b216e2a97.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/js/batch_load.7e7c6e51a1c07e71.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://applets.ebxcdn.com/ebx.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "ebxcdn.com",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/02/25/0/0/4180/2787/220/146/30/0/d23cd46_ftp-1-045ncjptzbcq-5289828-01-06.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/03/01/0/106/7075/4717/220/146/30/0/509f15b_ftp-1-e8qn2bgbkj4y-5330611-01-06.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/02/23/0/0/8028/5352/220/146/30/0/c763d6c_ftp-1-1eshhwj91x8m-5276781-01-06.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/03/01/0/0/5997/3998/220/146/30/0/7487a1d_ftp-1-exulgh2d7ca3-5330520-01-06.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/marr-sans/MarrSans-Regular-Web.2f89fff3877253bf.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/css/icons.4946a6dfb1e5a258.css",
+        "method": "GET",
+        "resource_type": "stylesheet",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/css/fonts_last.22964dae3c13b9a5.css",
+        "method": "GET",
+        "resource_type": "stylesheet",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/02/28/48/0/2040/1360/220/146/30/0/0fe74d2_ftp-1-caobh3d2dcww-5323428-01-06.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/js/common.64c1cfe5e9ea7b1f.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/js/home.1eab5db69ceaa3ed.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://eus.rubiconproject.com/account/19358.html",
+        "method": "GET",
+        "resource_type": "document",
+        "domain": "rubiconproject.com",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/e5e799ce5a520ade.da000a48cd131c6b16cbb68937c606e3e941b215.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/js/forecast.f71940a11bf854d8.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://applets.ebxcdn.com/applets/www.lemonde.fr/scripts.js",
+        "method": "GET",
+        "resource_type": "xhr",
+        "domain": "ebxcdn.com",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/marr-sans/MarrSans-Semibold-Web.f7d5c05af8370693.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/bucket/resources/front/css/header.53fdc9cbaf6aa44a.css"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/marr-sans-cond/MarrSansCondensed-Semibold-Web.22ed62e40765ed70.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/marr-sans-cond/MarrSansCondensed-Bold-Web.07e8c5aa145a2514.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/bucket/resources/front/css/header.53fdc9cbaf6aa44a.css"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/front/fonts/variables/the-antiqua-b/TheAntiquaB-LeMonde-Italic.a9ec17f6e3f905ea.woff2",
+        "method": "GET",
+        "resource_type": "font",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/bucket/resources/front/css/header.53fdc9cbaf6aa44a.css"
+      },
+      {
+        "url": "https://cmp.lemonde.fr/html/lemonde/wall.html?css=/css/lemonde/wall.min.css",
+        "method": "GET",
+        "resource_type": "fetch",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/02/25/0/0/4180/2787/228/152/75/0/d23cd46_ftp-1-045ncjptzbcq-5289828-01-06.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/02/28/0/0/7290/4860/228/152/75/0/2c03597_ftp-1-48m9axbhnwyi-5322540-01-06.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/02/28/74/0/1920/1280/228/152/75/0/2178b67_upload-1-nd2qyl2ktf4e-thumbnail-guerre-iran-2026-sirius-copie.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://img.lemde.fr/2026/02/28/443/0/1572/1048/355/236/75/0/049c7cc_upload-1-dzsfsphpcsg3-rea11333721.jpg",
+        "method": "GET",
+        "resource_type": "image",
+        "domain": "lemde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/ca618854ca95a48e.da000a48cd131c6b16cbb68937c606e3e941b215.43260.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/bucket/resources/front/03ea4fa719e85114.da000a48cd131c6b16cbb68937c606e3e941b215.da000a48cd131c6.js",
+        "method": "GET",
+        "resource_type": "script",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://cmp.lemonde.fr/api/impression",
+        "method": "POST",
+        "resource_type": "fetch",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://cdn.amplitude.com/libs/amplitude-4.2.1-min.gz.js",
+        "method": "HEAD",
+        "resource_type": "fetch",
+        "domain": "amplitude.com",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/da000a48cd131c6b16cbb68937c606e3e941b215",
+        "method": "POST",
+        "resource_type": "ping",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      },
+      {
+        "url": "https://www.lemonde.fr/da000a48cd131c6b16cbb68937c606e3e941b215?Rdt=On",
+        "method": "POST",
+        "resource_type": "ping",
+        "domain": "lemonde.fr",
+        "referer": "https://www.lemonde.fr/"
+      }
+    ],
+    "third_party_domains": [
+      "amplitude.com",
+      "ebxcdn.com",
+      "lemde.fr",
+      "rubiconproject.com"
+    ],
+    "local_storage": {
+      "lmd.batch.first.url": "a-la-une"
+    },
+    "session_storage": {
+      "ebx_webtag_": "{\"referrer\":\"\",\"utmSource\":null}",
+      "auto-refresh": "false",
+      "lmd_referrer_key": "direct",
+      "fontsLast": "true",
+      "fontsFirst": "true"
+    },
+    "total_cookies": 7,
+    "total_third_party_domains": 4,
+    "total_requests": 41
+  }
+}
