@@ -506,6 +506,53 @@ python -m reporting.report_generator --source-mode mock --open
 - Matte et al., "Do Cookie Banners Respect my Choice?" (USENIX Security 2020)
 - Bollinger et al., "Automating Cookie Consent and GDPR Violation Detection" (USENIX 2022)
 
+## Why Some PETs Show Negative Tracker Reduction
+
+The negative reduction percentages mean those PETs actually recorded **more** trackers than the baseline (no PET) measurement. This seems counterintuitive, but there are several reasons it happens.
+
+**Important caveat:** This does **not** mean these extensions are ineffective. Tools like uBlock Origin and Privacy Badger are highly effective in real-world browsing — they block thousands of network requests, ads, and tracking scripts. The negative values reflect a **limitation of our snapshot-based measurement methodology**, which counts cookies present at a single moment rather than measuring total requests blocked over time. Extensions alter page load behavior and timing, which can cause different cookies to appear during our fixed observation window.
+
+This is noted in the report's Limitations section (Section 8, bullet 3) as a known measurement artifact.
+
+### 1. Page Load Timing Differences
+
+Extensions like Privacy Badger and Firefox ETP alter how and when resources load. This can cause the page to load differently (e.g., longer load time, different resource ordering), which may trigger **additional** tracker scripts that wouldn't have fired during the baseline's snapshot window. The Princeton OpenWPM study found that tracker loading varies significantly with page load timing, requiring a 90-second observation window because new requests kept appearing at different intervals.
+
+- [Online Tracking: A 1-million-site Measurement and Analysis — Englehardt & Narayanan, Princeton](https://www.cs.princeton.edu/~arvindn/publications/OpenWPM_1_million_site_tracking_measurement.pdf)
+- [Combating Web Tracking: Analyzing Web Tracking Technologies for User Privacy (MDPI, 2024)](https://www.mdpi.com/1999-5903/16/10/363)
+
+### 2. Consent Banner Interaction Changes
+
+Some PETs (especially Consent-O-Matic, which auto-clicks reject) change the consent state. This can cause the site to load different scripts or redirect through different flows, potentially exposing more tracker domains in the process. Matte, Bielova & Santos (IEEE S&P 2020) proved that clicking "reject" on cookie banners does not stop trackers — 38 websites stored positive consent despite user refusal, and 26 websites shared positive consent even when the user opted out. Rejecting can actually trigger additional third-party consent-sharing requests.
+
+- [Do Cookie Banners Respect My Choice? — Matte et al., IEEE S&P 2020 (PDF)](https://www-sop.inria.fr/members/Nataliia.Bielova/papers/Matt-etal-20-SP.pdf)
+- [CNIL Summary of Matte et al. Findings](https://linc.cnil.fr/celestin-matte-cristiana-santos-and-nataliia-bielova-not-every-cookie-banner-respects-users-choice)
+- [Automating Cookie Consent and GDPR Violation Detection — Bollinger et al., USENIX Security 2022](https://www.usenix.org/system/files/sec22-bollinger.pdf)
+
+### 3. Anti-Adblock Responses
+
+Some sites detect blocking extensions and respond by loading alternative tracking scripts or fingerprinting fallbacks, which increases the observed tracker count. A USENIX Security 2025 paper showed ad blockers can be fingerprinted via their filter lists (CSS-based detection achieving 0.73 entropy for AdGuard, 0.56 for uBlock), and sites use this to deploy fallback tracking scripts.
+
+- [Double-Edged Shield: On the Fingerprintability of Customized Ad Blockers — USENIX Security 2025](https://www.usenix.org/system/files/conference/usenixsecurity25/sec25cycle1-prepub-432-el-hajj-chehade.pdf)
+- [How Ad Blockers Can Be Used for Browser Fingerprinting — Fingerprint.com](https://fingerprint.com/blog/ad-blocker-fingerprinting/)
+- [Detecting uBlock Origin and Adblock Plus with JavaScript — incolumitas.com](https://incolumitas.com/2020/12/27/detecting-uBlock-Origin-and-Adblock-Plus-with-JavaScript-only/)
+
+### 4. Measurement Window Variance
+
+Each crawl captures a snapshot. Network timing, ad auction delays, and lazy-loaded scripts mean two visits to the same site can yield different tracker counts. When a PET doesn't aggressively block at the network level (like Brave does), this variance can push results negative. The EFF's Cover Your Tracks project demonstrates that privacy tools can make browsers more uniquely identifiable, and a NYU study found that privacy-enhancing browser extensions often fail to meet their privacy goals in practice.
+
+- [Cover Your Tracks — EFF](https://coveryourtracks.eff.org/)
+- [Privacy-Enhancing Browser Extensions Fail to Meet User Needs — NYU Tandon](https://engineering.nyu.edu/news/privacy-enhancing-browser-extensions-fail-meet-user-needs-new-study-finds)
+- [From User Insights to Actionable Metrics: Evaluation of Privacy-Preserving Browser Extensions — ACM AsiaCCS 2024](https://dl.acm.org/doi/10.1145/3634737.3657028)
+
+### 5. Why Brave Shields Is the Only Positive One
+
+Brave blocks trackers at the **network/route level** before requests are even made. The other PETs work at higher levels (cookie blocking, list-based filtering, heuristic learning) which don't prevent the initial request — they just try to limit what the tracker can do after loading. This is why Brave is the only PET with a positive reduction in our measurement.
+
+- [Blocking Annoying and Privacy-Harming Cookie Consent Banners — Brave](https://brave.com/privacy-updates/21-blocking-cookie-notices/)
+
+**The core takeaway:** Extensions that don't block at the network level can alter page behavior in ways that trigger additional tracking in snapshot-based measurements, whether through timing changes, consent flow modifications, or anti-adblock counter-responses. This does not diminish their real-world effectiveness — it highlights the limitations of automated cookie-counting as a metric for PET evaluation.
+
 ## License
 
 MIT
