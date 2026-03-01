@@ -9,9 +9,11 @@ and dataset/provenance helpers.
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import tldextract
 
@@ -106,6 +108,25 @@ def get_dataset_layout(source_mode: str | None = None) -> DatasetLayout:
 def utc_now_iso() -> str:
     """Return a timezone-aware UTC timestamp."""
     return datetime.now(timezone.utc).isoformat()
+
+
+def redact_proxy_url(proxy_url: str | None) -> str | None:
+    """Return a provenance-safe proxy label without embedded credentials."""
+    if not proxy_url:
+        return None
+
+    try:
+        parsed = urlsplit(proxy_url)
+    except Exception:
+        return "configured"
+
+    if not parsed.scheme or not parsed.hostname:
+        return "configured"
+
+    host = parsed.hostname
+    if parsed.port is not None:
+        host = f"{host}:{parsed.port}"
+    return f"{parsed.scheme}://{host}"
 
 
 def generate_run_id(prefix: str | None = None) -> str:
@@ -227,7 +248,9 @@ HTML_REPORT_PATH = DEFAULT_LAYOUT.html_report
 # serve their GDPR-compliant cookie banners. Example:
 #   PROXY_URL = "socks5://user:pass@eu-proxy.example.com:1080"
 # Leave as None to connect directly (may not trigger EU cookie banners).
-PROXY_URL: str | None = None
+_CONFIG_PROXY_URL: str | None = None
+PROXY_URL: str | None = os.environ.get("AECCS_PROXY_URL") or _CONFIG_PROXY_URL
+PROXY_DISPLAY_URL: str | None = redact_proxy_url(PROXY_URL)
 
 # ── Browser / Crawl Settings ──────────────────────────────────────────────────
 

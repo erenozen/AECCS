@@ -40,6 +40,7 @@ from config import (
     PET_EFFECTIVENESS_FIELDS,
     PET_CONFIGURATIONS,
     PROCESSED_DIR,
+    PROXY_DISPLAY_URL,
     PROXY_URL,
     RAW_DIR,
     REQUEST_DELAY_RANGE,
@@ -163,7 +164,7 @@ def _build_skipped_result(
         build_provenance(
             source_mode=source_mode,
             run_id=run_id,
-            proxy_used=PROXY_URL,
+            proxy_used=PROXY_DISPLAY_URL,
             browser_name=result["browser_name"],
             browser_version=result["browser_version"],
             site_list_source=site_list_source,
@@ -292,7 +293,7 @@ async def crawl_with_pet(
         **build_provenance(
             source_mode=source_mode,
             run_id=run_id,
-            proxy_used=PROXY_URL,
+            proxy_used=PROXY_DISPLAY_URL,
             browser_name=pet_config.get("browser", ""),
             browser_version=None,
             site_list_source=site_list_source,
@@ -537,7 +538,7 @@ async def crawl_with_pet(
                 build_provenance(
                     source_mode=source_mode,
                     run_id=result.get("run_id"),
-                    proxy_used=PROXY_URL,
+                    proxy_used=PROXY_DISPLAY_URL,
                     browser_name=result.get("browser_name"),
                     browser_version=result.get("browser_version"),
                     site_list_source=site_list_source,
