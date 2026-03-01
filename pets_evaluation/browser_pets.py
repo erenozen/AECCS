@@ -449,11 +449,23 @@ async def crawl_with_pet(
 
                 async def _block_tracker(route):
                     nonlocal blocked_count
-                    blocked_count += 1
-                    await route.abort()
+                    from urllib.parse import urlparse
 
-                for bd in block_domains:
-                    await page.route(f"**/*{bd}*", _block_tracker)
+                    request = route.request
+                    parsed = urlparse(request.url)
+                    req_ext = TLD_EXTRACT(parsed.netloc.lower().lstrip("www."))
+                    req_rd = f"{req_ext.domain}.{req_ext.suffix}".lower()
+
+                    if req_rd in block_domains and req_rd != ".":
+                        blocked_count += 1
+                        await route.abort()
+                        return
+
+                    await route.continue_()
+
+                # A single catch-all route scales far better than registering one
+                # pattern per tracker domain.
+                await page.route("**/*", _block_tracker)
 
             # ── Navigate ──────────────────────────────────────────────
             start_ts = time.perf_counter()

@@ -163,13 +163,29 @@ def test_run_scoring_skips_failed_crawl_fixture(tmp_path: Path) -> None:
     }
     (raw_dir / "failed.example.json").write_text(json.dumps(failed_site), encoding="utf-8")
 
-    run_scoring(processed_dir=str(processed_dir), source_mode="real", output_path=str(processed_dir / "scores.csv"))
+    run_scoring(
+        raw_dir=str(raw_dir),
+        processed_dir=str(processed_dir),
+        source_mode="real",
+        output_path=str(processed_dir / "scores.csv"),
+    )
 
     assert not (processed_dir / "scores.csv").exists()
 
 
-def test_pet_runner_marks_unavailable_extension_as_skipped(tmp_path: Path) -> None:
+def test_pet_runner_marks_unavailable_extension_as_skipped(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     output_csv = tmp_path / "pets_effectiveness.csv"
+    monkeypatch.setattr(
+        "pets_evaluation.browser_pets.setup_pet_extensions",
+        lambda: {
+            "ublock-origin": None,
+            "privacy-badger": None,
+            "consent-o-matic": None,
+        },
+    )
 
     asyncio.run(
         run_pet_evaluation(

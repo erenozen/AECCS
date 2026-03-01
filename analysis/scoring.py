@@ -297,6 +297,7 @@ def compute_compliance_score(
 
 
 def run_scoring(
+    raw_dir: str | None = None,
     processed_dir: str | None = None,
     output_path: str | None = None,
     source_mode: str = DEFAULT_SOURCE_MODE,
@@ -309,10 +310,10 @@ def run_scoring(
     csv_path = Path(output_path) if output_path else p_dir / "compliance_scores.csv"
 
     # Find raw site JSONs
-    raw_dir = layout.raw_dir
-    raw_files = sorted(raw_dir.glob("*.json"))
+    data_dir = Path(raw_dir) if raw_dir else layout.raw_dir
+    raw_files = sorted(data_dir.glob("*.json"))
     if not raw_files:
-        print(f"[WARN] No raw JSON files found in {raw_dir}")
+        print(f"[WARN] No raw JSON files found in {data_dir}")
         return
 
     rows = []
@@ -441,6 +442,10 @@ def main() -> None:
         description="AECCS GDPR compliance scorer"
     )
     parser.add_argument(
+        "--raw-dir", type=str, default=None,
+        help=f"Raw data directory (default: {RAW_DIR})",
+    )
+    parser.add_argument(
         "--processed-dir", type=str, default=None,
         help=f"Processed data directory (default: {PROCESSED_DIR})",
     )
@@ -472,6 +477,8 @@ def main() -> None:
         p_dir.mkdir(parents=True, exist_ok=True)
 
         site_path = layout.raw_dir / f"{args.domain}.json"
+        if args.raw_dir:
+            site_path = Path(args.raw_dir) / f"{args.domain}.json"
         if not site_path.exists():
             print(f"[ERROR] {site_path} not found")
             return
@@ -507,6 +514,7 @@ def main() -> None:
         return
 
     run_scoring(
+        raw_dir=args.raw_dir,
         processed_dir=args.processed_dir,
         output_path=args.output,
         source_mode=args.source_mode,
