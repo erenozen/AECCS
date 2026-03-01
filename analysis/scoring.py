@@ -1,56 +1,466 @@
 """
 GDPR compliance scoring.
 
-Computes a 0–100 compliance score for each website based on six weighted
+Computes a 0-100 compliance score for each website based on six weighted
 criteria defined in ``config.COMPLIANCE_WEIGHTS``:
 
-1. no_pre_consent_trackers (0.25) — No tracking cookies/requests before
-   the user interacts with the consent banner.
-2. reject_option_available (0.20) — A visible "Reject All" button exists
-   in the consent banner.
-3. equal_accept_reject_effort (0.15) — Accept and reject buttons require
-   equal effort (same number of clicks, same visibility).
-4. no_dark_patterns (0.15) — No deceptive UI patterns detected in the
-   consent banner.
-5. post_reject_compliance (0.15) — After clicking "Reject All", tracking
-   cookies and requests are actually stopped.
-6. transparent_information (0.10) — The banner provides clear information
-   about cookie purposes and data processing.
+1. no_pre_consent_trackers (0.25)
+2. reject_option_available (0.20)
+3. equal_accept_reject_effort (0.15)
+4. no_dark_patterns (0.15)
+5. post_reject_compliance (0.15)
+6. transparent_information (0.10)
 """
 
 from __future__ import annotations
 
-from config import COMPLIANCE_WEIGHTS
+import argparse
+import json
+import re
+from pathlib import Path
+
+import pandas as pd
+
+from config import COMPLIANCE_WEIGHTS, PROCESSED_DIR, RAW_DIR
+
+# Grade thresholds
+_GRADES = [
+    (90, "A"),
+    (75, "B"),
+    (60, "C"),
+    (40, "D"),
+    (0, "F"),
+]
+
+# Privacy-policy link keywords (multilingual)
+_PRIVACY_LINK_KEYWORDS = [
+    "privacy policy", "privacy notice", "data protection",
+    "datenschutz", "datenschutzerklaerung", "datenschutzerklärung",
+    "politique de confidentialité", "politique de confidentialite",
+    "privacybeleid", "privacyverklaring",
+    "politica de privacidad", "política de privacidad",
+    "informativa sulla privacy",
+    "gizlilik politikası", "gizlilik politikasi",
+]
+
+# Purpose keywords for transparency check
+_PURPOSE_KEYWORDS = [
+    "analytics", "advertising", "personalization", "marketing",
+    "functional", "preferences", "statistics", "targeting",
+    "analyse", "werbung", "personalisierung",
+    "analytique", "publicité", "personnalisation",
+]
+
+
+def _score_grade(score: float) -> str:
+    for threshold, grade in _GRADES:
+        if score >= threshold:
+            return grade
+    return "F"
+
+
+def _count_pre_consent_trackers(
+    site_data: dict, classified_cookies: list[dict]
+) -> int:
+    """Count tracker cookies present before any consent interaction."""
+    pre = site_data.get("pre_consent") or {}
+    pre_cookie_keys = {
+        (c.get("name", ""), c.get("domain", ""))
+        for c in pre.get("cookies", [])
+    }
+    count = 0
+    for cc in classified_cookies:
+        key = (cc.get("name", ""), cc.get("domain", ""))
+        if key in pre_cookie_keys and cc.get("is_tracker"):
+            count += 1
+
+    # Also count third-party domains as tracker signals
+    tp_domains = pre.get("third_party_domains", [])
+    count += len(tp_domains)
+    return count
+
+
+def _score_no_pre_consent_trackers(
+    site_data: dict, classified_cookies: list[dict]
+) -> tuple[int, str]:
+    """Criterion 1: No pre-consent trackers."""
+    n = _count_pre_consent_trackers(site_data, classified_cookies)
+    if n == 0:
+        return 100, "No pre-consent trackers found"
+    elif n <= 2:
+        return 60, f"{n} pre-consent trackers found"
+    elif n <= 5:
+        return 30, f"{n} pre-consent trackers found"
+    elif n <= 10:
+        return 10, f"{n} pre-consent trackers found"
+    else:
+        return 0, f"{n} pre-consent trackers found"
+
+
+def _score_reject_option(site_data: dict) -> tuple[int, str]:
+    """Criterion 2: Reject option available."""
+    banner = site_data.get("consent_banner") or {}
+    if not banner.get("found"):
+        return 0, "No consent banner found"
+    if banner.get("has_reject_button"):
+        clicks = banner.get("reject_clicks_required", 1)
+        if clicks == 1:
+            return 100, "Direct reject button available"
+        elif clicks < 999:
+            return 50, f"Reject available via {clicks} clicks (through settings)"
+    return 0, "No reject option available"
+
+
+def _score_equal_effort(site_data: dict) -> tuple[int, str]:
+    """Criterion 3: Equal accept/reject effort."""
+    banner = site_data.get("consent_banner") or {}
+    a = banner.get("accept_clicks_required", 999)
+    r = banner.get("reject_clicks_required", 999)
+
+    if a == 999 and r == 999:
+        return 0, "No functional accept/reject buttons"
+    if r == 999:
+        return 0, "No reject option"
+
+    diff = r - a
+    if diff <= 0:
+        return 100, f"Equal clicks: {a} vs {r}"
+    elif diff == 1:
+        return 50, f"Reject requires 1 extra click ({a} vs {r})"
+    else:
+        return 20, f"Reject requires {diff} extra clicks ({a} vs {r})"
+
+
+def _score_no_dark_patterns(dark_pattern_data: dict) -> tuple[int, str]:
+    """Criterion 4: No dark patterns."""
+    count = dark_pattern_data.get("dark_pattern_count", 0)
+    detected = dark_pattern_data.get("dark_patterns_detected", [])
+    names_str = ", ".join(detected) if detected else "none"
+    if count == 0:
+        return 100, "No dark patterns detected"
+    elif count == 1:
+        return 60, f"1 dark pattern detected: {names_str}"
+    elif count == 2:
+        return 30, f"2 dark patterns detected: {names_str}"
+    else:
+        return 0, f"{count} dark patterns detected: {names_str}"
+
+
+def _score_post_reject_compliance(
+    site_data: dict, classified_cookies: list[dict]
+) -> tuple[int, str]:
+    """Criterion 5: Post-reject compliance."""
+    banner = site_data.get("consent_banner") or {}
+    post_reject = site_data.get("post_consent_reject")
+    post_accept = site_data.get("post_consent_accept")
+    pre = site_data.get("pre_consent") or {}
+
+    if not banner.get("has_reject_button", False):
+        return 0, "No reject option available"
+
+    if not post_reject or not isinstance(post_reject, dict):
+        return 0, "No post-reject data available"
+
+    if not post_reject.get("reject_successful", False) and not post_reject.get("reject_button_found", False):
+        return 0, "Reject was not successful"
+
+    # Compare tracker counts
+    pre_tp = set(pre.get("third_party_domains", []))
+    reject_tp = set(post_reject.get("third_party_domains", []))
+    new_tp_reject = post_reject.get("new_third_party_domains_after_interaction", [])
+    new_cookies_reject = post_reject.get("new_cookies_after_interaction", [])
+
+    # Count new tracker cookies after rejection
+    new_tracker_count = len(new_tp_reject) + len(new_cookies_reject)
+
+    if new_tracker_count == 0 and len(reject_tp) <= len(pre_tp):
+        return 100, "No new trackers after rejection"
+
+    # Compare with post-accept
+    if post_accept and isinstance(post_accept, dict):
+        accept_tp = set(post_accept.get("third_party_domains", []))
+        if len(reject_tp) < len(accept_tp):
+            return 50, "Some new trackers after reject, but fewer than accept"
+        else:
+            return 0, "Post-reject tracker count same or worse than post-accept"
+
+    # No post-accept data for comparison, but new trackers appeared
+    if new_tracker_count > 0:
+        return 30, f"{new_tracker_count} new tracker signals after rejection"
+
+    return 50, "Partial compliance after rejection"
+
+
+def _score_transparent_information(site_data: dict) -> tuple[int, str]:
+    """Criterion 6: Transparent information."""
+    banner = site_data.get("consent_banner") or {}
+    text = (banner.get("text_content") or "").lower()
+    html = (banner.get("html") or "").lower()
+
+    if not text and not html:
+        return 0, "No banner text available"
+
+    score = 0
+    details = []
+
+    # Mentions specific purposes?
+    purpose_found = any(kw in text for kw in _PURPOSE_KEYWORDS)
+    if purpose_found:
+        score += 30
+        details.append("mentions purposes")
+
+    # Mentions vendor names?
+    vendor_keywords = ["google", "facebook", "meta", "analytics", "advertisement"]
+    vendor_found = any(kw in text for kw in vendor_keywords)
+    if vendor_found:
+        score += 30
+        details.append("mentions vendors")
+
+    # Privacy policy link?
+    has_pp_link = False
+    if html:
+        for kw in _PRIVACY_LINK_KEYWORDS:
+            if kw in html:
+                has_pp_link = True
+                break
+    if has_pp_link:
+        score += 20
+        details.append("privacy policy link")
+
+    # Clear language (short sentences)?
+    if text:
+        sentences = re.split(r"[.!?]+", text)
+        sentences = [s.strip() for s in sentences if s.strip()]
+        if sentences:
+            avg_words = sum(len(s.split()) for s in sentences) / len(sentences)
+            if avg_words < 30:
+                score += 20
+                details.append("clear language")
+
+    return min(score, 100), "; ".join(details) if details else "No transparency indicators"
+
+
+# ── Public API ────────────────────────────────────────────────────────────────
 
 
 def compute_compliance_score(
-    site_data: dict, dark_pattern_data: dict, classified_cookies: list[dict]
+    site_data: dict,
+    dark_pattern_data: dict,
+    classified_cookies: list[dict],
 ) -> dict:
     """Compute the GDPR compliance score for a single website.
 
-    Evaluates each of the six criteria, applies the configured weights,
-    and produces a total score between 0 and 100.
-
-    Args:
-        site_data: Merged crawl data for the site (all three interaction modes).
-        dark_pattern_data: Dark pattern detection results for the site's banner.
-        classified_cookies: List of classified cookies for the site.
-
-    Returns:
-        A dict with per-criterion scores (0.0–1.0), the weighted total (0–100),
-        and a human-readable compliance level (e.g., "Good", "Poor").
+    Returns a dict with per-criterion scores, the weighted total (0-100),
+    and a letter grade.
     """
-    raise NotImplementedError("Implemented in Phase 3")
+    criteria_funcs = {
+        "no_pre_consent_trackers": lambda: _score_no_pre_consent_trackers(site_data, classified_cookies),
+        "reject_option_available": lambda: _score_reject_option(site_data),
+        "equal_accept_reject_effort": lambda: _score_equal_effort(site_data),
+        "no_dark_patterns": lambda: _score_no_dark_patterns(dark_pattern_data),
+        "post_reject_compliance": lambda: _score_post_reject_compliance(site_data, classified_cookies),
+        "transparent_information": lambda: _score_transparent_information(site_data),
+    }
+
+    criterion_scores = {}
+    overall = 0.0
+
+    for criterion_name, func in criteria_funcs.items():
+        raw_score, details = func()
+        weight = COMPLIANCE_WEIGHTS.get(criterion_name, 0.0)
+        weighted = raw_score * weight
+        overall += weighted
+        criterion_scores[criterion_name] = {
+            "score": raw_score,
+            "weight": weight,
+            "weighted_score": round(weighted, 2),
+            "details": details,
+        }
+
+    overall = round(overall, 2)
+
+    return {
+        "domain": site_data.get("domain", ""),
+        "category": site_data.get("category", ""),
+        "overall_score": overall,
+        "criterion_scores": criterion_scores,
+        "grade": _score_grade(overall),
+    }
 
 
-def run_scoring(processed_dir: str, output_path: str) -> None:
-    """Batch-score all websites and write results to a CSV file.
+def run_scoring(
+    processed_dir: str | None = None,
+    output_path: str | None = None,
+) -> None:
+    """Batch-score all websites and write results."""
+    p_dir = Path(processed_dir) if processed_dir else PROCESSED_DIR
+    p_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = Path(output_path) if output_path else p_dir / "compliance_scores.csv"
 
-    Reads classified cookies and dark pattern results from ``processed_dir``,
-    computes compliance scores, and writes ``compliance_scores.csv``.
+    # Find raw site JSONs
+    raw_dir = RAW_DIR
+    raw_files = sorted(raw_dir.glob("*.json"))
+    if not raw_files:
+        print(f"[WARN] No raw JSON files found in {raw_dir}")
+        return
 
-    Args:
-        processed_dir: Directory containing processed/classified site data.
-        output_path: Path to write the compliance scores CSV.
-    """
-    raise NotImplementedError("Implemented in Phase 3")
+    rows = []
+    for rf in raw_files:
+        domain = rf.stem
+        try:
+            site_data = json.loads(rf.read_text(encoding="utf-8"))
+        except Exception as exc:
+            print(f"[ERROR] {domain}: cannot read raw data: {exc}")
+            continue
+
+        if not site_data.get("success", False):
+            print(f"[SKIP] {domain}: crawl was not successful")
+            continue
+
+        # Load classified cookies
+        cls_path = p_dir / f"{domain}_classified.json"
+        classified_cookies = []
+        if cls_path.exists():
+            try:
+                classified_cookies = json.loads(cls_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+
+        # Load dark pattern data
+        dp_path = p_dir / f"{domain}_dark_patterns.json"
+        dark_pattern_data: dict = {"dark_pattern_count": 0, "dark_patterns_detected": []}
+        if dp_path.exists():
+            try:
+                dark_pattern_data = json.loads(dp_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+
+        # Compute score
+        result = compute_compliance_score(site_data, dark_pattern_data, classified_cookies)
+
+        # Save detailed per-site JSON
+        score_json_path = p_dir / f"{domain}_score.json"
+        score_json_path.write_text(
+            json.dumps(result, indent=2, default=str), encoding="utf-8"
+        )
+
+        # Build CSV row
+        cs = result["criterion_scores"]
+        pre = site_data.get("pre_consent") or {}
+        row = {
+            "domain": domain,
+            "category": site_data.get("category", ""),
+            "region": site_data.get("region", ""),
+            "rank": site_data.get("rank", 0),
+            "overall_score": result["overall_score"],
+            "grade": result["grade"],
+            "no_pre_consent_trackers": cs["no_pre_consent_trackers"]["score"],
+            "reject_option_available": cs["reject_option_available"]["score"],
+            "equal_accept_reject_effort": cs["equal_accept_reject_effort"]["score"],
+            "no_dark_patterns": cs["no_dark_patterns"]["score"],
+            "post_reject_compliance": cs["post_reject_compliance"]["score"],
+            "transparent_information": cs["transparent_information"]["score"],
+            "cmp_detected": site_data.get("cmp_detected", ""),
+            "dark_pattern_count": dark_pattern_data.get("dark_pattern_count", 0),
+            "pre_consent_tracker_count": pre.get("total_third_party_domains", 0),
+            "total_pre_consent_cookies": pre.get("total_cookies", 0),
+        }
+        rows.append(row)
+        print(f"[OK] {domain}: {result['overall_score']:.1f} ({result['grade']})")
+
+    # Write CSV
+    if rows:
+        df = pd.DataFrame(rows)
+        df.to_csv(csv_path, index=False)
+        print(f"\nScores saved to {csv_path}")
+
+    # Summary
+    if rows:
+        scores = [r["overall_score"] for r in rows]
+        avg = sum(scores) / len(scores)
+        grades = [r["grade"] for r in rows]
+
+        print(f"\n{'=' * 60}")
+        print(f"Scoring complete: {len(rows)} sites scored")
+        print(f"  Average score: {avg:.1f}")
+        print(f"  Score range:   {min(scores):.1f} - {max(scores):.1f}")
+        print(f"\nGrade distribution:")
+        for g in ["A", "B", "C", "D", "F"]:
+            cnt = grades.count(g)
+            pct = cnt / len(grades) * 100 if grades else 0
+            print(f"  {g}: {cnt} ({pct:.1f}%)")
+        print(f"\nBest 5:")
+        sorted_rows = sorted(rows, key=lambda r: r["overall_score"], reverse=True)
+        for r in sorted_rows[:5]:
+            print(f"  {r['domain']:30s} {r['overall_score']:6.1f} ({r['grade']})")
+        print(f"\nWorst 5:")
+        for r in sorted_rows[-5:]:
+            print(f"  {r['domain']:30s} {r['overall_score']:6.1f} ({r['grade']})")
+
+        # Average by category
+        categories: dict[str, list[float]] = {}
+        for r in rows:
+            cat = r.get("category", "") or "Unknown"
+            categories.setdefault(cat, []).append(r["overall_score"])
+        if categories:
+            print(f"\nAverage by category:")
+            for cat, sc in sorted(categories.items()):
+                print(f"  {cat:20s} {sum(sc)/len(sc):6.1f} (n={len(sc)})")
+        print(f"{'=' * 60}")
+
+
+# ── CLI Entry Point ──────────────────────────────────────────────────────────
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="AECCS GDPR compliance scorer"
+    )
+    parser.add_argument(
+        "--processed-dir", type=str, default=None,
+        help=f"Processed data directory (default: {PROCESSED_DIR})",
+    )
+    parser.add_argument(
+        "--output", type=str, default=None,
+        help="Output CSV path (default: PROCESSED_DIR/compliance_scores.csv)",
+    )
+    parser.add_argument(
+        "--domain", type=str, default=None,
+        help="Score a single domain only",
+    )
+    args = parser.parse_args()
+
+    if args.domain:
+        p_dir = Path(args.processed_dir) if args.processed_dir else PROCESSED_DIR
+        p_dir.mkdir(parents=True, exist_ok=True)
+
+        site_path = RAW_DIR / f"{args.domain}.json"
+        if not site_path.exists():
+            print(f"[ERROR] {site_path} not found")
+            return
+        site_data = json.loads(site_path.read_text(encoding="utf-8"))
+
+        cls_path = p_dir / f"{args.domain}_classified.json"
+        classified = []
+        if cls_path.exists():
+            classified = json.loads(cls_path.read_text(encoding="utf-8"))
+
+        dp_path = p_dir / f"{args.domain}_dark_patterns.json"
+        dp_data: dict = {"dark_pattern_count": 0, "dark_patterns_detected": []}
+        if dp_path.exists():
+            dp_data = json.loads(dp_path.read_text(encoding="utf-8"))
+
+        result = compute_compliance_score(site_data, dp_data, classified)
+
+        out = p_dir / f"{args.domain}_score.json"
+        out.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
+        print(f"[OK] {args.domain}: {result['overall_score']:.1f} ({result['grade']})")
+        for cname, cval in result["criterion_scores"].items():
+            print(f"  {cname:35s} {cval['score']:>3d} x {cval['weight']:.2f} = {cval['weighted_score']:5.1f}  ({cval['details']})")
+        return
+
+    run_scoring(processed_dir=args.processed_dir, output_path=args.output)
+
+
+if __name__ == "__main__":
+    main()
