@@ -121,159 +121,383 @@
     <div class="title-block">
       <h1>AECCS: Assessing the Effectiveness of Cookie Consent Systems</h1>
       <p class="authors">Ahmed Hatem Haikal, Atakan Keser, Deniz Sahin, Seyhmus Eren Ozen, Moin Khan</p>
-      <p class="meta">CS475 Privacy-Enhancing Technologies · Final report template aligned with the current repository state</p>
+      <p class="meta">CS475 Privacy-Enhancing Technologies &middot; Final Report &middot; 1 March 2026</p>
     </div>
 
     <div class="columns">
       <h2>Abstract</h2>
       <p>
-        AECCS is an implementation-focused measurement system for studying cookie consent
-        systems, GDPR-oriented compliance signals, dark patterns, and privacy-enhancing
-        technologies (PETs). The repository now contains a provenance-aware pipeline that
-        separates synthetic development data from the final real-study dataset. The current
-        implementation supports automated crawling, tracker classification, dark-pattern
-        detection, compliance scoring, browser PET evaluation, CMP comparison, differential
-        privacy reporting, and report generation. The remaining gap is empirical rather than
-        architectural: the real crawl and real PET experiments must be executed under the
-        <span class="mono">data/real/</span> tree before final claims are made.
+        We present AECCS, an automated measurement system that evaluates GDPR cookie consent
+        compliance, dark pattern prevalence, and privacy-enhancing technology (PET) effectiveness
+        across 100 popular European and international websites. Our pipeline crawls each site in
+        three consent states (no interaction, accept all, reject all), classifies trackers using
+        EasyList/EasyPrivacy filter lists, detects seven types of dark patterns in consent banners,
+        and computes per-site compliance scores (0&ndash;100). We further evaluate seven browser-level
+        PETs across all 100 sites (700 measurements), rank consent management platforms (CMPs) as
+        privacy tools, and apply differential privacy mechanisms to protect aggregate statistics.
+        Our findings reveal that 89.7% of sites deploy pre-consent trackers, 82% employ at least
+        one dark pattern, and the average compliance score is just 33.1/100. Among PETs, Brave
+        Shields provides the strongest tracker reduction (14.7%), while OneTrust-managed sites
+        show the highest CMP effectiveness (PET score 33.4). We recommend an epsilon of 1.0 for
+        differentially private publication of aggregate compliance statistics.
       </p>
 
-      <div class="callout">
-        The metrics presented below are from the completed 100-site real study executed on
-        1 March 2026 under run ID <span class="mono">real-study-20260301-final</span>, with
-        EU geolocation via Proton VPN (Netherlands). The synthetic dataset in
-        <span class="mono">data/mock/</span> remains available for pipeline validation.
-      </div>
-
-      <h2>1. Problem Statement</h2>
+      <h2>1. Introduction</h2>
       <p>
-        Cookie consent systems are intended to provide meaningful user control over non-essential
-        tracking. Prior work and regulatory guidance suggest that many banners either manipulate
-        users toward acceptance or fail to technically enforce rejection. The core question of
-        this project is whether consent systems protect privacy in practice and, when they do not,
-        whether PETs reduce user exposure.
+        Under the EU's General Data Protection Regulation (GDPR), websites must obtain explicit,
+        informed consent before placing non-essential cookies. Users should have clear accept/reject
+        choices, no manipulative design patterns, and no tracking activated before consent is given.
+        In practice, enforcement is uneven and many sites bypass these requirements through dark
+        patterns, missing reject options, or pre-consent tracker deployment.
+      </p>
+      <p>
+        This project addresses the question: <em>Do cookie consent systems on popular websites
+        effectively protect user privacy under GDPR requirements?</em> We built an automated
+        pipeline that crawls real websites from an EU IP address, measures compliance signals,
+        evaluates PET countermeasures, and produces actionable findings.
       </p>
 
       <h2>2. Related Work</h2>
       <p>
-        AECCS is grounded in three main strands of prior work: studies of dark patterns in
-        consent banners, studies of enforcement failures after rejection, and large-scale
-        automated cookie-consent measurement. A companion literature review is included in
-        <span class="mono">docs/literature_review.md</span>.
+        AECCS builds on three strands of prior work. Nouwens et al. [1] found that only 11.8% of
+        consent banners met minimal GDPR requirements, with dark patterns actively steering users
+        toward acceptance. Matte et al. [2] demonstrated that many CMPs store positive consent
+        before users interact with the banner. Bollinger et al. [3] developed CookieBlock, an
+        automated system for classifying and blocking non-essential cookies. Our work extends these
+        by combining compliance measurement, dark pattern detection, and PET evaluation into a
+        single automated pipeline, and by applying differential privacy to aggregate reporting.
       </p>
 
-      <h3>Key references</h3>
-      <ul>
-        <li>Nouwens et al., <em>Dark Patterns after the GDPR</em></li>
-        <li>Matte et al., <em>Do Cookie Banners Respect My Choice?</em></li>
-        <li>Bollinger et al., <em>Automating Cookie Consent and GDPR Violation Detection</em></li>
-        <li>GDPR Regulation (EU) 2016/679</li>
-        <li>CNIL cookie and tracker guidance</li>
-      </ul>
+      <h2>3. Methodology</h2>
 
-      <h2>3. System Overview</h2>
+      <h3>3.1 Website Selection</h3>
       <p>
-        The implemented pipeline follows the proposal closely. Each target site is visited in
-        three states: no interaction, accept all, and reject all. Raw crawl outputs are then
-        processed into tracker classifications, dark-pattern findings, compliance scores,
-        aggregate statistics, PET comparisons, and report artifacts.
+        We compiled a list of 100 websites across 11 categories: news (20), e-commerce (15),
+        social media (10), entertainment (9), education (9), travel (8), tech (8), finance (6),
+        government (5), marketplace (5), and employment (2). Sites were selected from European
+        and international rankings, focusing on EU-targeted domains.
+      </p>
+
+      <h3>3.2 Data Collection</h3>
+      <p>
+        We used Playwright for headless browser automation with Proton VPN (Netherlands) for EU
+        geolocation. Each site was visited in three states: (1) no interaction with the consent
+        banner, (2) clicking "Accept All," and (3) clicking "Reject All." For each state we
+        recorded all cookies, HTTP requests, third-party domains, and consent banner HTML.
+        Anti-bot measures were mitigated with 8 rotating user agents, randomized 2&ndash;5 second
+        delays, and stealth mode.
+      </p>
+
+      <h3>3.3 Analysis Pipeline</h3>
+      <p>
+        The pipeline consists of 11 automated stages: crawl, classify, dark pattern detection,
+        scoring, metrics, PET evaluation, differential privacy reporting, CMP analysis, unified
+        comparison, visualization (11 figures), and HTML report generation. All stages are
+        orchestrated by a unified pipeline runner with manifest-based tracking for reproducibility.
       </p>
 
       <table>
         <thead>
-          <tr>
-            <th>Module</th>
-            <th>Status</th>
-          </tr>
+          <tr><th>Module</th><th>Function</th><th>Status</th></tr>
         </thead>
         <tbody>
-          <tr><td>Crawler</td><td>Implemented</td></tr>
-          <tr><td>Tracker classification</td><td>Implemented</td></tr>
-          <tr><td>Dark-pattern detection</td><td>Implemented</td></tr>
-          <tr><td>Compliance scoring</td><td>Implemented</td></tr>
-          <tr><td>Aggregate metrics</td><td>Implemented</td></tr>
-          <tr><td>Browser PET evaluation</td><td>Implemented, awaiting real runs</td></tr>
-          <tr><td>CMP analysis</td><td>Implemented</td></tr>
-          <tr><td>Differential privacy reporting</td><td>Implemented</td></tr>
-          <tr><td>Visualization and HTML reporting</td><td>Implemented</td></tr>
+          <tr><td>Crawler</td><td>Playwright-based 3-state crawling</td><td>Completed</td></tr>
+          <tr><td>Classifier</td><td>EasyList/EasyPrivacy/Disconnect matching</td><td>Completed</td></tr>
+          <tr><td>Dark Patterns</td><td>7 pattern types via HTML analysis</td><td>Completed</td></tr>
+          <tr><td>Scoring</td><td>6-criteria weighted compliance (0&ndash;100)</td><td>Completed</td></tr>
+          <tr><td>Metrics</td><td>Aggregate statistics computation</td><td>Completed</td></tr>
+          <tr><td>Browser PETs</td><td>7 PET configs &times; 100 sites</td><td>Completed</td></tr>
+          <tr><td>DP Reporting</td><td>Laplace/Gaussian/Randomized Response</td><td>Completed</td></tr>
+          <tr><td>CMP Analysis</td><td>CMP effectiveness ranking</td><td>Completed</td></tr>
+          <tr><td>Visualization</td><td>11 publication-quality figures</td><td>Completed</td></tr>
         </tbody>
       </table>
 
-      <h2>4. Data Hygiene and Reproducibility</h2>
+      <h3>3.4 Compliance Scoring</h3>
       <p>
-        A major repository milestone in the current phase was separating historical mixed outputs
-        from the active datasets. New runs now target <span class="mono">data/mock/</span> or
-        <span class="mono">data/real/</span>, while older root-level artifacts have been quarantined
-        under <span class="mono">data/legacy/</span> and <span class="mono">reporting/legacy/</span>.
-      </p>
-      <p>
-        Raw and processed artifacts now carry provenance fields including source mode, run ID,
-        generation timestamp, browser information, proxy state, and study-list origin. The report
-        generator rejects mixed processed inputs to avoid blending mock and real findings.
+        Each site receives a score from 0 to 100 based on six weighted criteria: no pre-consent
+        trackers (25%), reject option available (20%), equal accept/reject effort (15%), no dark
+        patterns (15%), post-reject compliance (15%), and transparent information (10%). Letter
+        grades are assigned: A (90+), B (75+), C (60+), D (40+), F (&lt;40).
       </p>
 
-      <h2>5. Real-Study Findings (100 Sites)</h2>
+      <h2>4. Results</h2>
+
+      <h3>4.1 Pre-Consent Tracker Violations</h3>
       <p>
-        The real study crawled 100 European and international websites on 1 March 2026 using
-        Proton VPN (Netherlands) for EU geolocation. 97 sites were successfully crawled; 3 failed
-        due to transient HTTP/2 or timeout errors. The PET evaluation covered 7 configurations
-        across all 100 sites (700 measurements total, 681 successful).
+        Of 97 successfully crawled sites, 87 (89.7%) deployed trackers before any user interaction
+        with the consent banner. The average site loaded 6.7 pre-consent trackers (median: 5).
+        This represents a clear violation of GDPR's requirement for prior consent.
+      </p>
+      <p>
+        Violation rates varied by category. Entertainment, finance, travel, and employment sites
+        showed 100% violation rates. News sites averaged the highest tracker density (11.7 per
+        site), followed by education (10.9) and travel (8.4). Government sites had the lowest
+        average (1.2 trackers), though 80% still deployed at least one.
       </p>
 
+      <h3>4.2 Tracker Ecosystem</h3>
+      <p>
+        We identified 403 unique tracker cookies across 93 tracker domains. By category, 54.3%
+        were analytics trackers, 26.3% advertising, 14.6% social, 4.2% fingerprinting, and 0.5%
+        functional. The dominant vendors were:
+      </p>
       <table>
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th>Real-study value</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Vendor</th><th>Sites present</th><th>Share</th></tr></thead>
         <tbody>
-          <tr><td>Pre-consent tracker violations</td><td>89.7%</td></tr>
-          <tr><td>Sites with any dark pattern</td><td>82.0%</td></tr>
-          <tr><td>Average compliance score</td><td>33.1 / 100 (median 24.0)</td></tr>
-          <tr><td>Best browser PET</td><td>Brave Shields (14.7% average tracker reduction)</td></tr>
-          <tr><td>Best CMP</td><td>OneTrust (PET score 33.4)</td></tr>
-          <tr><td>Recommended DP epsilon</td><td>1.0</td></tr>
+          <tr><td>Google</td><td>31</td><td>32.0%</td></tr>
+          <tr><td>Meta</td><td>10</td><td>10.3%</td></tr>
+          <tr><td>Adobe</td><td>6</td><td>6.2%</td></tr>
+          <tr><td>Amazon</td><td>6</td><td>6.2%</td></tr>
+          <tr><td>LinkedIn</td><td>6</td><td>6.2%</td></tr>
+          <tr><td>Criteo</td><td>4</td><td>4.1%</td></tr>
+          <tr><td>Hotjar / X / TikTok</td><td>3 each</td><td>3.1% each</td></tr>
         </tbody>
       </table>
 
-      <h2>6. Proposal Coverage</h2>
+      <h3>4.3 Consent Banner and Reject Effectiveness</h3>
       <p>
-        The original proposal committed to a real-site automated measurement study over 100 to
-        200 websites. The repository now includes a 100-domain seed list in
-        <span class="mono">data/websites.csv</span>, which brings the project back in line with the
-        proposal at the planning level. What remains is execution of the final study under EU-like
-        browsing conditions and regeneration of all figures and report outputs from real data only.
+        72 of 97 sites displayed a consent banner. Of these, only 31 (43.1%) provided a visible
+        "Reject All" button. 28 sites (38.9%) offered equal click effort for accept and reject.
+        Critically, clicking "Reject All" reduced tracker counts on only 7.2% of sites and
+        eliminated all trackers on just 9.3%. On average, sites retained 7.0 trackers after
+        rejection compared to 6.7 before interaction&mdash;meaning rejection was largely ineffective.
       </p>
 
-      <h2>7. Completed Work</h2>
+      <h3>4.4 Dark Patterns</h3>
+      <p>
+        82 sites (82.0%) employed at least one dark pattern in their consent interface. The
+        breakdown by type:
+      </p>
+      <table>
+        <thead><tr><th>Dark Pattern</th><th>Sites</th><th>Prevalence</th></tr></thead>
+        <tbody>
+          <tr><td>Missing reject option</td><td>69</td><td>69.0%</td></tr>
+          <tr><td>Multi-layer rejection</td><td>14</td><td>14.0%</td></tr>
+          <tr><td>Asymmetric buttons</td><td>7</td><td>7.0%</td></tr>
+          <tr><td>Hidden reject</td><td>6</td><td>6.0%</td></tr>
+          <tr><td>Confusing language</td><td>5</td><td>5.0%</td></tr>
+          <tr><td>Forced action</td><td>1</td><td>1.0%</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The dominant dark pattern is the complete absence of a reject button (69%), forcing users
+        to navigate through settings menus to decline. Multi-layer rejection, where rejecting
+        requires more clicks than accepting, affected 14% of sites.
+      </p>
+
+      <h3>4.5 Compliance Scores</h3>
+      <p>
+        The average compliance score was 33.1/100 (median: 24.0, std dev: 21.7). The score
+        range was 9.0 to 75.0&mdash;notably, no site achieved an A grade (&ge;90).
+      </p>
+      <table>
+        <thead><tr><th>Grade</th><th>Score range</th><th>Count</th><th>Percentage</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>90&ndash;100</td><td>0</td><td>0.0%</td></tr>
+          <tr><td>B</td><td>75&ndash;89</td><td>1</td><td>1.0%</td></tr>
+          <tr><td>C</td><td>60&ndash;74</td><td>18</td><td>18.6%</td></tr>
+          <tr><td>D</td><td>40&ndash;59</td><td>13</td><td>13.4%</td></tr>
+          <tr><td>F</td><td>0&ndash;39</td><td>65</td><td>67.0%</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Two-thirds of sites received a failing grade. By category, finance (47.8) and entertainment
+        (47.0) scored highest, while marketplace (20.4) and news (23.3) scored lowest:
+      </p>
+      <table>
+        <thead><tr><th>Category</th><th>Avg Score</th><th>Median</th></tr></thead>
+        <tbody>
+          <tr><td>Finance</td><td>47.8</td><td>60.0</td></tr>
+          <tr><td>Entertainment</td><td>47.0</td><td>60.5</td></tr>
+          <tr><td>Technology</td><td>44.6</td><td>46.2</td></tr>
+          <tr><td>Government</td><td>35.9</td><td>24.5</td></tr>
+          <tr><td>Education</td><td>35.7</td><td>34.0</td></tr>
+          <tr><td>Employment</td><td>35.5</td><td>35.5</td></tr>
+          <tr><td>E-Commerce</td><td>32.9</td><td>24.0</td></tr>
+          <tr><td>Social Media</td><td>32.4</td><td>29.5</td></tr>
+          <tr><td>Travel</td><td>23.4</td><td>14.0</td></tr>
+          <tr><td>News</td><td>23.3</td><td>14.8</td></tr>
+          <tr><td>Marketplace</td><td>20.4</td><td>19.0</td></tr>
+        </tbody>
+      </table>
+
+      <h3>4.6 CMP Distribution</h3>
+      <p>
+        We identified six commercial CMP providers across the 100 sites:
+      </p>
+      <table>
+        <thead><tr><th>CMP</th><th>Sites</th></tr></thead>
+        <tbody>
+          <tr><td>Custom/Unknown</td><td>43</td></tr>
+          <tr><td>OneTrust</td><td>26</td></tr>
+          <tr><td>TrustArc</td><td>17</td></tr>
+          <tr><td>Cookiebot</td><td>6</td></tr>
+          <tr><td>Didomi</td><td>3</td></tr>
+          <tr><td>Quantcast</td><td>1</td></tr>
+          <tr><td>Usercentrics</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p>
+        43% of sites use custom or unidentifiable consent implementations rather than established
+        CMP providers, which correlates with lower compliance scores and fewer reject options.
+      </p>
+
+      <h2>5. PET Evaluation</h2>
+
+      <h3>5.1 Browser PET Comparison</h3>
+      <p>
+        We tested 7 PET configurations across all 100 sites (700 total measurements, 681 successful).
+        Each configuration was evaluated by measuring tracker cookies, tracker domains, and
+        third-party requests compared to the baseline (no PET).
+      </p>
+      <table>
+        <thead><tr><th>Rank</th><th>PET</th><th>Avg Tracker Domains</th><th>Avg Tracker Cookies</th><th>Reduction %</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Brave Shields</td><td>2.0</td><td>0.1</td><td>14.7%</td></tr>
+          <tr><td>2</td><td>Firefox ETP Strict</td><td>3.4</td><td>1.4</td><td>&minus;8.7%</td></tr>
+          <tr><td>3</td><td>uBlock Origin</td><td>3.3</td><td>1.2</td><td>&minus;13.7%</td></tr>
+          <tr><td>4</td><td>Firefox ETP Standard</td><td>3.4</td><td>1.4</td><td>&minus;16.3%</td></tr>
+          <tr><td>5</td><td>Consent-O-Matic</td><td>3.4</td><td>1.3</td><td>&minus;17.7%</td></tr>
+          <tr><td>6</td><td>Privacy Badger</td><td>3.4</td><td>1.3</td><td>&minus;18.4%</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Brave Shields was the only PET that achieved a positive average tracker reduction, primarily
+        through aggressive route-level blocking of known tracker domains. The negative reduction
+        percentages for other PETs indicate that these tools did not substantially reduce tracker
+        exposure relative to baseline in this measurement configuration.
+      </p>
+
+      <h3>5.2 CMP Effectiveness as Privacy Tools</h3>
+      <p>
+        We ranked CMPs as privacy tools using a composite PET score (30% compliance score, 25%
+        reject effectiveness, 20% reject availability, 15% inverse dark patterns, 10% tracker
+        reduction):
+      </p>
+      <table>
+        <thead><tr><th>CMP</th><th>PET Score</th><th>Compliance</th><th>Reject Available</th></tr></thead>
+        <tbody>
+          <tr><td>OneTrust</td><td>33.4</td><td>45.1</td><td>61.5%</td></tr>
+          <tr><td>TrustArc</td><td>24.1</td><td>37.2</td><td>47.1%</td></tr>
+          <tr><td>No CMP Detected</td><td>14.9</td><td>28.3</td><td>15.2%</td></tr>
+          <tr><td>Cookiebot</td><td>5.6</td><td>18.8</td><td>0.0%</td></tr>
+          <tr><td>Usercentrics</td><td>5.0</td><td>16.5</td><td>0.0%</td></tr>
+          <tr><td>Didomi</td><td>4.0</td><td>14.0</td><td>0.0%</td></tr>
+          <tr><td>Quantcast</td><td>2.2</td><td>18.5</td><td>0.0%</td></tr>
+        </tbody>
+      </table>
+      <p>
+        OneTrust-managed sites showed the highest compliance and the most frequent presence of a
+        reject button (61.5%). Cookiebot, Usercentrics, Didomi, and Quantcast sites in our sample
+        had 0% reject button availability, resulting in very low PET scores.
+      </p>
+
+      <h3>5.3 Best PET+CMP Combinations</h3>
+      <p>
+        The most effective combination was Brave Shields on a site using OneTrust, with an estimated
+        43.2% combined effectiveness. The top 5 combinations:
+      </p>
+      <table>
+        <thead><tr><th>Browser PET</th><th>CMP</th><th>Est. Effectiveness</th></tr></thead>
+        <tbody>
+          <tr><td>Brave Shields</td><td>OneTrust</td><td>43.2%</td></tr>
+          <tr><td>Brave Shields</td><td>TrustArc</td><td>35.3%</td></tr>
+          <tr><td>Firefox ETP Strict</td><td>OneTrust</td><td>27.6%</td></tr>
+          <tr><td>Brave Shields</td><td>No CMP</td><td>27.4%</td></tr>
+          <tr><td>uBlock Origin</td><td>OneTrust</td><td>24.3%</td></tr>
+        </tbody>
+      </table>
+
+      <h2>6. Differential Privacy Analysis</h2>
+      <p>
+        To enable privacy-preserving publication of aggregate compliance statistics, we applied
+        three DP mechanisms: Laplace (for numeric queries), Gaussian (with delta parameter), and
+        Randomized Response (for binary attributes). We tested epsilon values from 0.1 to 10.0
+        over 100 trials each across 38 aggregate queries.
+      </p>
+      <table>
+        <thead><tr><th>Epsilon</th><th>Avg MAE</th><th>Utility</th></tr></thead>
+        <tbody>
+          <tr><td>0.1</td><td>25.10</td><td>Low (high privacy)</td></tr>
+          <tr><td>0.5</td><td>12.25</td><td>Moderate</td></tr>
+          <tr><td>1.0</td><td>7.23</td><td>Balanced (recommended)</td></tr>
+          <tr><td>2.0</td><td>3.95</td><td>Good utility</td></tr>
+          <tr><td>5.0</td><td>1.76</td><td>High utility</td></tr>
+          <tr><td>10.0</td><td>0.86</td><td>Near-exact</td></tr>
+        </tbody>
+      </table>
+      <p>
+        We recommend epsilon = 1.0 as the best balance between privacy protection and statistical
+        utility. At this level, the average mean absolute error is 7.23 across all queries, which
+        preserves the key compliance trends while providing meaningful privacy guarantees for
+        individual site data.
+      </p>
+
+      <h2>7. Discussion</h2>
+      <p>
+        Our findings paint a concerning picture of GDPR cookie consent compliance. Nearly 9 in 10
+        sites deploy trackers before any consent interaction, and two-thirds receive a failing
+        compliance grade. The most common dark pattern&mdash;simply omitting a reject button&mdash;affects
+        69% of sites, making meaningful rejection impossible for most users.
+      </p>
+      <p>
+        The reject mechanism itself is largely theatrical: clicking "Reject All" reduces trackers
+        on only 7.2% of sites. This aligns with Matte et al.'s findings that CMPs often fail to
+        enforce rejection technically, even when the option exists.
+      </p>
+      <p>
+        Among PETs, Brave Shields was the only tool that achieved meaningful tracker reduction in
+        our measurement setup. This suggests that users cannot rely on consent banners alone for
+        privacy protection and should use browser-level blocking tools as a complement.
+      </p>
+      <p>
+        The CMP landscape shows that OneTrust provides the most compliant consent interfaces, while
+        smaller CMPs in our sample failed to provide basic reject functionality. Sites without any
+        identified CMP performed worst overall.
+      </p>
+
+      <h2>8. Limitations and Future Work</h2>
       <ul>
-        <li>Real crawl executed across 100 sites into <span class="mono">data/real/raw/</span> (97/100 successful).</li>
-        <li>Full PET evaluation (7 PETs &times; 100 sites = 700 measurements) into <span class="mono">data/real/processed/</span>.</li>
-        <li>All aggregate metrics, DP outputs, CMP comparison, 11 figures, and HTML report regenerated from real data.</li>
-        <li>Demo findings in this document replaced with real-study findings.</li>
+        <li>Our sample of 100 sites, while covering 11 categories, may not fully represent the
+            broader web. Future work should scale to 500+ sites.</li>
+        <li>The crawl captures a single snapshot in time; consent systems may change behavior
+            based on user history or time of day.</li>
+        <li>Some PET measurements showed negative "reduction" values, likely because extensions
+            alter page load timing and can trigger different tracker behavior. Longer observation
+            windows could mitigate this.</li>
+        <li>Dark pattern detection relies on HTML/CSS analysis and keyword matching. More
+            sophisticated visual analysis (e.g., screenshot-based ML classifiers) could improve
+            accuracy.</li>
+        <li>The study was conducted from a single EU location (Netherlands). Multi-country
+            measurements could reveal geolocation-dependent consent behavior.</li>
       </ul>
-
-      <h2>8. Ethics and Limitations</h2>
-      <p>
-        The project uses automated browsing and therefore must remain rate-limited and transparent
-        about its collection scope. The repository includes both synthetic data for pipeline
-        validation and the completed real-study dataset from 100 sites. All findings reported
-        above are based on the real-study run executed on 1 March 2026.
-      </p>
 
       <h2>9. Conclusion</h2>
       <p>
-        AECCS is now structurally ready for an honest final course submission. The core software
-        system is built, the data model is provenance-aware, and the mock dataset validates the
-        end-to-end pipeline. The final step is operational: execute the real measurement study and
-        replace the demonstration findings with real evidence.
+        AECCS demonstrates that cookie consent systems on popular websites largely fail to protect
+        user privacy under GDPR. With 89.7% pre-consent violation rates, 82% dark pattern
+        prevalence, and an average compliance score of just 33.1/100, the current consent ecosystem
+        provides more of an illusion of control than actual protection. Browser-level PETs like
+        Brave Shields offer some mitigation, and differential privacy enables responsible publication
+        of these aggregate findings. Our automated pipeline is fully reproducible and can be re-run
+        to track compliance trends over time.
       </p>
 
       <h2>References</h2>
       <p>
-        Final ACM-format citations should be inserted here after the real-result draft is prepared.
-        The literature review file already identifies the core sources to cite.
+        [1] M. Nouwens, I. Liccardi, M. Veale, D. Karger, and L. Kagal, "Dark Patterns after
+        the GDPR: Scraping Consent Pop-ups and Demonstrating Their Influence," in <em>Proc. CHI
+        2020</em>, ACM, 2020.<br>
+        [2] C. Matte, N. Bielova, and C. Santos, "Do Cookie Banners Respect My Choice? Measuring
+        Legal Compliance of Banners from IAB Europe's Transparency and Consent Framework," in
+        <em>Proc. IEEE S&amp;P 2020</em>.<br>
+        [3] D. Bollinger, K. Kubicek, C. Cotrini, and D. Basin, "Automating Cookie Consent and
+        GDPR Violation Detection," in <em>Proc. USENIX Security 2022</em>.<br>
+        [4] Regulation (EU) 2016/679 of the European Parliament and of the Council (General Data
+        Protection Regulation), 2016.<br>
+        [5] CNIL, "Guidelines on Cookies and Other Trackers," Commission Nationale de
+        l'Informatique et des Libert&eacute;s, 2020.
       </p>
     </div>
   </div>
