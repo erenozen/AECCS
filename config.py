@@ -117,7 +117,7 @@ def redact_proxy_url(proxy_url: str | None) -> str | None:
 
     try:
         parsed = urlsplit(proxy_url)
-    except Exception:
+    except ValueError:
         return "configured"
 
     if not parsed.scheme or not parsed.hostname:

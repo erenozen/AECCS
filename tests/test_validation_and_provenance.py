@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 
 from analysis.classifier import classify_cookie
 from analysis.scoring import compute_compliance_score, run_scoring
+from config import redact_proxy_url
 from dark_patterns.detector import (
     detect_asymmetric_buttons,
     detect_confusing_language,
@@ -385,3 +386,13 @@ def test_comparison_propagates_upstream_provenance(tmp_path: Path) -> None:
     summary = json.loads((processed_dir / "pets_summary.json").read_text(encoding="utf-8"))
     assert summary["run_id"] == "study-run"
     assert summary["site_list_source"] == "data/websites.csv"
+
+
+def test_redact_proxy_url_strips_credentials() -> None:
+    assert redact_proxy_url("socks5://user:pass@eu-proxy.example.com:1080") == "socks5://eu-proxy.example.com:1080"
+    assert redact_proxy_url("http://admin:secret@proxy.example.com:8080") == "http://proxy.example.com:8080"
+    assert redact_proxy_url("http://proxy.example.com:8080") == "http://proxy.example.com:8080"
+    assert redact_proxy_url(None) is None
+    assert redact_proxy_url("") is None
+    assert redact_proxy_url("invalid-url") == "configured"
+    assert redact_proxy_url("//no-scheme.example.com") == "configured"
