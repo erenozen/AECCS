@@ -3,7 +3,7 @@ Browser-based PET evaluation.
 
 Re-runs the crawling pipeline under different browser PET configurations
 to measure their effectiveness at blocking trackers and enforcing consent
-preferences. Configurations are defined in ``config.PET_CONFIGURATIONS``.
+preferences.  Configurations are defined in ``config.PET_CONFIGURATIONS``.
 
 Tested PETs include:
 - uBlock Origin (extension-based tracker blocker)
@@ -12,7 +12,7 @@ Tested PETs include:
 - Brave Shields (simulated via filter lists)
 - Consent-O-Matic (auto-reject consent extension)
 
-For each PET, the module records:
+For each PET the module records:
 - Number of trackers blocked vs. baseline
 - Cookies blocked vs. baseline
 - Third-party requests blocked vs. baseline
@@ -21,36 +21,597 @@ For each PET, the module records:
 
 from __future__ import annotations
 
-from config import PET_CONFIGURATIONS, WEBSITES_CSV
+import argparse
+import asyncio
+import csv
+import json
+import random
+import shutil
+import tempfile
+import time
+from pathlib import Path
+
+import pandas as pd
+
+from config import (
+    DATA_DIR,
+    PAGE_LOAD_TIMEOUT,
+    PET_CONFIGURATIONS,
+    PROCESSED_DIR,
+    PROXY_URL,
+    RAW_DIR,
+    REQUEST_DELAY_RANGE,
+    USER_AGENTS,
+    WEBSITES_CSV,
+)
+
+# ── Extension management ──────────────────────────────────────────────────────
+
+PET_EXTENSIONS_DIR = DATA_DIR / "pet_extensions"
+
+_EXTENSION_INFO: dict[str, dict] = {
+    "ublock-origin": {
+        "dir_name": "ublock-origin",
+        "display_name": "uBlock Origin",
+        "github_url": "https://github.com/nicedayzhu/nicedayzhu.github.io",
+    },
+    "privacy-badger": {
+        "dir_name": "privacy-badger",
+        "display_name": "Privacy Badger",
+        "github_url": "https://github.com/nicedayzhu/nicedayzhu.github.io",
+    },
+    "consent-o-matic": {
+        "dir_name": "consent-o-matic",
+        "display_name": "Consent-O-Matic",
+        "github_url": "https://github.com/nicedayzhu/nicedayzhu.github.io",
+    },
+}
 
 
-async def crawl_with_pet(domain: str, pet_config: dict) -> dict:
+def setup_pet_extensions() -> dict[str, Path | None]:
+    """Check for available browser extensions and return their paths.
+
+    For each known extension:
+      1. If the unpacked directory exists and contains *manifest.json* → use it.
+      2. Otherwise print instructions and mark it as unavailable.
+
+    Returns:
+        Mapping of extension slug → Path (or *None* if missing).
+    """
+    PET_EXTENSIONS_DIR.mkdir(parents=True, exist_ok=True)
+    result: dict[str, Path | None] = {}
+
+    for slug, info in _EXTENSION_INFO.items():
+        ext_dir = PET_EXTENSIONS_DIR / info["dir_name"]
+        manifest = ext_dir / "manifest.json"
+
+        if ext_dir.is_dir() and manifest.is_file():
+            print(f"[OK] Extension '{info['display_name']}' found at {ext_dir}")
+            result[slug] = ext_dir
+        else:
+            print(
+                f"[WARN] Extension '{info['display_name']}' not found at {ext_dir}\n"
+                f"  To set up this extension:\n"
+                f"    1. Download the extension source/release from its official GitHub repository\n"
+                f"    2. Unpack it into: {ext_dir}\n"
+                f"    3. Ensure the directory contains a manifest.json file\n"
+                f"  Skipping this PET configuration.\n"
+            )
+            result[slug] = None
+
+    return result
+
+
+# ── Tracker classification integration ────────────────────────────────────────
+
+
+def _classify_pet_cookies(
+    cookies: list[dict],
+    site_domain: str,
+    filter_data: dict,
+) -> tuple[int, int]:
+    """Classify cookies captured during a PET crawl.
+
+    Returns (tracker_cookie_count, tracker_domain_count).
+    """
+    from analysis.classifier import classify_cookie
+
+    tracker_cookies = 0
+    tracker_domains: set[str] = set()
+    for cookie in cookies:
+        classified = classify_cookie(cookie, site_domain, filter_data)
+        if classified.get("is_tracker"):
+            tracker_cookies += 1
+            rd = classified.get("registered_domain", "")
+            if rd:
+                tracker_domains.add(rd)
+    return tracker_cookies, len(tracker_domains)
+
+
+def _count_tracker_domains(
+    third_party_domains: list[str],
+    filter_data: dict,
+) -> int:
+    """Count how many third-party domains are known trackers."""
+    ep = filter_data.get("easyprivacy_domains", set())
+    el = filter_data.get("easylist_domains", set())
+    dc = filter_data.get("disconnect_map", {})
+
+    from analysis.classifier import FALLBACK_TRACKERS
+
+    count = 0
+    for d in third_party_domains:
+        if d in ep or d in el or d in dc or d in FALLBACK_TRACKERS:
+            count += 1
+    return count
+
+
+# ── Brave Shields simulation: tracker domain list ────────────────────────────
+
+
+def _load_block_domains(filter_data: dict) -> set[str]:
+    """Return a set of tracker domains for route-blocking (Brave simulation)."""
+    from analysis.classifier import FALLBACK_TRACKERS
+
+    domains: set[str] = set()
+    domains.update(filter_data.get("easyprivacy_domains", set()))
+    domains.update(FALLBACK_TRACKERS.keys())
+    # Keep it manageable — only the top-level domains
+    return domains
+
+
+# ── PET Crawler ───────────────────────────────────────────────────────────────
+
+
+async def crawl_with_pet(
+    domain: str,
+    pet_config: dict,
+    extension_paths: dict[str, Path | None],
+    filter_data: dict,
+) -> dict:
     """Crawl a single website with a specific PET configuration active.
-
-    Launches the browser specified in ``pet_config``, loads any required
-    extensions, applies configuration (e.g., Firefox ETP mode), then
-    crawls the domain and records cookies, requests, and tracker counts.
 
     Args:
         domain: The website domain to crawl.
         pet_config: A PET configuration dict from ``PET_CONFIGURATIONS``.
+        extension_paths: Mapping of extension slug → local path.
+        filter_data: Loaded filter lists for tracker classification.
 
     Returns:
-        A dict with crawl results including tracker/cookie counts and
-        the PET configuration used.
+        A dict with crawl results including tracker/cookie counts.
     """
-    raise NotImplementedError("Implemented in Phase 4")
+    from playwright.async_api import async_playwright
+
+    pet_name = pet_config["name"]
+    pet_desc = pet_config["description"]
+    ext_slug = pet_config.get("extension")
+
+    result: dict = {
+        "domain": domain,
+        "pet_name": pet_name,
+        "pet_description": pet_desc,
+        "success": False,
+        "error": None,
+        "cookies": [],
+        "http_requests": [],
+        "third_party_domains": [],
+        "total_cookies": 0,
+        "total_third_party_domains": 0,
+        "total_requests": 0,
+        "tracker_cookies": 0,
+        "tracker_domains": 0,
+        "blocked_requests": 0,
+    }
+
+    url = f"https://{domain}"
+    user_agent = random.choice(USER_AGENTS)
+    tmp_dir: str | None = None
+
+    try:
+        async with async_playwright() as pw:
+            browser = None
+            context = None
+            page = None
+            request_log: list[dict] = []
+            blocked_count = 0
+
+            # ── Browser setup per PET type ────────────────────────────
+            if pet_name == "baseline":
+                browser = await pw.chromium.launch(
+                    headless=True,
+                    proxy={"server": PROXY_URL} if PROXY_URL else None,
+                )
+                context = await browser.new_context(
+                    user_agent=user_agent,
+                    viewport={"width": 1920, "height": 1080},
+                    locale="en-GB",
+                    timezone_id="Europe/Berlin",
+                )
+
+            elif pet_name in ("ublock_origin", "privacy_badger", "consent_o_matic"):
+                ext_path = extension_paths.get(ext_slug)
+                if ext_path is None:
+                    result["error"] = f"Extension '{ext_slug}' not available"
+                    return result
+
+                tmp_dir = tempfile.mkdtemp(prefix=f"aeccs_pet_{pet_name}_")
+                context = await pw.chromium.launch_persistent_context(
+                    user_data_dir=tmp_dir,
+                    headless=False,
+                    args=[
+                        f"--disable-extensions-except={ext_path}",
+                        f"--load-extension={ext_path}",
+                        "--headless=new",
+                    ],
+                    proxy={"server": PROXY_URL} if PROXY_URL else None,
+                    viewport={"width": 1920, "height": 1080},
+                    locale="en-GB",
+                    timezone_id="Europe/Berlin",
+                    user_agent=user_agent,
+                )
+                # Wait for extension to initialise
+                await asyncio.sleep(3)
+
+            elif pet_name == "firefox_etp_standard":
+                browser = await pw.firefox.launch(
+                    headless=True,
+                    proxy={"server": PROXY_URL} if PROXY_URL else None,
+                    firefox_user_prefs={
+                        "privacy.trackingprotection.enabled": True,
+                        "privacy.trackingprotection.socialtracking.enabled": True,
+                        "network.cookie.cookieBehavior": 4,
+                        "privacy.annotate_channels.strict_list.enabled": False,
+                    },
+                )
+                context = await browser.new_context(
+                    user_agent=user_agent,
+                    viewport={"width": 1920, "height": 1080},
+                    locale="en-GB",
+                    timezone_id="Europe/Berlin",
+                )
+
+            elif pet_name == "firefox_etp_strict":
+                browser = await pw.firefox.launch(
+                    headless=True,
+                    proxy={"server": PROXY_URL} if PROXY_URL else None,
+                    firefox_user_prefs={
+                        "privacy.trackingprotection.enabled": True,
+                        "privacy.trackingprotection.socialtracking.enabled": True,
+                        "privacy.trackingprotection.cryptomining.enabled": True,
+                        "privacy.trackingprotection.fingerprinting.enabled": True,
+                        "network.cookie.cookieBehavior": 5,
+                        "privacy.annotate_channels.strict_list.enabled": True,
+                        "privacy.partition.network_state.ocsp_cache": True,
+                    },
+                )
+                context = await browser.new_context(
+                    user_agent=user_agent,
+                    viewport={"width": 1920, "height": 1080},
+                    locale="en-GB",
+                    timezone_id="Europe/Berlin",
+                )
+
+            elif pet_name == "brave_shields":
+                # Simulate Brave Shields via Chromium + route blocking
+                browser = await pw.chromium.launch(
+                    headless=True,
+                    proxy={"server": PROXY_URL} if PROXY_URL else None,
+                )
+                context = await browser.new_context(
+                    user_agent=user_agent,
+                    viewport={"width": 1920, "height": 1080},
+                    locale="en-GB",
+                    timezone_id="Europe/Berlin",
+                )
+
+            else:
+                result["error"] = f"Unknown PET configuration: {pet_name}"
+                return result
+
+            # ── Page setup ────────────────────────────────────────────
+            if context is None:
+                result["error"] = "Failed to create browser context"
+                return result
+
+            page = await context.new_page()
+
+            # Request logging
+            async def _on_request(req):
+                nonlocal request_log
+                try:
+                    from urllib.parse import urlparse
+                    parsed = urlparse(req.url)
+                    req_domain = parsed.netloc.lower().lstrip("www.")
+                    request_log.append({
+                        "url": req.url,
+                        "method": req.method,
+                        "resource_type": req.resource_type,
+                        "domain": req_domain,
+                    })
+                except Exception:
+                    pass
+
+            page.on("request", _on_request)
+
+            # Brave Shields: block known tracker domains
+            if pet_name == "brave_shields":
+                block_domains = _load_block_domains(filter_data)
+
+                async def _block_tracker(route):
+                    nonlocal blocked_count
+                    blocked_count += 1
+                    await route.abort()
+
+                for bd in block_domains:
+                    await page.route(f"**/*{bd}*", _block_tracker)
+
+            # ── Navigate ──────────────────────────────────────────────
+            try:
+                await page.goto(url, wait_until="domcontentloaded", timeout=PAGE_LOAD_TIMEOUT)
+            except Exception:
+                try:
+                    await page.goto(url, wait_until="commit", timeout=PAGE_LOAD_TIMEOUT)
+                except Exception as nav_err:
+                    result["error"] = f"Navigation failed: {nav_err}"
+                    return result
+
+            # Extra wait for dynamic content
+            await asyncio.sleep(3)
+
+            # ── Capture state ─────────────────────────────────────────
+            cookies = await context.cookies()
+            import tldextract
+            site_ext = tldextract.extract(domain)
+            site_rd = f"{site_ext.domain}.{site_ext.suffix}".lower()
+
+            third_party: set[str] = set()
+            for req in request_log:
+                req_ext = tldextract.extract(req.get("domain", ""))
+                req_rd = f"{req_ext.domain}.{req_ext.suffix}".lower()
+                if req_rd and req_rd != site_rd and req_rd != ".":
+                    third_party.add(req_rd)
+
+            tp_sorted = sorted(third_party)
+
+            # Classify cookies
+            cookie_dicts = []
+            for c in cookies:
+                cookie_dicts.append({
+                    "name": c.get("name", ""),
+                    "value": c.get("value", ""),
+                    "domain": c.get("domain", ""),
+                    "path": c.get("path", "/"),
+                    "expires": c.get("expires", -1),
+                    "httpOnly": c.get("httpOnly", False),
+                    "secure": c.get("secure", False),
+                    "sameSite": c.get("sameSite", "None"),
+                })
+
+            tracker_cookies, tracker_cookie_domains = _classify_pet_cookies(
+                cookie_dicts, domain, filter_data
+            )
+            tracker_domains = _count_tracker_domains(tp_sorted, filter_data)
+
+            result.update({
+                "success": True,
+                "cookies": cookie_dicts,
+                "http_requests": request_log,
+                "third_party_domains": tp_sorted,
+                "total_cookies": len(cookie_dicts),
+                "total_third_party_domains": len(tp_sorted),
+                "total_requests": len(request_log),
+                "tracker_cookies": tracker_cookies,
+                "tracker_domains": tracker_domains,
+                "blocked_requests": blocked_count,
+            })
+
+            # ── Cleanup ───────────────────────────────────────────────
+            await page.close()
+            if browser:
+                await browser.close()
+            elif context:
+                await context.close()
+
+    except Exception as exc:
+        result["error"] = str(exc)
+    finally:
+        if tmp_dir:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    return result
 
 
-async def run_pet_evaluation(websites_csv: str, output_path: str) -> None:
-    """Run the full PET evaluation across all sites and configurations.
+# ── Full PET evaluation runner ────────────────────────────────────────────────
 
-    For each website in the CSV and each PET in ``PET_CONFIGURATIONS``,
-    crawls the site and records tracker reduction metrics. Writes a
-    consolidated results file.
+
+async def run_pet_evaluation(
+    websites_csv: str | None = None,
+    output_path: str | None = None,
+    pets: list[str] | None = None,
+    max_sites: int | None = None,
+    domain: str | None = None,
+) -> None:
+    """Run the full PET evaluation across sites and configurations.
 
     Args:
-        websites_csv: Path to the websites CSV file.
-        output_path: Path to write the PET evaluation results.
+        websites_csv: Path to the website list CSV.
+        output_path: Path for the output CSV.
+        pets: PET names to test (default: all).
+        max_sites: Limit number of sites tested.
+        domain: Test a single domain instead of CSV list.
     """
-    raise NotImplementedError("Implemented in Phase 4")
+    from analysis.classifier import load_filter_lists
+
+    csv_path = Path(websites_csv) if websites_csv else WEBSITES_CSV
+    out_csv = Path(output_path) if output_path else PROCESSED_DIR / "pets_effectiveness.csv"
+    out_json = out_csv.with_name("pets_raw_results.json")
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Determine sites to test
+    if domain:
+        domains = [domain]
+    else:
+        df = pd.read_csv(csv_path)
+        col = "domain" if "domain" in df.columns else df.columns[0]
+        domains = df[col].dropna().tolist()
+        if max_sites:
+            domains = domains[:max_sites]
+
+    # Determine PET configs
+    if pets:
+        configs = [c for c in PET_CONFIGURATIONS if c["name"] in pets]
+    else:
+        configs = list(PET_CONFIGURATIONS)
+
+    # Setup extensions
+    print("Checking PET extensions …")
+    ext_paths = setup_pet_extensions()
+
+    # Filter out unavailable extension PETs
+    available_configs: list[dict] = []
+    for cfg in configs:
+        ext_slug = cfg.get("extension")
+        if ext_slug and ext_paths.get(ext_slug) is None:
+            print(f"[SKIP] PET '{cfg['name']}' — extension not available")
+            continue
+        available_configs.append(cfg)
+
+    if not available_configs:
+        print("[ERROR] No PET configurations available. Aborting.")
+        return
+
+    # Load filter lists once
+    print("Loading filter lists …")
+    filter_data = load_filter_lists()
+
+    total = len(domains) * len(available_configs)
+    print(f"\nRunning PET evaluation: {len(domains)} sites × {len(available_configs)} PETs = {total} crawls\n")
+
+    all_results: list[dict] = []
+    completed = 0
+
+    for dom in domains:
+        for cfg in available_configs:
+            completed += 1
+            print(f"  [{completed}/{total}] {dom} — {cfg['name']} … ", end="", flush=True)
+            res = await crawl_with_pet(dom, cfg, ext_paths, filter_data)
+            all_results.append(res)
+
+            if res["success"]:
+                print(
+                    f"OK (cookies={res['total_cookies']}, "
+                    f"trackers={res['tracker_cookies']}, "
+                    f"tp_domains={res['total_third_party_domains']})"
+                )
+            else:
+                print(f"FAIL — {res.get('error', 'unknown')}")
+
+            # Delay between crawls
+            delay = random.uniform(*REQUEST_DELAY_RANGE)
+            await asyncio.sleep(delay)
+
+    # ── Save results ──────────────────────────────────────────────────────
+    # CSV
+    csv_fields = [
+        "domain", "category", "pet_name", "total_cookies", "tracker_cookies",
+        "tracker_domains", "total_third_party_domains", "total_requests",
+        "blocked_requests", "success", "error",
+    ]
+    with open(out_csv, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=csv_fields, extrasaction="ignore")
+        writer.writeheader()
+        for r in all_results:
+            r.setdefault("category", "")
+            writer.writerow(r)
+    print(f"\nResults saved to {out_csv}")
+
+    # Full JSON
+    # Strip heavy fields for JSON output
+    slim_results = []
+    for r in all_results:
+        slim = {k: v for k, v in r.items() if k not in ("cookies", "http_requests")}
+        slim_results.append(slim)
+    out_json.write_text(json.dumps(slim_results, indent=2, default=str), encoding="utf-8")
+    print(f"Raw results saved to {out_json}")
+
+    # ── Print summary ─────────────────────────────────────────────────────
+    _print_summary(all_results, available_configs)
+
+
+def _print_summary(results: list[dict], configs: list[dict]) -> None:
+    """Print a formatted effectiveness summary."""
+    import statistics
+
+    print(f"\n{'=' * 70}")
+    print("PET EFFECTIVENESS SUMMARY")
+    print(f"{'=' * 70}")
+
+    # Group by PET
+    by_pet: dict[str, list[dict]] = {}
+    for r in results:
+        by_pet.setdefault(r["pet_name"], []).append(r)
+
+    baseline_trackers: list[int] = []
+    baseline_domains: list[int] = []
+    if "baseline" in by_pet:
+        for r in by_pet["baseline"]:
+            if r["success"]:
+                baseline_trackers.append(r["tracker_cookies"])
+                baseline_domains.append(r["tracker_domains"])
+
+    avg_bl_t = statistics.mean(baseline_trackers) if baseline_trackers else 0
+    avg_bl_d = statistics.mean(baseline_domains) if baseline_domains else 0
+
+    print(f"\n{'PET':<25s} {'Avg Cookies':>12s} {'Avg Trackers':>13s} {'Avg TP Domains':>15s} {'Tracker Δ vs BL':>16s}")
+    print("-" * 83)
+
+    pet_scores: list[tuple[str, float]] = []
+    for cfg in configs:
+        name = cfg["name"]
+        if name not in by_pet:
+            continue
+        success = [r for r in by_pet[name] if r["success"]]
+        if not success:
+            continue
+        avg_c = statistics.mean([r["total_cookies"] for r in success])
+        avg_t = statistics.mean([r["tracker_cookies"] for r in success])
+        avg_d = statistics.mean([r["tracker_domains"] for r in success])
+        if avg_bl_t > 0:
+            reduction = (1 - avg_t / avg_bl_t) * 100
+        else:
+            reduction = 0.0
+        pet_scores.append((name, reduction))
+        print(f"{name:<25s} {avg_c:>12.1f} {avg_t:>13.1f} {avg_d:>15.1f} {reduction:>15.1f}%")
+
+    if pet_scores:
+        best = max(pet_scores, key=lambda x: x[1])
+        print(f"\nBest performing PET: {best[0]} ({best[1]:.1f}% tracker reduction)")
+
+    print(f"{'=' * 70}")
+
+
+# ── CLI Entry Point ───────────────────────────────────────────────────────────
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="AECCS Browser PET Evaluation")
+    parser.add_argument("--pets", nargs="+", default=None, help="PET names to test")
+    parser.add_argument("--max-sites", type=int, default=None, help="Limit number of sites")
+    parser.add_argument("--domain", type=str, default=None, help="Test single domain")
+    parser.add_argument("--output", type=str, default=None, help="Output CSV path")
+    parser.add_argument("--websites-csv", type=str, default=None, help="Websites CSV path")
+    args = parser.parse_args()
+
+    asyncio.run(
+        run_pet_evaluation(
+            websites_csv=args.websites_csv,
+            output_path=args.output,
+            pets=args.pets,
+            max_sites=args.max_sites,
+            domain=args.domain,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()
