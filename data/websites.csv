@@ -1,0 +1,13 @@
+domain,category,region,rank
+zalando.de,e-commerce,DE,245
+bol.com,e-commerce,NL,312
+lemonde.fr,news,FR,418
+spiegel.de,news,DE,523
+bbc.co.uk,news,UK,87
+reddit.com,social_media,US/EU,19
+twitter.com,social_media,US/EU,4
+europa.eu,government,EU,1024
+service-public.fr,government,FR,1567
+spotify.com,entertainment,SE,78
+coursera.org,education,US/EU,892
+github.com,tech,US/EU,56
