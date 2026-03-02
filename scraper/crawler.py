@@ -767,6 +767,8 @@ async def crawl_site(
 
 # ── Full Crawl Runner ────────────────────────────────────────────────────────
 
+MAX_CONCURRENT_SITES: int = 8
+
 
 async def run_full_crawl(
     websites_csv: str | Path | None = None,
@@ -792,97 +794,107 @@ async def run_full_crawl(
     df = pd.read_csv(csv_path)
     domains = df.to_dict("records")
 
-    success_count = 0
-    fail_count = 0
-    total_cookies = 0
-
     effective_run_id = run_id or generate_run_id("crawl")
 
-    for row in tqdm(domains, desc="Crawling sites"):
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_SITES)
+    stats = {"success": 0, "fail": 0, "total_cookies": 0}
+    progress = tqdm(total=len(domains), desc="Crawling sites")
+
+    async def _crawl_one_site(row: dict) -> None:
         domain = row["domain"]
         output_path = out_dir / f"{domain}.json"
 
         if output_path.exists() and not force:
             print(f"[SKIP] {domain} — output already exists. Use --force to re-crawl.")
-            continue
+            progress.update(1)
+            return
 
-        # Run all three interaction modes
-        results: dict = {
-            "domain": domain,
-            "category": row.get("category", ""),
-            "region": row.get("region", ""),
-            "rank": row.get("rank", 0),
-            "crawl_timestamp": datetime.now(timezone.utc).isoformat(),
-            "success": True,
-            "error": None,
-            "cmp_detected": None,
-            "consent_banner": None,
-        }
+        async with semaphore:
+            # Run all three interaction modes
+            results: dict = {
+                "domain": domain,
+                "category": row.get("category", ""),
+                "region": row.get("region", ""),
+                "rank": row.get("rank", 0),
+                "crawl_timestamp": datetime.now(timezone.utc).isoformat(),
+                "success": True,
+                "error": None,
+                "cmp_detected": None,
+                "consent_banner": None,
+            }
 
-        site_run_id = effective_run_id
-        for mode in ("none", "accept", "reject"):
-            data = await crawl_site(
-                domain,
-                interaction=mode,
-                headless=headless,
-                source_mode=source_mode,
-                run_id=site_run_id,
-                site_list_source=str(csv_path),
+            site_run_id = effective_run_id
+            for mode in ("none", "accept", "reject"):
+                data = await crawl_site(
+                    domain,
+                    interaction=mode,
+                    headless=headless,
+                    source_mode=source_mode,
+                    run_id=site_run_id,
+                    site_list_source=str(csv_path),
+                )
+                if site_run_id is None:
+                    site_run_id = data.get("run_id")
+
+                if mode == "none":
+                    results["cmp_detected"] = data.get("cmp_detected")
+                    results["consent_banner"] = data.get("consent_banner")
+                    results["screenshot_path"] = data.get("screenshot_path")
+                    results["pre_consent"] = data.get("pre_consent")
+                    for field in (
+                        "source_mode",
+                        "run_id",
+                        "generated_at",
+                        "proxy_used",
+                        "browser_name",
+                        "browser_version",
+                        "site_list_source",
+                    ):
+                        results[field] = data.get(field)
+                    if not data.get("success", False):
+                        results["success"] = False
+                        results["error"] = data.get("error")
+                elif mode == "accept":
+                    results["post_consent_accept"] = data.get(
+                        "post_consent_accept", data.get("pre_consent")
+                    )
+                elif mode == "reject":
+                    results["post_consent_reject"] = data.get(
+                        "post_consent_reject", data.get("pre_consent")
+                    )
+
+            # Tally stats
+            if results["success"]:
+                stats["success"] += 1
+                pre = results.get("pre_consent") or {}
+                stats["total_cookies"] += pre.get("total_cookies", 0)
+            else:
+                stats["fail"] += 1
+
+            # Save merged JSON
+            output_path.write_text(
+                json.dumps(results, indent=2, default=_safe_json), encoding="utf-8"
             )
-            if site_run_id is None:
-                site_run_id = data.get("run_id")
 
-            if mode == "none":
-                results["cmp_detected"] = data.get("cmp_detected")
-                results["consent_banner"] = data.get("consent_banner")
-                results["screenshot_path"] = data.get("screenshot_path")
-                results["pre_consent"] = data.get("pre_consent")
-                for field in (
-                    "source_mode",
-                    "run_id",
-                    "generated_at",
-                    "proxy_used",
-                    "browser_name",
-                    "browser_version",
-                    "site_list_source",
-                ):
-                    results[field] = data.get(field)
-                if not data.get("success", False):
-                    results["success"] = False
-                    results["error"] = data.get("error")
-            elif mode == "accept":
-                results["post_consent_accept"] = data.get(
-                    "post_consent_accept", data.get("pre_consent")
-                )
-            elif mode == "reject":
-                results["post_consent_reject"] = data.get(
-                    "post_consent_reject", data.get("pre_consent")
-                )
+            # Random delay between sites
+            delay = random.uniform(*REQUEST_DELAY_RANGE)
+            await asyncio.sleep(delay)
 
-        # Tally stats
-        if results["success"]:
-            success_count += 1
-            pre = results.get("pre_consent") or {}
-            total_cookies += pre.get("total_cookies", 0)
-        else:
-            fail_count += 1
+            progress.update(1)
 
-        # Save merged JSON
-        output_path.write_text(
-            json.dumps(results, indent=2, default=_safe_json), encoding="utf-8"
-        )
-
-        # Random delay between sites
-        delay = random.uniform(*REQUEST_DELAY_RANGE)
-        await asyncio.sleep(delay)
+    # Launch all site tasks; the semaphore limits concurrency to
+    # MAX_CONCURRENT_SITES browsers running at a time.
+    tasks = [asyncio.create_task(_crawl_one_site(row)) for row in domains]
+    await asyncio.gather(*tasks)
+    progress.close()
 
     # Summary
-    total = success_count + fail_count
-    avg_cookies = total_cookies / success_count if success_count else 0
+    total = stats["success"] + stats["fail"]
+    avg_cookies = stats["total_cookies"] / stats["success"] if stats["success"] else 0
     print(f"\n{'='*60}")
     print(f"Crawl complete: {total} sites")
-    print(f"  Success: {success_count}")
-    print(f"  Failed:  {fail_count}")
+    print(f"  Success: {stats['success']}")
+    print(f"  Failed:  {stats['fail']}")
     print(f"  Avg cookies (pre-consent): {avg_cookies:.1f}")
     print(f"{'='*60}")
 

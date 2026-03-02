@@ -19,11 +19,11 @@ data/mock/raw/banners/*.html
 data/mock/raw/*.json
 data/mock/processed/*.json
 data/mock/processed/*.csv
-data/real/raw/screenshots/*.png
-data/real/raw/banners/*.html
-data/real/raw/*.json
-data/real/processed/*.json
-data/real/processed/*.csv
+data/real_1/raw/screenshots/*.png
+data/real_1/raw/banners/*.html
+data/real_1/raw/*.json
+data/real_1/processed/*.json
+data/real_1/processed/*.csv
 data/.cache/
 data/tracker_lists/*.txt
 data/tracker_lists/*.json
