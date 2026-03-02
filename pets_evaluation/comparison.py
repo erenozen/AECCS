@@ -85,20 +85,24 @@ def load_all_pet_results(
 
 
 def _build_browser_pets_ranking(browser_pets: list[dict] | None) -> list[dict]:
-    """Rank browser PETs by average tracker-blocking effectiveness.
+    """Rank browser PETs by composite blocking effectiveness.
 
-    For each PET we compute the mean percentage of trackers blocked
-    compared to the baseline (no PET) across all tested sites.
+    Uses request reduction as the primary ranking metric, supplemented
+    by tracker domain reduction and blocked request counts.  This avoids
+    the cookie-snapshot bias that caused negative reduction percentages
+    for extensions that block network requests.
     """
     if not browser_pets:
         return []
 
     df = pd.DataFrame(browser_pets)
 
-    # We need a baseline tracker count per site to compute reduction %
-    baselines: dict[str, float] = {}
+    # Per-site baseline values
+    baselines_domains: dict[str, float] = {}
+    baselines_requests: dict[str, float] = {}
     for _, row in df[df["pet_name"] == "baseline"].iterrows():
-        baselines[row["domain"]] = float(row.get("tracker_domains", 0) or 0)
+        baselines_domains[row["domain"]] = float(row.get("tracker_domains", 0) or 0)
+        baselines_requests[row["domain"]] = float(row.get("total_requests", 0) or 0)
 
     pet_stats: dict[str, dict] = {}
 
@@ -109,32 +113,45 @@ def _build_browser_pets_ranking(browser_pets: list[dict] | None) -> list[dict]:
 
         tracker_counts: list[float] = []
         cookie_counts: list[float] = []
-        reduction_pcts: list[float] = []
+        domain_reduction_pcts: list[float] = []
+        request_reduction_pcts: list[float] = []
+        blocked_counts: list[float] = []
 
         for _, row in sub.iterrows():
             td = float(row.get("tracker_domains", 0) or 0)
             tc = float(row.get("tracker_cookies", 0) or 0)
+            tr = float(row.get("total_requests", 0) or 0)
+            bl = float(row.get("blocked_requests", 0) or 0)
             tracker_counts.append(td)
             cookie_counts.append(tc)
+            blocked_counts.append(bl)
 
-            base = baselines.get(row["domain"])
-            if base and base > 0:
-                reduction_pcts.append((base - td) / base * 100)
+            base_dom = baselines_domains.get(row["domain"])
+            if base_dom and base_dom > 0:
+                domain_reduction_pcts.append((base_dom - td) / base_dom * 100)
+
+            base_req = baselines_requests.get(row["domain"])
+            if base_req and base_req > 0:
+                request_reduction_pcts.append((base_req - tr) / base_req * 100)
 
         avg_trackers = round(sum(tracker_counts) / len(tracker_counts), 1) if tracker_counts else 0
         avg_cookies = round(sum(cookie_counts) / len(cookie_counts), 1) if cookie_counts else 0
-        avg_reduction = round(sum(reduction_pcts) / len(reduction_pcts), 1) if reduction_pcts else 0
+        avg_domain_reduction = round(sum(domain_reduction_pcts) / len(domain_reduction_pcts), 1) if domain_reduction_pcts else 0
+        avg_request_reduction = round(sum(request_reduction_pcts) / len(request_reduction_pcts), 1) if request_reduction_pcts else 0
+        avg_blocked = round(sum(blocked_counts) / len(blocked_counts), 1) if blocked_counts else 0
 
         pet_stats[pet_name] = {
             "pet_name": pet_name,
             "sites_tested": len(sub),
             "avg_tracker_domains": avg_trackers,
             "avg_tracker_cookies": avg_cookies,
-            "avg_tracker_reduction_pct": avg_reduction,
+            "avg_tracker_reduction_pct": avg_domain_reduction,
+            "avg_request_reduction_pct": avg_request_reduction,
+            "avg_blocked_requests": avg_blocked,
         }
 
-    # Sort by reduction percentage (higher is better)
-    ranking = sorted(pet_stats.values(), key=lambda x: x["avg_tracker_reduction_pct"], reverse=True)
+    # Sort by request reduction (higher is better)
+    ranking = sorted(pet_stats.values(), key=lambda x: x["avg_request_reduction_pct"], reverse=True)
     for i, r in enumerate(ranking, 1):
         r["rank"] = i
     return ranking

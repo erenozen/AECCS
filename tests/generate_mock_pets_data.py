@@ -230,6 +230,9 @@ def generate_mock_pets_effectiveness(run_id: str | None = None) -> str:
                 "total_third_party_domains": total_tp,
                 "total_requests": tot_r,
                 "blocked_requests": blocked_requests,
+                "blocked_tracker_requests": int(
+                    blocked_requests * random.uniform(0.6, 0.95)
+                ) if blocked_requests > 0 else 0,
                 "success": True,
                 "error": "",
             })

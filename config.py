@@ -51,6 +51,7 @@ PET_EFFECTIVENESS_FIELDS = [
     "total_third_party_domains",
     "total_requests",
     "blocked_requests",
+    "blocked_tracker_requests",
     "success",
     "error",
 ]

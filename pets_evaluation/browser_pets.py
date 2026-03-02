@@ -149,6 +149,7 @@ def _build_skipped_result(
         "tracker_cookies": 0,
         "tracker_domains": 0,
         "blocked_requests": 0,
+        "blocked_tracker_requests": 0,
         "consent_banner_detected": False,
         "page_load_time_ms": None,
         "browser_name": pet_config.get("browser", ""),
@@ -236,6 +237,18 @@ def _load_block_domains(filter_data: dict) -> set[str]:
     return domains
 
 
+def _get_all_tracker_domains(filter_data: dict) -> set[str]:
+    """Return the combined set of all known tracker domains for classification."""
+    from analysis.classifier import FALLBACK_TRACKERS
+
+    domains: set[str] = set()
+    domains.update(filter_data.get("easyprivacy_domains", set()))
+    domains.update(filter_data.get("easylist_domains", set()))
+    domains.update(filter_data.get("tracker_domain_map", {}).keys())
+    domains.update(FALLBACK_TRACKERS.keys())
+    return domains
+
+
 # ── PET Crawler ───────────────────────────────────────────────────────────────
 
 
@@ -280,6 +293,7 @@ async def crawl_with_pet(
         "tracker_cookies": 0,
         "tracker_domains": 0,
         "blocked_requests": 0,
+        "blocked_tracker_requests": 0,
         "consent_banner_detected": False,
         "page_load_time_ms": None,
         "browser_name": pet_config.get("browser", ""),
@@ -316,6 +330,7 @@ async def crawl_with_pet(
             page = None
             request_log: list[dict] = []
             blocked_count = 0
+            failed_request_log: list[dict] = []
 
             # ── Browser setup per PET type ────────────────────────────
             if pet_name == "baseline":
@@ -443,6 +458,42 @@ async def crawl_with_pet(
 
             page.on("request", _on_request)
 
+            # Detect requests blocked by extensions (requestfailed fires when
+            # an extension like uBlock Origin or Privacy Badger intercepts a
+            # request).  Not attached for brave_shields which already counts
+            # blocked requests via route.abort().
+            if pet_name != "brave_shields":
+                _BLOCKING_PATTERNS = (
+                    "net::ERR_BLOCKED_BY_CLIENT",
+                    "net::ERR_BLOCKED_BY_RESPONSE",
+                    "net::ERR_ABORTED",
+                    "NS_ERROR_ABORT",
+                    "NS_BINDING_ABORTED",
+                )
+
+                async def _on_request_failed(req):
+                    nonlocal blocked_count, failed_request_log
+                    try:
+                        failure_text = req.failure
+                        if failure_text and any(
+                            p in failure_text for p in _BLOCKING_PATTERNS
+                        ):
+                            from urllib.parse import urlparse
+
+                            parsed = urlparse(req.url)
+                            req_domain = parsed.netloc.lower().lstrip("www.")
+                            blocked_count += 1
+                            failed_request_log.append({
+                                "url": req.url,
+                                "domain": req_domain,
+                                "resource_type": req.resource_type,
+                                "failure": failure_text,
+                            })
+                    except Exception:
+                        pass
+
+                page.on("requestfailed", _on_request_failed)
+
             # Brave Shields: block known tracker domains
             if pet_name == "brave_shields":
                 block_domains = _load_block_domains(filter_data)
@@ -521,6 +572,19 @@ async def crawl_with_pet(
             )
             tracker_domains = _count_tracker_domains(tp_sorted, filter_data)
 
+            # Classify which blocked requests targeted tracker domains
+            all_tracker_doms = _get_all_tracker_domains(filter_data)
+            blocked_tracker_count = 0
+            if pet_name == "brave_shields":
+                # All route-blocked requests target tracker domains by design
+                blocked_tracker_count = blocked_count
+            else:
+                for freq in failed_request_log:
+                    req_ext = TLD_EXTRACT(freq.get("domain", ""))
+                    req_rd = f"{req_ext.domain}.{req_ext.suffix}".lower()
+                    if req_rd and req_rd != "." and req_rd in all_tracker_doms:
+                        blocked_tracker_count += 1
+
             result.update({
                 "success": True,
                 "cookies": cookie_dicts,
@@ -532,6 +596,7 @@ async def crawl_with_pet(
                 "tracker_cookies": tracker_cookies,
                 "tracker_domains": tracker_domains,
                 "blocked_requests": blocked_count,
+                "blocked_tracker_requests": blocked_tracker_count,
             })
             result.update(
                 build_provenance(
@@ -738,33 +803,37 @@ async def run_pet_evaluation(
 
 
 def _print_summary(results: list[dict], configs: list[dict]) -> None:
-    """Print a formatted effectiveness summary."""
+    """Print a formatted effectiveness summary using request-based metrics."""
     import statistics
 
-    print(f"\n{'=' * 70}")
+    print(f"\n{'=' * 80}")
     print("PET EFFECTIVENESS SUMMARY")
-    print(f"{'=' * 70}")
+    print(f"{'=' * 80}")
 
     # Group by PET
     by_pet: dict[str, list[dict]] = {}
     for r in results:
         by_pet.setdefault(r["pet_name"], []).append(r)
 
-    baseline_trackers: list[int] = []
+    # Baseline averages
+    baseline_requests: list[int] = []
     baseline_domains: list[int] = []
     if "baseline" in by_pet:
         for r in by_pet["baseline"]:
             if r["success"]:
-                baseline_trackers.append(r["tracker_cookies"])
+                baseline_requests.append(r["total_requests"])
                 baseline_domains.append(r["tracker_domains"])
 
-    avg_bl_t = statistics.mean(baseline_trackers) if baseline_trackers else 0
-    avg_bl_d = statistics.mean(baseline_domains) if baseline_domains else 0
+    avg_bl_req = statistics.mean(baseline_requests) if baseline_requests else 0
+    avg_bl_dom = statistics.mean(baseline_domains) if baseline_domains else 0
 
-    print(f"\n{'PET':<25s} {'Avg Cookies':>12s} {'Avg Trackers':>13s} {'Avg TP Domains':>15s} {'Tracker Δ vs BL':>16s}")
-    print("-" * 83)
+    print(
+        f"\n{'PET':<25s} {'Avg Reqs':>9s} {'Avg TrkDom':>11s} "
+        f"{'Blocked':>8s} {'BlkTrk':>7s} {'Req Δ%':>7s} {'Dom Δ%':>7s}"
+    )
+    print("-" * 79)
 
-    pet_scores: list[tuple[str, float]] = []
+    pet_scores: list[tuple[str, float, float]] = []
     for cfg in configs:
         name = cfg["name"]
         if name not in by_pet:
@@ -772,21 +841,32 @@ def _print_summary(results: list[dict], configs: list[dict]) -> None:
         success = [r for r in by_pet[name] if r["success"]]
         if not success:
             continue
-        avg_c = statistics.mean([r["total_cookies"] for r in success])
-        avg_t = statistics.mean([r["tracker_cookies"] for r in success])
-        avg_d = statistics.mean([r["tracker_domains"] for r in success])
-        if avg_bl_t > 0:
-            reduction = (1 - avg_t / avg_bl_t) * 100
-        else:
-            reduction = 0.0
-        pet_scores.append((name, reduction))
-        print(f"{name:<25s} {avg_c:>12.1f} {avg_t:>13.1f} {avg_d:>15.1f} {reduction:>15.1f}%")
+
+        avg_req = statistics.mean([r["total_requests"] for r in success])
+        avg_td = statistics.mean([r["tracker_domains"] for r in success])
+        avg_blocked = statistics.mean([r.get("blocked_requests", 0) for r in success])
+        avg_blk_trk = statistics.mean(
+            [r.get("blocked_tracker_requests", 0) for r in success]
+        )
+
+        req_reduction = (1 - avg_req / avg_bl_req) * 100 if avg_bl_req > 0 else 0.0
+        dom_reduction = (1 - avg_td / avg_bl_dom) * 100 if avg_bl_dom > 0 else 0.0
+
+        pet_scores.append((name, req_reduction, dom_reduction))
+        print(
+            f"{name:<25s} {avg_req:>9.1f} {avg_td:>11.1f} "
+            f"{avg_blocked:>8.1f} {avg_blk_trk:>7.1f} "
+            f"{req_reduction:>6.1f}% {dom_reduction:>6.1f}%"
+        )
 
     if pet_scores:
         best = max(pet_scores, key=lambda x: x[1])
-        print(f"\nBest performing PET: {best[0]} ({best[1]:.1f}% tracker reduction)")
+        print(
+            f"\nBest performing PET: {best[0]} "
+            f"({best[1]:.1f}% request reduction, {best[2]:.1f}% tracker domain reduction)"
+        )
 
-    print(f"{'=' * 70}")
+    print(f"{'=' * 80}")
 
 
 # ── CLI Entry Point ───────────────────────────────────────────────────────────

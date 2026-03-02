@@ -431,37 +431,37 @@ def plot_pet_effectiveness(
 
     # Baseline averages
     bl = df[df["pet_name"] == "baseline"]
-    bl_cookies = bl["tracker_cookies"].mean()
+    bl_requests = bl["total_requests"].mean()
     bl_domains = bl["tracker_domains"].mean()
-    if bl_cookies == 0:
-        bl_cookies = 1
+    if bl_requests == 0:
+        bl_requests = 1
     if bl_domains == 0:
         bl_domains = 1
 
     stats: list[dict] = []
     for pet in pets:
         sub = df[df["pet_name"] == pet]
-        mc = sub["tracker_cookies"].mean()
+        mr = sub["total_requests"].mean()
         md = sub["tracker_domains"].mean()
-        sc = sub["tracker_cookies"].std()
+        sr = sub["total_requests"].std()
         sd = sub["tracker_domains"].std()
-        pct_c = mc / bl_cookies * 100
+        pct_r = mr / bl_requests * 100
         pct_d = md / bl_domains * 100
         stats.append({
             "pet": pet, "label": PET_LABELS.get(pet, pet),
-            "pct_cookies": pct_c, "pct_domains": pct_d,
-            "std_cookies": sc / bl_cookies * 100 if bl_cookies else 0,
+            "pct_requests": pct_r, "pct_domains": pct_d,
+            "std_requests": sr / bl_requests * 100 if bl_requests else 0,
             "std_domains": sd / bl_domains * 100 if bl_domains else 0,
         })
 
-    stats.sort(key=lambda x: x["pct_domains"])
+    stats.sort(key=lambda x: x["pct_requests"])
     x = np.arange(len(stats))
     width = 0.35
 
     fig, ax = plt.subplots(figsize=(max(7, len(stats) * 1.5), 4.5))
-    b1 = ax.bar(x - width / 2, [s["pct_cookies"] for s in stats], width,
-                yerr=[s["std_cookies"] for s in stats], capsize=3,
-                label="Tracker Cookies", color=COLORS["primary"], alpha=0.85)
+    b1 = ax.bar(x - width / 2, [s["pct_requests"] for s in stats], width,
+                yerr=[s["std_requests"] for s in stats], capsize=3,
+                label="Total Requests", color=COLORS["primary"], alpha=0.85)
     b2 = ax.bar(x + width / 2, [s["pct_domains"] for s in stats], width,
                 yerr=[s["std_domains"] for s in stats], capsize=3,
                 label="Tracker Domains", color=COLORS["secondary"], alpha=0.85)
@@ -476,8 +476,8 @@ def plot_pet_effectiveness(
     ax.axhline(100, color=COLORS["neutral"], linestyle="--", linewidth=0.8, label="Baseline (100%)")
     ax.set_xticks(x)
     ax.set_xticklabels([s["label"] for s in stats], rotation=25, ha="right")
-    ax.set_ylabel("Trackers Remaining (% of Baseline)")
-    ax.set_title("Tracker Reduction by Privacy-Enhancing Technology")
+    ax.set_ylabel("Remaining (% of Baseline)")
+    ax.set_title("Request and Tracker Domain Reduction by PET")
     ax.legend(loc="upper right", fontsize=7)
     fig.tight_layout()
     return _save(fig, out, fmt)
@@ -511,13 +511,13 @@ def plot_pet_heatmap(
     df["category"] = df["category"].fillna("Unknown")
     df["pet_label"] = df["pet_name"].map(PET_LABELS).fillna(df["pet_name"])
 
-    pivot = df.pivot_table(values="tracker_cookies", index="pet_label",
+    pivot = df.pivot_table(values="tracker_domains", index="pet_label",
                            columns="category", aggfunc="mean")
 
     fig, ax = plt.subplots(figsize=(max(7, pivot.shape[1] * 1.0), max(4, pivot.shape[0] * 0.55)))
     sns.heatmap(pivot, annot=True, fmt=".1f", cmap="YlOrRd_r",
-                linewidths=0.5, ax=ax, cbar_kws={"label": "Avg Tracker Cookies"})
-    ax.set_title("Average Tracker Cookies by PET and Website Category")
+                linewidths=0.5, ax=ax, cbar_kws={"label": "Avg Tracker Domains"})
+    ax.set_title("Average Tracker Domains by PET and Website Category")
     ax.set_xlabel("Website Category")
     ax.set_ylabel("PET")
     fig.tight_layout()
