@@ -296,9 +296,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the AECCS pipeline end-to-end")
     parser.add_argument(
         "--source-mode",
-        choices=["mock", "real"],
+        type=str,
         default=DEFAULT_SOURCE_MODE,
-        help="Dataset/output mode to run (default: real)",
+        help="Dataset/output mode to run (default: real). Accepts 'real_N' for batch workflows.",
     )
     parser.add_argument(
         "--run-id",

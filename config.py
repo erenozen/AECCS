@@ -73,11 +73,17 @@ class DatasetLayout:
 
 
 def normalize_source_mode(source_mode: str | None) -> str:
-    """Return a validated source mode."""
+    """Return a validated source mode.
+
+    Accepts the built-in modes ("real", "mock") as well as any custom name
+    that starts with "real_" (e.g. "real_0", "real_combined") so that batch
+    workflows can store data under ``data/<mode>/``.
+    """
     mode = (source_mode or DEFAULT_SOURCE_MODE).strip().lower()
-    if mode not in VALID_SOURCE_MODES:
+    if mode not in VALID_SOURCE_MODES and not mode.startswith("real_"):
         raise ValueError(
-            f"Invalid source_mode={source_mode!r}; expected one of {VALID_SOURCE_MODES}"
+            f"Invalid source_mode={source_mode!r}; expected one of "
+            f"{VALID_SOURCE_MODES} or a 'real_*' variant"
         )
     return mode
 
