@@ -595,6 +595,99 @@ How to verify reliability post-run:
 Bottom line: Your methodology is sound for an academic study. The stealth measures get you past ~85-90% of sites. The ones that block you are logged as failures and excluded from analysis — which is the correct approach. Your report should mention this in the Methodology/Limitations section (which it already does in the PDF template under "Limitations").
 
 
+## Why Websites Don't Comply (And Get Away With It)
+
+### The Short Answer
+
+**It's not legal. They're violating GDPR. Enforcement is just slow and inconsistent.**
+
+---
+
+### Your Batch 0 Data Proves It
+
+| Finding | GDPR Requirement | Violation Rate (Batch 0) |
+|---|---|---|
+| **67.7% scored F** | Must obtain valid consent before processing | 2/3 of sites fail basic compliance |
+| **70% missing reject button** | Reject must be as easy as accept (Art. 7.3) | Most sites only show "Accept All" |
+| **Avg 9 pre-consent cookies** | No tracking before consent (Art. 6.1) | Sites drop trackers immediately on page load |
+| **Google found on 74 sites** | Must disclose all data processors (Art. 13) | Trackers fire silently before any consent |
+
+---
+
+### Why They Get Away With It
+
+**1. Enforcement bottleneck**
+- Only ~30 Data Protection Authorities (DPAs) across the EU
+- Each handles thousands of complaints for millions of websites
+- Average investigation takes **1-3 years**
+- Irish DPC (handles Google, Meta, Apple, TikTok) had a backlog of 10,000+ cases
+
+**2. Fines are rare and slow**
+
+| Company | Fine | Year | Time from complaint to fine |
+|---|---|---|---|
+| Amazon | €746M | 2021 | 3 years |
+| Meta (Instagram) | €405M | 2022 | 2 years |
+| Google (France) | €150M | 2022 | Cookie consent specifically |
+| TikTok | €345M | 2023 | Children's data |
+| Criteo | €40M | 2023 | Cookie consent specifically |
+
+Only ~1,500 fines total since GDPR started in 2018 — versus millions of non-compliant websites.
+
+**3. The cost-benefit calculation favors non-compliance**
+
+```
+Revenue from tracking cookies:  €millions/year
+Probability of being fined:     <0.1%
+Expected fine (if caught):      €50K-500K for most companies
+Cost of full compliance:        €100K-1M (engineering + lost ad revenue)
+```
+
+Most companies rationally choose to keep tracking until specifically targeted.
+
+**4. Dark patterns create plausible deniability**
+
+Your data shows the strategy clearly:
+
+| Dark Pattern | What it does | Legal cover |
+|---|---|---|
+| `missing_reject` (70%) | No reject button on first layer | "Users can manage preferences in settings" |
+| `multi_layer_rejection` (14%) | Reject buried 2-3 clicks deep | "The option exists, it's just in the details" |
+| `asymmetric_buttons` (7%) | Accept is big and green, reject is tiny grey text | "Both options are available" |
+| `hidden_reject` (6%) | Reject disguised as "Manage cookies" link | "We offer granular control" |
+
+This technically violates GDPR's requirement for "freely given" consent, but it's hard to prove intent in court.
+
+**5. Cross-border jurisdiction mess**
+
+- A French user visits a German website hosted in Ireland
+- Which DPA investigates? Irish (where the company is registered), German (where the server is), or French (where the user is)?
+- This jurisdictional ambiguity delays enforcement by years
+
+---
+
+### What's Changing
+
+**Your research is part of the solution.** Automated compliance tools are what regulators need:
+
+- **2024-2025:** CNIL (France) deployed automated cookie scanners — fined 100+ sites
+- **2024:** noyb.eu filed 1,000+ automated GDPR complaints using tools similar to yours
+- **2025:** EU Digital Services Act adds additional enforcement mechanisms
+- **Academic studies like yours** provide evidence that regulators cite in enforcement actions
+
+The Nouwens et al. (CHI 2020) study you reference in your report found similar non-compliance rates — and it was cited in multiple DPA enforcement decisions.
+
+---
+
+### This Is Exactly Why Your Study Matters
+
+Your 1000-site analysis with automated scoring provides:
+
+1. **Quantified evidence** that non-compliance is systemic, not isolated
+2. **PET effectiveness data** showing users need technical countermeasures because legal enforcement alone fails
+3. **Category/region breakdowns** showing which sectors are worst (your data: news 22.6, travel 23.4 — worst)
+4. **Reproducible methodology** that regulators can adopt
+
 
 ## License
 
