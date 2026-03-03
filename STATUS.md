@@ -1,12 +1,25 @@
 # AECCS Project Status
 
-## What This Project Is (Plain English)
+## To run crawler:
+### Create a Python environment (3.10+ required, I used 3.14 )
+python3 -m venv .venv && source .venv/bin/activate
+            
+### install dependencies
+pip install -r requirements.txt
 
-**Course:** CS475 — Privacy-Enhancing Technologies (60% of the grade is the project)
+### install Playwright browsers 
+playwright install chromium firefox
 
-**The question you're answering:** *"Do cookie consent systems on popular websites actually protect user privacy under GDPR?"*
+### run
+./scripts/run_batches.sh 0
+./scripts/run_batches.sh 1
+./scripts/run_batches.sh 2
+...
+./scripts/run_batches.sh 9
+./scripts/run_batches.sh merge
 
-**What you built:** An automated system that:
+
+**The question:** *"Do cookie consent systems on popular websites actually protect user privacy under GDPR?"*
 
 1. Visits 100 real websites from an EU IP address (Proton VPN, Netherlands)
 2. Records what cookies and trackers each site sets *before* you click anything on the consent banner
