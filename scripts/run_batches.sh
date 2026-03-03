@@ -32,7 +32,7 @@ run_batch() {
     python -m scripts.run_pipeline \
         --source-mode "real_${N}" \
         --websites-csv "$CSV" \
-        --steps crawl,classify,dark_patterns,score \
+        --steps crawl,classify,dark_patterns,score,pets \
         --force \
         --run-id "batch-${N}" \
         --continue-on-error
@@ -54,7 +54,7 @@ run_merge() {
     python -m scripts.run_pipeline \
         --source-mode real_combined \
         --websites-csv data/websites_combined.csv \
-        --steps metrics,pets,dp,cmp,comparison,visualize,report \
+        --steps metrics,dp,cmp,comparison,visualize,report \
         --run-id combined-1000 \
         --continue-on-error
 

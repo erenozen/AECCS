@@ -635,7 +635,6 @@ def main() -> None:
                         help="Open report in browser after generation")
     parser.add_argument(
         "--source-mode",
-        choices=["real", "mock"],
         default=DEFAULT_SOURCE_MODE,
         help="Dataset/output mode to use (default: real)",
     )

@@ -881,7 +881,6 @@ def main() -> None:
     parser.add_argument("--websites-csv", type=str, default=None, help="Websites CSV path")
     parser.add_argument(
         "--source-mode",
-        choices=["real", "mock"],
         default=DEFAULT_SOURCE_MODE,
         help="Dataset/output mode to use (default: real)",
     )

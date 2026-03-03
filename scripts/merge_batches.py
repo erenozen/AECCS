@@ -31,6 +31,8 @@ def merge_batches(
     out_layout.banners_dir.mkdir(parents=True, exist_ok=True)
 
     all_scores: list[pd.DataFrame] = []
+    all_pets: list[pd.DataFrame] = []
+    all_pets_raw: list[dict] = []
     raw_count = 0
     processed_count = 0
 
@@ -73,6 +75,20 @@ def merge_batches(
             if scores_csv.exists():
                 all_scores.append(pd.read_csv(scores_csv))
 
+            # Collect PET effectiveness data
+            pets_csv = batch_layout.processed_dir / "pets_effectiveness.csv"
+            if pets_csv.exists():
+                all_pets.append(pd.read_csv(pets_csv))
+
+            # Collect PET raw results
+            pets_json = batch_layout.processed_dir / "pets_raw_results.json"
+            if pets_json.exists():
+                data = json.loads(pets_json.read_text(encoding="utf-8"))
+                if isinstance(data, list):
+                    all_pets_raw.extend(data)
+                elif isinstance(data, dict) and "results" in data:
+                    all_pets_raw.extend(data["results"])
+
     # Merge compliance scores (deduplicate by domain, keep last)
     if all_scores:
         combined_scores = pd.concat(all_scores, ignore_index=True)
@@ -80,6 +96,23 @@ def merge_batches(
         out_csv = out_layout.processed_dir / "compliance_scores.csv"
         combined_scores.to_csv(out_csv, index=False)
         print(f"Merged compliance_scores.csv: {len(combined_scores)} sites")
+
+    # Merge PET effectiveness (deduplicate by domain + pet_name, keep last)
+    if all_pets:
+        combined_pets = pd.concat(all_pets, ignore_index=True)
+        dedup_cols = ["domain", "pet_name"] if "pet_name" in combined_pets.columns else ["domain"]
+        combined_pets = combined_pets.drop_duplicates(subset=dedup_cols, keep="last")
+        out_pets_csv = out_layout.processed_dir / "pets_effectiveness.csv"
+        combined_pets.to_csv(out_pets_csv, index=False)
+        print(f"Merged pets_effectiveness.csv: {len(combined_pets)} rows")
+
+    # Merge PET raw results
+    if all_pets_raw:
+        out_pets_json = out_layout.processed_dir / "pets_raw_results.json"
+        out_pets_json.write_text(
+            json.dumps(all_pets_raw, indent=2), encoding="utf-8"
+        )
+        print(f"Merged pets_raw_results.json: {len(all_pets_raw)} entries")
 
     # Merge website CSVs into a combined list
     if website_csvs:

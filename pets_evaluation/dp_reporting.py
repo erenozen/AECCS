@@ -530,7 +530,6 @@ def main() -> None:
     parser.add_argument("--trials", type=int, default=100, help="Number of trials per epsilon")
     parser.add_argument(
         "--source-mode",
-        choices=["real", "mock"],
         default=DEFAULT_SOURCE_MODE,
         help="Dataset/output mode to use (default: real)",
     )
