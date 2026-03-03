@@ -61,13 +61,16 @@ def merge_batches(
                 if not dest.exists():
                     shutil.copy2(html, dest)
 
-        # Copy processed per-site files
+        # Copy processed per-site files, rewriting source_mode to output_mode
         if batch_layout.processed_dir.exists():
             for suffix in ("_classified.json", "_dark_patterns.json", "_score.json"):
                 for f in batch_layout.processed_dir.glob(f"*{suffix}"):
                     dest = out_layout.processed_dir / f.name
                     if not dest.exists():
-                        shutil.copy2(f, dest)
+                        data = json.loads(f.read_text(encoding="utf-8"))
+                        if isinstance(data, dict):
+                            data["source_mode"] = output_mode
+                        dest.write_text(json.dumps(data, indent=2), encoding="utf-8")
                         processed_count += 1
 
             # Collect compliance scores
@@ -93,6 +96,7 @@ def merge_batches(
     if all_scores:
         combined_scores = pd.concat(all_scores, ignore_index=True)
         combined_scores = combined_scores.drop_duplicates(subset="domain", keep="last")
+        combined_scores["source_mode"] = output_mode
         out_csv = out_layout.processed_dir / "compliance_scores.csv"
         combined_scores.to_csv(out_csv, index=False)
         print(f"Merged compliance_scores.csv: {len(combined_scores)} sites")
@@ -102,6 +106,7 @@ def merge_batches(
         combined_pets = pd.concat(all_pets, ignore_index=True)
         dedup_cols = ["domain", "pet_name"] if "pet_name" in combined_pets.columns else ["domain"]
         combined_pets = combined_pets.drop_duplicates(subset=dedup_cols, keep="last")
+        combined_pets["source_mode"] = output_mode
         out_pets_csv = out_layout.processed_dir / "pets_effectiveness.csv"
         combined_pets.to_csv(out_pets_csv, index=False)
         print(f"Merged pets_effectiveness.csv: {len(combined_pets)} rows")
