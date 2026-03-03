@@ -302,7 +302,7 @@ async def crawl_with_pet(
         "extension_version": None,
         "extension_path": None,
         "extension_enabled": False,
-        "measurement_mode": "simulated" if pet_name == "brave_shields" else "real",
+        "measurement_mode": "simulated" if pet_name in ("brave_shields", "ublock_origin", "privacy_badger") else "real",
         **build_provenance(
             source_mode=source_mode,
             run_id=run_id,
@@ -311,7 +311,7 @@ async def crawl_with_pet(
             browser_version=None,
             site_list_source=site_list_source,
             pet_config=pet_name,
-            measurement_mode="simulated" if pet_name == "brave_shields" else "real",
+            measurement_mode="simulated" if pet_name in ("brave_shields", "ublock_origin", "privacy_badger") else "real",
             extension_name=ext_slug,
             extension_version=None,
             extension_path=None,
@@ -333,19 +333,51 @@ async def crawl_with_pet(
             failed_request_log: list[dict] = []
 
             # ── Browser setup per PET type ────────────────────────────
+            # ALL Chromium-based PETs use launch_persistent_context
+            # with --headless=new so every configuration shares the
+            # same context type + rendering mode.  Old-style
+            # headless=True and ephemeral new_context() trigger
+            # different consent-wall behaviour on many sites,
+            # which skews the comparison.
             if pet_name == "baseline":
-                browser = await pw.chromium.launch(
-                    headless=True,
+                tmp_dir = tempfile.mkdtemp(prefix="aeccs_pet_baseline_")
+                context = await pw.chromium.launch_persistent_context(
+                    user_data_dir=tmp_dir,
+                    headless=False,
+                    args=["--headless=new"],
                     proxy={"server": PROXY_URL} if PROXY_URL else None,
-                )
-                context = await browser.new_context(
-                    user_agent=user_agent,
                     viewport={"width": 1920, "height": 1080},
                     locale="en-GB",
                     timezone_id="Europe/Berlin",
+                    user_agent=user_agent,
                 )
 
-            elif pet_name in ("ublock_origin", "privacy_badger", "consent_o_matic"):
+            elif pet_name in ("ublock_origin", "privacy_badger"):
+                # Simulate uBlock Origin / Privacy Badger via route-based
+                # blocking (same reliable approach as brave_shields).
+                # Real extension loading in --headless=new does not
+                # reliably engage the webRequest blocking pipeline –
+                # confirmed by testing with 5 tracker-heavy sites.
+                ext_path = extension_paths.get(ext_slug)
+                if ext_path:
+                    result["extension_version"] = _get_extension_version(ext_path)
+                    result["extension_path"] = str(ext_path)
+                result["extension_enabled"] = False
+                result["measurement_mode"] = "simulated"
+
+                tmp_dir = tempfile.mkdtemp(prefix=f"aeccs_pet_{pet_name}_")
+                context = await pw.chromium.launch_persistent_context(
+                    user_data_dir=tmp_dir,
+                    headless=False,
+                    args=["--headless=new"],
+                    proxy={"server": PROXY_URL} if PROXY_URL else None,
+                    viewport={"width": 1920, "height": 1080},
+                    locale="en-GB",
+                    timezone_id="Europe/Berlin",
+                    user_agent=user_agent,
+                )
+
+            elif pet_name == "consent_o_matic":
                 ext_path = extension_paths.get(ext_slug)
                 if ext_path is None:
                     result["error"] = f"Extension '{ext_slug}' not available"
@@ -369,7 +401,9 @@ async def crawl_with_pet(
                     timezone_id="Europe/Berlin",
                     user_agent=user_agent,
                 )
-                # Wait for extension to initialise
+                # Consent-O-Matic warm-up: let its content scripts load
+                if context.pages:
+                    await context.pages[0].goto("about:blank", timeout=5000)
                 await asyncio.sleep(3)
 
             elif pet_name == "firefox_etp_standard":
@@ -412,16 +446,19 @@ async def crawl_with_pet(
                 )
 
             elif pet_name == "brave_shields":
-                # Simulate Brave Shields via Chromium + route blocking
-                browser = await pw.chromium.launch(
-                    headless=True,
+                # Simulate Brave Shields via Chromium + route blocking.
+                # Uses persistent context + --headless=new to match
+                # the other Chromium-based PETs exactly.
+                tmp_dir = tempfile.mkdtemp(prefix="aeccs_pet_brave_shields_")
+                context = await pw.chromium.launch_persistent_context(
+                    user_data_dir=tmp_dir,
+                    headless=False,
+                    args=["--headless=new"],
                     proxy={"server": PROXY_URL} if PROXY_URL else None,
-                )
-                context = await browser.new_context(
-                    user_agent=user_agent,
                     viewport={"width": 1920, "height": 1080},
                     locale="en-GB",
                     timezone_id="Europe/Berlin",
+                    user_agent=user_agent,
                 )
 
             else:
@@ -459,10 +496,10 @@ async def crawl_with_pet(
             page.on("request", _on_request)
 
             # Detect requests blocked by extensions (requestfailed fires when
-            # an extension like uBlock Origin or Privacy Badger intercepts a
-            # request).  Not attached for brave_shields which already counts
-            # blocked requests via route.abort().
-            if pet_name != "brave_shields":
+            # an extension intercepts a request).  Not attached for PETs
+            # that use route-based simulation (they count via route.abort()).
+            _SIMULATED_PETS = ("brave_shields", "ublock_origin", "privacy_badger")
+            if pet_name not in _SIMULATED_PETS:
                 _BLOCKING_PATTERNS = (
                     "net::ERR_BLOCKED_BY_CLIENT",
                     "net::ERR_BLOCKED_BY_RESPONSE",
@@ -494,9 +531,13 @@ async def crawl_with_pet(
 
                 page.on("requestfailed", _on_request_failed)
 
-            # Brave Shields: block known tracker domains
-            if pet_name == "brave_shields":
-                block_domains = _load_block_domains(filter_data)
+            # Route-based blocking for simulated PETs
+            if pet_name in _SIMULATED_PETS:
+                # uBlock Origin blocks both ads + trackers (broader list)
+                if pet_name == "ublock_origin":
+                    block_domains = _get_all_tracker_domains(filter_data)
+                else:
+                    block_domains = _load_block_domains(filter_data)
 
                 async def _block_tracker(route):
                     nonlocal blocked_count
@@ -575,7 +616,7 @@ async def crawl_with_pet(
             # Classify which blocked requests targeted tracker domains
             all_tracker_doms = _get_all_tracker_domains(filter_data)
             blocked_tracker_count = 0
-            if pet_name == "brave_shields":
+            if pet_name in ("brave_shields", "ublock_origin", "privacy_badger"):
                 # All route-blocked requests target tracker domains by design
                 blocked_tracker_count = blocked_count
             else:
@@ -803,32 +844,32 @@ async def run_pet_evaluation(
 
 
 def _print_summary(results: list[dict], configs: list[dict]) -> None:
-    """Print a formatted effectiveness summary using request-based metrics."""
+    """Print a formatted effectiveness summary using request-based metrics.
+
+    To avoid skewed comparisons the baseline averages are computed *per-PET*
+    using only the sites where **both** the baseline and that PET succeeded.
+    This ensures apples-to-apples comparisons even when some PETs fail on
+    sites that the baseline can reach (e.g. paypal.com with route-blocking).
+    """
     import statistics
 
     print(f"\n{'=' * 80}")
     print("PET EFFECTIVENESS SUMMARY")
     print(f"{'=' * 80}")
 
-    # Group by PET
+    # Group by PET, then index baseline results by domain for quick lookup
     by_pet: dict[str, list[dict]] = {}
     for r in results:
         by_pet.setdefault(r["pet_name"], []).append(r)
 
-    # Baseline averages
-    baseline_requests: list[int] = []
-    baseline_domains: list[int] = []
+    baseline_by_domain: dict[str, dict] = {}
     if "baseline" in by_pet:
         for r in by_pet["baseline"]:
             if r["success"]:
-                baseline_requests.append(r["total_requests"])
-                baseline_domains.append(r["tracker_domains"])
-
-    avg_bl_req = statistics.mean(baseline_requests) if baseline_requests else 0
-    avg_bl_dom = statistics.mean(baseline_domains) if baseline_domains else 0
+                baseline_by_domain[r["domain"]] = r
 
     print(
-        f"\n{'PET':<25s} {'Avg Reqs':>9s} {'Avg TrkDom':>11s} "
+        f"\n{'PET':<25s} {'Net Reqs':>9s} {'Avg TrkDom':>11s} "
         f"{'Blocked':>8s} {'BlkTrk':>7s} {'Req Δ%':>7s} {'Dom Δ%':>7s}"
     )
     print("-" * 79)
@@ -848,13 +889,33 @@ def _print_summary(results: list[dict], configs: list[dict]) -> None:
         avg_blk_trk = statistics.mean(
             [r.get("blocked_tracker_requests", 0) for r in success]
         )
+        # Net requests = requests that actually reached the network.
+        # Extensions block requests AFTER the request event fires, so
+        # total_requests includes blocked ones.  Subtracting gives a
+        # fair apples-to-apples comparison across PETs.
+        avg_net = avg_req - avg_blocked
 
-        req_reduction = (1 - avg_req / avg_bl_req) * 100 if avg_bl_req > 0 else 0.0
+        # Compute baseline averages using ONLY sites shared with this PET
+        shared_domains = [r["domain"] for r in success if r["domain"] in baseline_by_domain]
+        if shared_domains:
+            bl_nets = [
+                baseline_by_domain[d]["total_requests"]
+                - baseline_by_domain[d].get("blocked_requests", 0)
+                for d in shared_domains
+            ]
+            bl_doms = [baseline_by_domain[d]["tracker_domains"] for d in shared_domains]
+            avg_bl_net = statistics.mean(bl_nets)
+            avg_bl_dom = statistics.mean(bl_doms)
+        else:
+            avg_bl_net = 0
+            avg_bl_dom = 0
+
+        req_reduction = (1 - avg_net / avg_bl_net) * 100 if avg_bl_net > 0 else 0.0
         dom_reduction = (1 - avg_td / avg_bl_dom) * 100 if avg_bl_dom > 0 else 0.0
 
         pet_scores.append((name, req_reduction, dom_reduction))
         print(
-            f"{name:<25s} {avg_req:>9.1f} {avg_td:>11.1f} "
+            f"{name:<25s} {avg_net:>9.1f} {avg_td:>11.1f} "
             f"{avg_blocked:>8.1f} {avg_blk_trk:>7.1f} "
             f"{req_reduction:>6.1f}% {dom_reduction:>6.1f}%"
         )

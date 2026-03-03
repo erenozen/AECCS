@@ -767,7 +767,7 @@ async def crawl_site(
 
 # ── Full Crawl Runner ────────────────────────────────────────────────────────
 
-MAX_CONCURRENT_SITES: int = 8
+MAX_CONCURRENT_SITES: int = 4
 
 
 async def run_full_crawl(
