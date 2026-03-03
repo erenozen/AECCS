@@ -97,19 +97,28 @@ def _build_browser_pets_ranking(browser_pets: list[dict] | None) -> list[dict]:
 
     df = pd.DataFrame(browser_pets)
 
-    # Per-site baseline values
+    # Per-site baseline values (only from successful crawls)
     baselines_domains: dict[str, float] = {}
     baselines_requests: dict[str, float] = {}
-    for _, row in df[df["pet_name"] == "baseline"].iterrows():
+    baselines_blocked: dict[str, float] = {}
+    bl_df = df[(df["pet_name"] == "baseline") & (df["success"] == True)]  # noqa: E712
+    for _, row in bl_df.iterrows():
         baselines_domains[row["domain"]] = float(row.get("tracker_domains", 0) or 0)
-        baselines_requests[row["domain"]] = float(row.get("total_requests", 0) or 0)
+        bl = float(row.get("blocked_requests", 0) or 0)
+        baselines_requests[row["domain"]] = float(row.get("total_requests", 0) or 0) - bl
+        baselines_blocked[row["domain"]] = bl
 
     pet_stats: dict[str, dict] = {}
 
     for pet_name in df["pet_name"].unique():
         if pet_name == "baseline":
             continue
-        sub = df[df["pet_name"] == pet_name]
+        # Only include rows where the crawl actually succeeded —
+        # failed rows carry zeros which would falsely inflate reduction
+        # percentages (a 0-request failure would look like 100% blocking).
+        sub = df[(df["pet_name"] == pet_name) & (df["success"] == True)]  # noqa: E712
+        if sub.empty:
+            continue
 
         tracker_counts: list[float] = []
         cookie_counts: list[float] = []
@@ -122,6 +131,10 @@ def _build_browser_pets_ranking(browser_pets: list[dict] | None) -> list[dict]:
             tc = float(row.get("tracker_cookies", 0) or 0)
             tr = float(row.get("total_requests", 0) or 0)
             bl = float(row.get("blocked_requests", 0) or 0)
+            # Net requests = requests that actually reached the network.
+            # Extensions block requests AFTER the Playwright request
+            # event fires, so total_requests includes blocked ones.
+            net_req = tr - bl
             tracker_counts.append(td)
             cookie_counts.append(tc)
             blocked_counts.append(bl)
@@ -132,7 +145,7 @@ def _build_browser_pets_ranking(browser_pets: list[dict] | None) -> list[dict]:
 
             base_req = baselines_requests.get(row["domain"])
             if base_req and base_req > 0:
-                request_reduction_pcts.append((base_req - tr) / base_req * 100)
+                request_reduction_pcts.append((base_req - net_req) / base_req * 100)
 
         avg_trackers = round(sum(tracker_counts) / len(tracker_counts), 1) if tracker_counts else 0
         avg_cookies = round(sum(cookie_counts) / len(cookie_counts), 1) if cookie_counts else 0
