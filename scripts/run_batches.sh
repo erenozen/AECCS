@@ -29,7 +29,7 @@ run_batch() {
     echo "================================================================"
     echo "  BATCH $N: $CSV → data/real_${N}/"
     echo "================================================================"
-    python -m scripts.run_pipeline \
+    python3 -m scripts.run_pipeline \
         --source-mode "real_${N}" \
         --websites-csv "$CSV" \
         --steps crawl,classify,dark_patterns,score,pets \
@@ -43,7 +43,7 @@ run_merge() {
     echo "================================================================"
     echo "  MERGING BATCHES 0-9 → data/real_combined/"
     echo "================================================================"
-    python -m scripts.merge_batches \
+    python3 -m scripts.merge_batches \
         --batch-range 0 9 \
         --output real_combined
 
@@ -51,7 +51,7 @@ run_merge() {
     echo "================================================================"
     echo "  GLOBAL ANALYSIS ON COMBINED DATA"
     echo "================================================================"
-    python -m scripts.run_pipeline \
+    python3 -m scripts.run_pipeline \
         --source-mode real_combined \
         --websites-csv data/websites_combined.csv \
         --steps metrics,dp,cmp,comparison,visualize,report \
