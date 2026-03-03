@@ -15,8 +15,9 @@ data/**/*.html
 data/**/*.csv
 data/**/*.txt
 data/.cache/
-# Keep website list CSVs and .gitkeep files tracked
+# Keep website list CSVs, tracker lists, and .gitkeep files tracked
 !data/websites_*.csv
+!data/tracker_lists/*.txt
 !data/**/.gitkeep
 reporting/mock/figures/*.png
 reporting/mock/*.html
