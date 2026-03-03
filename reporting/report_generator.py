@@ -302,7 +302,10 @@ def generate_html_report(
 <nav><div class="container">
   <a href="#executive-summary">Executive Summary</a>
   <a href="#compliance-overview">Compliance Overview</a>
+  <a href="#cmp-distribution">CMP Distribution</a>
   <a href="#pre-consent-violations">Pre-Consent Violations</a>
+  <a href="#tracker-ecosystem">Tracker Ecosystem</a>
+  <a href="#consent-banners">Consent Banners</a>
   <a href="#dark-patterns">Dark Patterns</a>
   <a href="#pets-evaluation">PETs Evaluation</a>
   <a href="#methodology">Methodology</a>
@@ -402,8 +405,56 @@ def generate_html_report(
     <figcaption>Figure 2: Average compliance score broken down by category and region/CMP.</figcaption>
   </figure>
 
+  <div class="stat-grid">
+    {_stat_card(f"{avg_score:.1f}", "Average Score", "warning")}
+    {_stat_card(f"{cs.get('median_score', 0):.1f}", "Median Score", "warning")}
+    {_stat_card(f"{cs.get('min_score', 0):.0f} - {cs.get('max_score', 0):.0f}", "Score Range", "")}
+    {_stat_card(f"{cs.get('std_dev', 0):.1f}", "Std Deviation", "")}
+  </div>
+""")
+
+    # Category breakdown table
+    by_cat = cs.get("by_category", {})
+    if by_cat:
+        cat_score_rows = ""
+        for cat_name, cat_val in sorted(by_cat.items(),
+                                         key=lambda x: x[1].get("avg_score", 0) if isinstance(x[1], dict) else 0,
+                                         reverse=True):
+            if isinstance(cat_val, dict):
+                cat_score_rows += (
+                    f"<tr><td>{cat_name}</td>"
+                    f"<td>{cat_val.get('avg_score', 0):.1f}</td>"
+                    f"<td>{cat_val.get('median', 0):.1f}</td></tr>\n"
+                )
+        parts.append(f"""
+  <h3>Compliance by Category</h3>
+  <table>
+    <thead><tr><th>Category</th><th>Avg Score</th><th>Median</th></tr></thead>
+    <tbody>{cat_score_rows}</tbody>
+  </table>
+""")
+
+    parts.append(f"""
   {top5_html}
   {bottom5_html}
+</section>
+""")
+
+    # ── CMP Distribution ──────────────────────────────────────────────
+    cmp_preview = metrics.get("cmp_analysis_preview", {})
+    cmp_dist = cmp_preview.get("cmp_distribution", {})
+    if cmp_dist:
+        cmp_dist_rows = ""
+        for cmp_name, cnt in sorted(cmp_dist.items(), key=lambda x: x[1], reverse=True):
+            cmp_dist_rows += f"<tr><td>{cmp_name}</td><td>{cnt}</td></tr>\n"
+        parts.append(f"""
+<section id="cmp-distribution">
+  <h2>CMP Distribution</h2>
+  <p>Consent Management Platforms identified across the {n_sites} analyzed sites:</p>
+  <table>
+    <thead><tr><th>CMP</th><th>Sites</th></tr></thead>
+    <tbody>{cmp_dist_rows}</tbody>
+  </table>
 </section>
 """)
 
@@ -434,6 +485,97 @@ def generate_html_report(
     {_embed_image(f_dir / "tracker_vendor_share.png")}
     <figcaption>Figure 5: Tracker vendor prevalence across analyzed websites.</figcaption>
   </figure>
+""")
+
+    # ── Tracker Ecosystem ─────────────────────────────────────────────
+    ta = metrics.get("tracker_analysis", {})
+    top_vendors = ta.get("top_tracker_vendors", [])
+    tracker_cats = ta.get("tracker_categories", {})
+
+    vendor_rows = ""
+    for v in top_vendors[:10]:
+        vendor_rows += (
+            f"<tr><td>{v.get('vendor', '')}</td>"
+            f"<td>{v.get('sites_present', 0)}</td>"
+            f"<td>{v.get('percentage', 0):.1f}%</td>"
+            f"<td>{v.get('cookie_count', 0)}</td></tr>\n"
+        )
+
+    cat_rows = ""
+    for cat_name, cat_val in sorted(tracker_cats.items(),
+                                     key=lambda x: x[1].get("percentage", 0) if isinstance(x[1], dict) else 0,
+                                     reverse=True):
+        if isinstance(cat_val, dict):
+            cat_rows += (
+                f"<tr><td>{cat_name}</td>"
+                f"<td>{cat_val.get('count', 0)}</td>"
+                f"<td>{cat_val.get('percentage', 0):.1f}%</td></tr>\n"
+            )
+
+    tracker_eco_html = ""
+    if vendor_rows or cat_rows:
+        tracker_eco_html = f"""
+<section id="tracker-ecosystem">
+  <h2>Tracker Ecosystem</h2>
+  <div class="stat-grid">
+    {_stat_card(str(ta.get("total_unique_trackers", 0)), "Unique Tracker Cookies", "danger")}
+    {_stat_card(str(ta.get("total_unique_tracker_domains", 0)), "Unique Tracker Domains", "warning")}
+  </div>
+"""
+        if vendor_rows:
+            tracker_eco_html += f"""
+  <h3>Top Tracker Vendors</h3>
+  <table>
+    <thead><tr><th>Vendor</th><th>Sites Present</th><th>Share</th><th>Cookies</th></tr></thead>
+    <tbody>{vendor_rows}</tbody>
+  </table>
+"""
+        if cat_rows:
+            tracker_eco_html += f"""
+  <h3>Tracker Categories</h3>
+  <table>
+    <thead><tr><th>Category</th><th>Count</th><th>Percentage</th></tr></thead>
+    <tbody>{cat_rows}</tbody>
+  </table>
+"""
+        tracker_eco_html += "</section>\n"
+        parts.append(tracker_eco_html)
+
+    # ── Consent Banner & Reject Effectiveness ───────────────────────
+    cba = metrics.get("consent_banner_analysis", {})
+    bva = metrics.get("tracker_analysis", {}).get("before_vs_after_consent", {})
+    sum_info = metrics.get("summary", {})
+    sites_with_banner = sum_info.get("sites_with_banners", 0)
+    reject_btn = cba.get("sites_with_reject_button", {})
+    reject_btn_pct = reject_btn.get("percentage", 0) if isinstance(reject_btn, dict) else 0
+    reject_btn_cnt = reject_btn.get("count", 0) if isinstance(reject_btn, dict) else 0
+    equal_effort = cba.get("sites_with_equal_click_effort", {})
+    equal_effort_pct = equal_effort.get("percentage", 0) if isinstance(equal_effort, dict) else 0
+    reject_reduces_pct = bva.get("reject_reduces_trackers_percentage", 0)
+    reject_eliminates_pct = bva.get("reject_eliminates_all_trackers_percentage", 0)
+    avg_after_reject = bva.get("avg_trackers_after_reject", 0)
+    avg_no_interaction = bva.get("avg_trackers_no_interaction", 0)
+
+    parts.append(f"""
+<section id="consent-banners">
+  <h2>Consent Banner & Reject Effectiveness</h2>
+  <div class="stat-grid">
+    {_stat_card(str(sites_with_banner), "Sites with Consent Banner", "")}
+    {_stat_card(f"{reject_btn_cnt} ({reject_btn_pct:.1f}%)", "Visible Reject Button", "warning")}
+    {_stat_card(f"{equal_effort_pct:.1f}%", "Equal Accept/Reject Effort", "warning")}
+    {_stat_card(f"{reject_reduces_pct:.1f}%", "Reject Actually Reduces Trackers", "danger")}
+  </div>
+  <p>
+    Of the {sites_with_banner} sites that displayed a consent banner, only {reject_btn_cnt}
+    ({reject_btn_pct:.1f}%) provided a visible "Reject All" button. {equal_effort_pct:.1f}% of
+    sites offered equal click effort for accept and reject.
+  </p>
+  <p>
+    Clicking "Reject All" reduced tracker counts on only {reject_reduces_pct:.1f}% of sites
+    and eliminated all trackers on just {reject_eliminates_pct:.1f}%.
+    On average, sites retained {avg_after_reject:.1f} trackers after rejection compared to
+    {avg_no_interaction:.1f} before interaction.
+  </p>
 </section>
 """)
 
@@ -497,8 +639,58 @@ def generate_html_report(
         cmp_show.columns = ["CMP", "Sites", "Avg Score", "Reject %", "Works %", "DP %", "PET Score", "Rank"]
         cmp_table = f"<h3>CMP Rankings</h3>\n{_df_to_html(cmp_show)}"
 
-    # DP section
+    # PET+CMP combinations
+    combos = pets_summary.get("combination_analysis", [])
+    combo_table = ""
+    if combos:
+        combo_rows = ""
+        for c in combos[:10]:
+            combo_rows += (
+                f"<tr><td>{c.get('browser_pet', '')}</td>"
+                f"<td>{c.get('cmp', '')}</td>"
+                f"<td>{c.get('estimated_combined_effectiveness_pct', 0):.1f}%</td></tr>\n"
+            )
+        combo_table = f"""
+  <h3>Best PET + CMP Combinations</h3>
+  <table>
+    <thead><tr><th>Browser PET</th><th>CMP</th><th>Est. Effectiveness</th></tr></thead>
+    <tbody>{combo_rows}</tbody>
+  </table>"""
+
+    # DP section with full epsilon tradeoff table
     rec_eps = dp_report.get("metadata", {}).get("recommended_epsilon", "N/A")
+    dp_tradeoff = dp_report.get("privacy_utility_tradeoff", {})
+
+    # Compute average MAE per epsilon across all metrics
+    eps_mae: dict[str, list[float]] = {}
+    for _metric_name, metric_data in dp_tradeoff.items():
+        if not isinstance(metric_data, dict):
+            continue
+        by_eps = metric_data.get("by_epsilon", {})
+        for eps_str, eps_data in by_eps.items():
+            if isinstance(eps_data, dict) and "mae" in eps_data:
+                eps_mae.setdefault(eps_str, []).append(eps_data["mae"])
+
+    eps_table_rows = ""
+    utility_labels = {
+        "0.1": "Low (high privacy)",
+        "0.5": "Moderate",
+        "1.0": "Balanced (recommended)",
+        "2.0": "Good utility",
+        "5.0": "High utility",
+        "10.0": "Near-exact",
+    }
+    for eps_str in sorted(eps_mae.keys(), key=float):
+        avg_mae = sum(eps_mae[eps_str]) / len(eps_mae[eps_str])
+        label = utility_labels.get(eps_str, "")
+        bold_open = "<strong>" if eps_str == str(rec_eps) else ""
+        bold_close = "</strong>" if eps_str == str(rec_eps) else ""
+        eps_table_rows += (
+            f"<tr><td>{bold_open}{eps_str}{bold_close}</td>"
+            f"<td>{bold_open}{avg_mae:.2f}{bold_close}</td>"
+            f"<td>{bold_open}{label}{bold_close}</td></tr>\n"
+        )
+
     dp_section = f"""
   <h3>Differential Privacy</h3>
   <p>
@@ -507,6 +699,16 @@ def generate_html_report(
     while protecting individual website data. Multiple privacy budgets (epsilon) were tested.
   </p>
   <p><strong>Recommended epsilon for publication: {rec_eps}</strong></p>
+"""
+    if eps_table_rows:
+        dp_section += f"""
+  <h3>Privacy-Utility Tradeoff</h3>
+  <table>
+    <thead><tr><th>Epsilon</th><th>Avg MAE</th><th>Utility</th></tr></thead>
+    <tbody>{eps_table_rows}</tbody>
+  </table>
+"""
+    dp_section += f"""
   <figure>
     {_embed_image(f_dir / "dp_privacy_utility_tradeoff.png")}
     <figcaption>Figure 9: Privacy-utility tradeoff under differential privacy.</figcaption>
@@ -542,6 +744,8 @@ def generate_html_report(
     <figcaption>Figure 10: CMP effectiveness as privacy tools.</figcaption>
   </figure>
   {cmp_table}
+
+  {combo_table}
 
   {dp_section}
 
