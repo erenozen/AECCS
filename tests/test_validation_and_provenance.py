@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -10,6 +11,7 @@ from bs4 import BeautifulSoup
 
 from analysis.classifier import classify_cookie
 from analysis.scoring import compute_compliance_score, run_scoring
+from config import DatasetLayout
 from dark_patterns.detector import (
     detect_asymmetric_buttons,
     detect_confusing_language,
@@ -23,6 +25,142 @@ from pets_evaluation.browser_pets import run_pet_evaluation
 from pets_evaluation.cmp_analysis import run_cmp_analysis
 from pets_evaluation.comparison import run_comparison
 from reporting.report_generator import generate_html_report
+from scripts.merge_batches import merge_batches
+
+
+def _test_layout(root: Path, mode: str) -> DatasetLayout:
+    data_root = root / "data" / mode
+    raw_dir = data_root / "raw"
+    report_dir = root / "reporting" / mode
+    return DatasetLayout(
+        source_mode=mode,
+        data_root=data_root,
+        raw_dir=raw_dir,
+        processed_dir=data_root / "processed",
+        screenshots_dir=raw_dir / "screenshots",
+        banners_dir=raw_dir / "banners",
+        tracker_lists_dir=root / "data" / "tracker_lists",
+        websites_csv=root / "data" / "websites.csv",
+        report_dir=report_dir,
+        figures_dir=report_dir / "figures",
+        html_report=report_dir / "compliance_report.html",
+    )
+
+
+def _patch_merge_layouts(monkeypatch: pytest.MonkeyPatch, root: Path) -> None:
+    def fake_get_dataset_layout(source_mode: str | None = None) -> DatasetLayout:
+        return _test_layout(root, (source_mode or "real").strip().lower())
+
+    monkeypatch.setattr("scripts.merge_batches.get_dataset_layout", fake_get_dataset_layout)
+    monkeypatch.setattr("scripts.merge_batches.DATA_DIR", root / "data")
+
+
+def _write_batch_fixture(
+    root: Path,
+    mode: str,
+    domain: str,
+    *,
+    run_id: str,
+    site_list_source: str,
+) -> None:
+    layout = _test_layout(root, mode)
+    layout.raw_dir.mkdir(parents=True, exist_ok=True)
+    layout.processed_dir.mkdir(parents=True, exist_ok=True)
+    layout.screenshots_dir.mkdir(parents=True, exist_ok=True)
+    layout.banners_dir.mkdir(parents=True, exist_ok=True)
+
+    raw_doc = {
+        "domain": domain,
+        "success": True,
+        "source_mode": mode,
+        "run_id": run_id,
+        "site_list_source": site_list_source,
+        "pre_consent": {"third_party_domains": [], "total_cookies": 0},
+    }
+    (layout.raw_dir / f"{domain}.json").write_text(
+        json.dumps(raw_doc, indent=2),
+        encoding="utf-8",
+    )
+    (layout.screenshots_dir / f"{domain}.png").write_bytes(b"png")
+    (layout.banners_dir / f"{domain}.html").write_text("<div>banner</div>", encoding="utf-8")
+
+    for suffix in ("_classified.json", "_dark_patterns.json", "_score.json"):
+        payload = {
+            "domain": domain,
+            "source_mode": mode,
+            "run_id": run_id,
+            "site_list_source": site_list_source,
+        }
+        (layout.processed_dir / f"{domain}{suffix}").write_text(
+            json.dumps(payload, indent=2),
+            encoding="utf-8",
+        )
+
+    pd.DataFrame(
+        [
+            {
+                "domain": domain,
+                "source_mode": mode,
+                "run_id": run_id,
+                "category": "News",
+                "region": "EU",
+                "overall_score": 80.0,
+                "grade": "B",
+            }
+        ]
+    ).to_csv(layout.processed_dir / "compliance_scores.csv", index=False)
+
+    pd.DataFrame(
+        [
+            {
+                "domain": domain,
+                "source_mode": mode,
+                "run_id": run_id,
+                "category": "News",
+                "pet_name": "baseline",
+                "measurement_mode": "real",
+                "browser_name": "chromium",
+                "browser_version": "1",
+                "extension_name": "",
+                "extension_version": "",
+                "extension_path": "",
+                "extension_enabled": False,
+                "consent_banner_detected": True,
+                "page_load_time_ms": 1000,
+                "total_cookies": 2,
+                "tracker_cookies": 0,
+                "tracker_domains": 0,
+                "total_third_party_domains": 0,
+                "total_requests": 5,
+                "blocked_requests": 0,
+                "blocked_tracker_requests": 0,
+                "success": True,
+                "error": "",
+            }
+        ]
+    ).to_csv(layout.processed_dir / "pets_effectiveness.csv", index=False)
+
+    (layout.processed_dir / "pets_raw_results.json").write_text(
+        json.dumps(
+            {
+                "source_mode": mode,
+                "run_id": run_id,
+                "site_list_source": site_list_source,
+                "results": [
+                    {
+                        "domain": domain,
+                        "source_mode": mode,
+                        "run_id": run_id,
+                        "site_list_source": site_list_source,
+                        "pet_name": "baseline",
+                        "success": True,
+                    }
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
 
 def test_classify_cookie_marks_known_tracker_from_tracker_map() -> None:
@@ -385,3 +523,81 @@ def test_comparison_propagates_upstream_provenance(tmp_path: Path) -> None:
     summary = json.loads((processed_dir / "pets_summary.json").read_text(encoding="utf-8"))
     assert summary["run_id"] == "study-run"
     assert summary["site_list_source"] == "data/websites.csv"
+
+
+def test_merge_batches_rewrites_combined_provenance_consistently(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _patch_merge_layouts(monkeypatch, tmp_path)
+    _write_batch_fixture(tmp_path, "real_0", "alpha.example", run_id="batch-0", site_list_source="websites_1.csv")
+    _write_batch_fixture(tmp_path, "real_1", "beta.example", run_id="batch-1", site_list_source="websites_2.csv")
+
+    merge_batches(["real_0", "real_1"], "real_combined")
+
+    combined = _test_layout(tmp_path, "real_combined")
+    raw_doc = json.loads((combined.raw_dir / "alpha.example.json").read_text(encoding="utf-8"))
+    classified_doc = json.loads(
+        (combined.processed_dir / "alpha.example_classified.json").read_text(encoding="utf-8")
+    )
+    scores_df = pd.read_csv(combined.processed_dir / "compliance_scores.csv")
+    pets_df = pd.read_csv(combined.processed_dir / "pets_effectiveness.csv")
+    pets_raw = json.loads((combined.processed_dir / "pets_raw_results.json").read_text(encoding="utf-8"))
+
+    assert raw_doc["source_mode"] == "real_combined"
+    assert classified_doc["source_mode"] == "real_combined"
+    assert set(scores_df["source_mode"]) == {"real_combined"}
+    assert set(pets_df["source_mode"]) == {"real_combined"}
+    assert pets_raw["source_mode"] == "real_combined"
+    assert isinstance(pets_raw["results"], list)
+    assert {entry["source_mode"] for entry in pets_raw["results"]} == {"real_combined"}
+
+
+def test_report_generation_accepts_normalized_combined_merge_output(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _patch_merge_layouts(monkeypatch, tmp_path)
+    _write_batch_fixture(tmp_path, "real_0", "alpha.example", run_id="batch-0", site_list_source="websites_1.csv")
+    _write_batch_fixture(tmp_path, "real_1", "beta.example", run_id="batch-1", site_list_source="websites_2.csv")
+
+    merge_batches(["real_0", "real_1"], "real_combined")
+
+    combined = _test_layout(tmp_path, "real_combined")
+    figures_dir = tmp_path / "figures"
+    figures_dir.mkdir()
+
+    report_path = generate_html_report(
+        processed_dir=str(combined.processed_dir),
+        figures_dir=str(figures_dir),
+        output_path=str(tmp_path / "report.html"),
+        source_mode="real_combined",
+    )
+
+    assert report_path.exists()
+
+
+def test_merge_batches_rebuilds_combined_outputs_on_rerun(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _patch_merge_layouts(monkeypatch, tmp_path)
+    _write_batch_fixture(tmp_path, "real_0", "alpha.example", run_id="batch-0", site_list_source="websites_1.csv")
+
+    merge_batches(["real_0"], "real_combined")
+
+    combined = _test_layout(tmp_path, "real_combined")
+    combined.report_dir.mkdir(parents=True, exist_ok=True)
+    (combined.report_dir / "stale.txt").write_text("stale", encoding="utf-8")
+
+    old_batch_layout = _test_layout(tmp_path, "real_0")
+    shutil.rmtree(old_batch_layout.data_root)
+    _write_batch_fixture(tmp_path, "real_0", "beta.example", run_id="batch-0b", site_list_source="websites_1.csv")
+
+    merge_batches(["real_0"], "real_combined")
+
+    assert not (combined.raw_dir / "alpha.example.json").exists()
+    assert not (combined.processed_dir / "alpha.example_score.json").exists()
+    assert (combined.raw_dir / "beta.example.json").exists()
+    assert (combined.processed_dir / "beta.example_score.json").exists()
+    assert not (combined.report_dir / "stale.txt").exists()

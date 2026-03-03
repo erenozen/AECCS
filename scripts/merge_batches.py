@@ -15,7 +15,27 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import DATA_DIR, get_dataset_layout
+from config import DATA_DIR, get_dataset_layout, infer_common_value, utc_now_iso
+
+
+def _rewrite_source_mode(payload: object, output_mode: str) -> object:
+    """Rewrite the top-level source mode for merged artifacts."""
+    if isinstance(payload, dict):
+        payload = dict(payload)
+        payload["source_mode"] = output_mode
+    return payload
+
+
+def _reset_combined_outputs(output_mode: str) -> None:
+    """Rebuild combined data/report directories from scratch."""
+    out_layout = get_dataset_layout(output_mode)
+    if out_layout.data_root.exists():
+        shutil.rmtree(out_layout.data_root)
+    if out_layout.report_dir.exists():
+        shutil.rmtree(out_layout.report_dir)
+    combined_csv = DATA_DIR / "websites_combined.csv"
+    if combined_csv.exists():
+        combined_csv.unlink()
 
 
 def merge_batches(
@@ -24,6 +44,7 @@ def merge_batches(
     website_csvs: list[Path] | None = None,
 ) -> None:
     """Merge per-batch data directories into a single combined dataset."""
+    _reset_combined_outputs(output_mode)
     out_layout = get_dataset_layout(output_mode)
     out_layout.raw_dir.mkdir(parents=True, exist_ok=True)
     out_layout.processed_dir.mkdir(parents=True, exist_ok=True)
@@ -33,6 +54,8 @@ def merge_batches(
     all_scores: list[pd.DataFrame] = []
     all_pets: list[pd.DataFrame] = []
     all_pets_raw: list[dict] = []
+    pets_run_ids: list[object] = []
+    pets_site_sources: list[object] = []
     raw_count = 0
     processed_count = 0
 
@@ -43,35 +66,32 @@ def merge_batches(
         if batch_layout.raw_dir.exists():
             for json_file in batch_layout.raw_dir.glob("*.json"):
                 dest = out_layout.raw_dir / json_file.name
-                if not dest.exists():
-                    shutil.copy2(json_file, dest)
-                    raw_count += 1
+                data = json.loads(json_file.read_text(encoding="utf-8"))
+                data = _rewrite_source_mode(data, output_mode)
+                dest.write_text(json.dumps(data, indent=2), encoding="utf-8")
+                raw_count += 1
 
         # Copy screenshots
         if batch_layout.screenshots_dir.exists():
             for img in batch_layout.screenshots_dir.glob("*"):
                 dest = out_layout.screenshots_dir / img.name
-                if not dest.exists():
-                    shutil.copy2(img, dest)
+                shutil.copy2(img, dest)
 
         # Copy banners
         if batch_layout.banners_dir.exists():
             for html in batch_layout.banners_dir.glob("*"):
                 dest = out_layout.banners_dir / html.name
-                if not dest.exists():
-                    shutil.copy2(html, dest)
+                shutil.copy2(html, dest)
 
         # Copy processed per-site files, rewriting source_mode to output_mode
         if batch_layout.processed_dir.exists():
             for suffix in ("_classified.json", "_dark_patterns.json", "_score.json"):
                 for f in batch_layout.processed_dir.glob(f"*{suffix}"):
                     dest = out_layout.processed_dir / f.name
-                    if not dest.exists():
-                        data = json.loads(f.read_text(encoding="utf-8"))
-                        if isinstance(data, dict):
-                            data["source_mode"] = output_mode
-                        dest.write_text(json.dumps(data, indent=2), encoding="utf-8")
-                        processed_count += 1
+                    data = json.loads(f.read_text(encoding="utf-8"))
+                    data = _rewrite_source_mode(data, output_mode)
+                    dest.write_text(json.dumps(data, indent=2), encoding="utf-8")
+                    processed_count += 1
 
             # Collect compliance scores
             scores_csv = batch_layout.processed_dir / "compliance_scores.csv"
@@ -88,9 +108,17 @@ def merge_batches(
             if pets_json.exists():
                 data = json.loads(pets_json.read_text(encoding="utf-8"))
                 if isinstance(data, list):
-                    all_pets_raw.extend(data)
+                    for entry in data:
+                        rewritten = _rewrite_source_mode(entry, output_mode)
+                        if isinstance(rewritten, dict):
+                            all_pets_raw.append(rewritten)
                 elif isinstance(data, dict) and "results" in data:
-                    all_pets_raw.extend(data["results"])
+                    pets_run_ids.append(data.get("run_id"))
+                    pets_site_sources.append(data.get("site_list_source"))
+                    for entry in data["results"]:
+                        rewritten = _rewrite_source_mode(entry, output_mode)
+                        if isinstance(rewritten, dict):
+                            all_pets_raw.append(rewritten)
 
     # Merge compliance scores (deduplicate by domain, keep last)
     if all_scores:
@@ -115,7 +143,17 @@ def merge_batches(
     if all_pets_raw:
         out_pets_json = out_layout.processed_dir / "pets_raw_results.json"
         out_pets_json.write_text(
-            json.dumps(all_pets_raw, indent=2), encoding="utf-8"
+            json.dumps(
+                {
+                    "source_mode": output_mode,
+                    "run_id": infer_common_value(pets_run_ids),
+                    "site_list_source": infer_common_value(pets_site_sources),
+                    "generated_at": utc_now_iso(),
+                    "results": all_pets_raw,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
         )
         print(f"Merged pets_raw_results.json: {len(all_pets_raw)} entries")
 

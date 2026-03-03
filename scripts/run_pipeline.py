@@ -247,6 +247,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
         return 0
 
     _write_manifest(manifest_path, manifest)
+    failed_steps: list[str] = []
 
     for step in selected_steps:
         entry = manifest["steps"][step]
@@ -283,9 +284,19 @@ def run_pipeline(args: argparse.Namespace) -> int:
         entry["status"] = "completed" if success else "failed"
         _write_manifest(manifest_path, manifest)
 
+        if not success:
+            failed_steps.append(step)
         if not success and not args.continue_on_error:
             print(f"[FAIL] {step}: {last_error}")
             return 1
+
+    if failed_steps:
+        print("\nPipeline finished with failures:")
+        for step in failed_steps:
+            entry = manifest["steps"][step]
+            print(f"  {step}: {entry.get('last_error') or 'unknown error'}")
+        print(f"Manifest: {manifest_path}")
+        return 1
 
     print(f"\nPipeline finished. Manifest: {manifest_path}")
     return 0
