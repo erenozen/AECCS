@@ -19,6 +19,9 @@ data/.cache/
 !data/websites_*.csv
 !data/tracker_lists/*.txt
 !data/**/.gitkeep
+# Keep browser extension files for PET evaluation
+!data/pet_extensions/
+!data/pet_extensions/**
 reporting/mock/figures/*.png
 reporting/mock/*.html
 reporting/real/figures/*.png
