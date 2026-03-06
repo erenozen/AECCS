@@ -487,6 +487,27 @@ def generate_html_report(
   </figure>
 """)
 
+    # ── Pre-Consent Violations by Category ───────────────────────────
+    pv_by_cat = pv.get("by_category", {})
+    if pv_by_cat:
+        pv_cat_rows = ""
+        for cat_name, cat_data in sorted(pv_by_cat.items(),
+                                          key=lambda x: x[1].get("percentage", 0),
+                                          reverse=True):
+            pv_cat_rows += (
+                f"<tr><td>{cat_name}</td>"
+                f"<td>{cat_data.get('count', 0)}/{cat_data.get('total', 0)}</td>"
+                f"<td>{cat_data.get('percentage', 0):.1f}%</td>"
+                f"<td>{cat_data.get('avg_trackers', 0):.1f}</td></tr>\n"
+            )
+        parts.append(f"""
+  <h3>Pre-Consent Violations by Category</h3>
+  <table>
+    <thead><tr><th>Category</th><th>Sites Affected</th><th>Violation Rate</th><th>Avg Trackers</th></tr></thead>
+    <tbody>{pv_cat_rows}</tbody>
+  </table>
+""")
+
     # ── Tracker Ecosystem ─────────────────────────────────────────────
     ta = metrics.get("tracker_analysis", {})
     top_vendors = ta.get("top_tracker_vendors", [])
@@ -575,6 +596,26 @@ def generate_html_report(
     and eliminated all trackers on just {reject_eliminates_pct:.1f}%.
     On average, sites retained {avg_after_reject:.1f} trackers after rejection compared to
     {avg_no_interaction:.1f} before interaction.
+  </p>
+</section>
+""")
+
+    # Extra consent banner detail (appended right after the section close, re-open not needed)
+    avg_accept_clicks = cba.get("avg_accept_clicks", 0)
+    avg_reject_clicks = cba.get("avg_reject_clicks", 0)
+    no_reject_info = cba.get("sites_without_reject_button", {})
+    no_reject_cnt = no_reject_info.get("count", 0) if isinstance(no_reject_info, dict) else 0
+    no_reject_pct = no_reject_info.get("percentage", 0) if isinstance(no_reject_info, dict) else 0
+    equal_cnt = equal_effort.get("count", 0) if isinstance(equal_effort, dict) else 0
+
+    parts.append(f"""
+<section id="consent-banners-detail">
+  <h3>Accept vs. Reject Click Effort</h3>
+  <p>
+    Accepting consent required an average of {avg_accept_clicks} click(s),
+    while rejecting required {avg_reject_clicks} click(s) —
+    {equal_cnt} sites ({equal_effort_pct:.1f}%) offered equal effort for both actions.
+    {no_reject_cnt} sites ({no_reject_pct:.1f}%) had no visible reject button at all.
   </p>
 </section>
 """)
@@ -708,6 +749,69 @@ def generate_html_report(
     <tbody>{eps_table_rows}</tbody>
   </table>
 """
+    # Per-metric MAE breakdown table
+    per_metric_rows = ""
+    for metric_name, metric_data in dp_tradeoff.items():
+        if not isinstance(metric_data, dict):
+            continue
+        by_eps = metric_data.get("by_epsilon", {})
+        true_val = metric_data.get("true_value", "")
+        row = f"<tr><td>{metric_name}</td><td>{true_val}</td>"
+        for eps_str in sorted(by_eps.keys(), key=float):
+            eps_data = by_eps[eps_str]
+            if isinstance(eps_data, dict):
+                row += f"<td>{eps_data.get('mae', 0):.2f}</td>"
+        row += "</tr>\n"
+        per_metric_rows += row
+
+    if per_metric_rows:
+        eps_headers = "".join(
+            f"<th>\u03b5={e}</th>"
+            for e in sorted(
+                next(iter(dp_tradeoff.values())).get("by_epsilon", {}).keys(),
+                key=float,
+            )
+            if isinstance(next(iter(dp_tradeoff.values())), dict)
+        )
+        dp_section += f"""
+  <h3>Per-Metric MAE Breakdown</h3>
+  <table>
+    <thead><tr><th>Metric</th><th>True Value</th>{eps_headers}</tr></thead>
+    <tbody>{per_metric_rows}</tbody>
+  </table>
+"""
+
+    # Randomized Response detail
+    rr_data = dp_report.get("randomized_response_analysis", {})
+    if rr_data:
+        rr_rows = ""
+        for attr_name, attr_data in rr_data.items():
+            if not isinstance(attr_data, dict):
+                continue
+            true_prop = attr_data.get("true_proportion", 0)
+            rr_rows += f"<tr><td colspan='4'><strong>{attr_name}</strong> (true proportion: {true_prop:.3f})</td></tr>\n"
+            by_eps = attr_data.get("by_epsilon", {})
+            for eps_str in sorted(by_eps.keys(), key=float):
+                eps_info = by_eps[eps_str]
+                if isinstance(eps_info, dict):
+                    est = eps_info.get("estimated_proportion", 0)
+                    err = eps_info.get("error", 0)
+                    label = eps_info.get("note", "")
+                    rr_rows += (
+                        f"<tr><td>\u03b5={eps_str}</td>"
+                        f"<td>{est:.3f}</td>"
+                        f"<td>{err:.3f}</td>"
+                        f"<td>{label}</td></tr>\n"
+                    )
+        if rr_rows:
+            dp_section += f"""
+  <h3>Randomized Response Analysis</h3>
+  <table>
+    <thead><tr><th>Epsilon</th><th>Estimated</th><th>Error</th><th>Privacy Level</th></tr></thead>
+    <tbody>{rr_rows}</tbody>
+  </table>
+"""
+
     dp_section += f"""
   <figure>
     {_embed_image(f_dir / "dp_privacy_utility_tradeoff.png")}
