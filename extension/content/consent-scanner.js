@@ -15,6 +15,12 @@
 (() => {
   "use strict";
 
+  // Guard against duplicate injection (scripting.executeScript re-runs the
+  // file even if it was already loaded).  Without this check, each injection
+  // would register an additional runtime.onMessage listener.
+  if (globalThis._AECCSConsentScannerLoaded) return;
+  globalThis._AECCSConsentScannerLoaded = true;
+
   // ── Dark-pattern keyword lists (from detector.py lines 38-80) ────────────
 
   const GUILT_TRIP_PHRASES = [
@@ -639,11 +645,29 @@
   // ── CMP Detection ────────────────────────────────────────────────────────
 
   function detectCMP() {
+    // Collect script src values — lightweight and avoids reading large DOM HTML.
     const scripts = document.querySelectorAll("script[src]");
     const scriptSrcs = Array.from(scripts).map(s => s.src.toLowerCase());
-    const bodySnippet = (document.body ? document.body.innerHTML.substring(0, 50000) : "").toLowerCase();
-    const headHtml = (document.head ? document.head.innerHTML : "").toLowerCase();
-    const searchText = headHtml + " " + bodySnippet + " " + scriptSrcs.join(" ");
+
+    // Check element IDs, class names, and data attributes for CMP signatures
+    // (e.g. #onetrust-consent-sdk, .didomi-popup).  This is much cheaper than
+    // reading innerHTML of the entire body.
+    const idAndClassTokens = [];
+    const selectorTargets = document.querySelectorAll("[id], [class]");
+    for (const el of selectorTargets) {
+      if (el.id) idAndClassTokens.push(el.id.toLowerCase());
+      if (el.className && typeof el.className === "string") {
+        idAndClassTokens.push(el.className.toLowerCase());
+      }
+      // Some CMPs attach data- attributes (e.g. data-cmp-vendor)
+      for (const attr of el.attributes) {
+        if (attr.name.startsWith("data-")) {
+          idAndClassTokens.push(attr.value.toLowerCase());
+        }
+      }
+    }
+
+    const searchText = scriptSrcs.join(" ") + " " + idAndClassTokens.join(" ");
 
     for (const [cmpName, signatures] of Object.entries(AECCS.CMP_SIGNATURES)) {
       for (const sig of signatures) {
@@ -1102,11 +1126,17 @@
     if (!bannerEl) return result;
 
     const text = (bannerEl.innerText || bannerEl.textContent || "").toLowerCase();
-    const html = bannerEl.innerHTML.toLowerCase();
 
     result.mentionsPurposes = AECCS.PURPOSE_KEYWORDS.some(kw => text.includes(kw));
     result.mentionsVendors = AECCS.VENDOR_KEYWORDS.some(kw => text.includes(kw));
-    result.hasPrivacyPolicyLink = AECCS.PRIVACY_LINK_KEYWORDS.some(kw => html.includes(kw));
+
+    // Check for privacy policy links via DOM traversal rather than innerHTML.
+    const links = bannerEl.querySelectorAll("a[href]");
+    result.hasPrivacyPolicyLink = Array.from(links).some(a => {
+      const href = (a.href || "").toLowerCase();
+      const linkText = (a.textContent || "").toLowerCase();
+      return AECCS.PRIVACY_LINK_KEYWORDS.some(kw => href.includes(kw) || linkText.includes(kw));
+    });
 
     if (text.length > 0) {
       const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);

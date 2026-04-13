@@ -22,20 +22,18 @@
       "128": "icons/icon-128.png"
     }
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": [
-        "lib/browser-polyfill.js",
-        "lib/tracker-data.js",
-        "content/consent-scanner.js"
-      ],
-      "run_at": "document_idle"
-    }
-  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "aeccs@compliance-checker",
+      "strict_min_version": "109.0"
+    }
   }
 }

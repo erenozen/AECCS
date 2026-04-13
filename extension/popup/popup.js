@@ -142,9 +142,9 @@
   }
 
   function renderStudyCopy(studyMetadata) {
-    const snapshotDateLabel = studyMetadata?.snapshotDateLabel || "March 1, 2026";
-    const sampleSize = studyMetadata?.sampleSize || 100;
-    const successfulCrawls = studyMetadata?.successfulCrawls || 97;
+    const snapshotDateLabel = studyMetadata?.snapshotDateLabel || "March 2026";
+    const sampleSize = studyMetadata?.sampleSize || 1000;
+    const successfulCrawls = studyMetadata?.successfulCrawls || 861;
 
     if (els.govNote) {
       els.govNote.textContent =
@@ -278,7 +278,7 @@
       els.cmpInfo.classList.remove("hidden");
       els.cmpInfo.innerHTML = `
         <div class="cmp-stats">
-          <div class="cmp-stats-title">${esc(scan.cmpDetected)} in the ${studyMetadata?.sampleSize || 100}-site AECCS snapshot</div>
+          <div class="cmp-stats-title">${esc(scan.cmpDetected)} in the ${studyMetadata?.sampleSize || 1000}-site AECCS snapshot</div>
           <div class="cmp-stat-row"><span>Avg compliance score</span><span>${cmpStats.avgScore}/100</span></div>
           <div class="cmp-stat-row"><span>Sites with reject button</span><span>${Math.round(cmpStats.rejectRate * 100)}%</span></div>
           <div class="cmp-stat-row"><span>Sample size</span><span>${cmpStats.sampleSize} sites</span></div>
@@ -460,7 +460,7 @@
 
     html += `<div class="insight-card">`;
     html += `<div class="insight-card-title">Snapshot Metrics</div>`;
-    html += `<div class="insight-kv"><span>Study baseline</span><strong>${study.sampleSize || 100} sites / ${study.successfulCrawls || 97} successful crawls</strong></div>`;
+    html += `<div class="insight-kv"><span>Study baseline</span><strong>${study.sampleSize || 1000} sites / ${study.successfulCrawls || 861} successful crawls</strong></div>`;
     html += `<div class="insight-kv"><span>Average compliance score</span><strong>${study.avgCompliance || 33.1}/100</strong></div>`;
     html += `<div class="insight-kv"><span>Missing reject rate</span><strong>${formatPercent(study.missingRejectRate)}</strong></div>`;
     html += `<div class="insight-kv"><span>Multi-layer rejection</span><strong>${formatPercent(study.multiLayerRate)}</strong></div>`;

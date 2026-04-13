@@ -63,25 +63,25 @@ async function handleAnalyze(tabId) {
   // 3. Classify cookies
   const classified = Classifier.classifyAll(cookies, hostname);
 
-  // 4. Ask content script to scan the DOM
+  // 4. Inject content script (if not already present) and scan the DOM.
+  //    We inject programmatically on-demand rather than via manifest
+  //    content_scripts — this avoids running code on every page load and
+  //    improves the extension's privacy posture for store review.
   let consentScan = null;
   try {
+    // Inject scripts.  The consent-scanner.js IIFE has a guard that skips
+    // re-initialisation if it was already loaded, so this is idempotent.
+    await browser.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: [
+        "lib/browser-polyfill.js",
+        "lib/tracker-data.js",
+        "content/consent-scanner.js",
+      ],
+    });
     consentScan = await browser.tabs.sendMessage(tab.id, { action: "scanConsent" });
-  } catch (_) {
-    // Content script might not be injected yet — try programmatic injection
-    try {
-      await browser.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: [
-          "lib/browser-polyfill.js",
-          "lib/tracker-data.js",
-          "content/consent-scanner.js",
-        ],
-      });
-      consentScan = await browser.tabs.sendMessage(tab.id, { action: "scanConsent" });
-    } catch (err2) {
-      consentScan = { error: `Content script unavailable: ${err2.message}` };
-    }
+  } catch (err) {
+    consentScan = { error: `Content script unavailable: ${err.message}` };
   }
 
   // 5. Compute compliance score
