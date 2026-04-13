@@ -26,6 +26,7 @@ AECCS is grounded in the completed 1000-site combined study snapshot (`combined-
 - reproducible open-pipeline provenance
 
 Project repo / methodology reference: https://github.com/erenozen/AECCS
+Privacy policy: https://erenozen.github.io/AECCS/privacy-policy.html
 
 ## Key Differentiators
 

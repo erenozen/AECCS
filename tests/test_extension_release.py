@@ -16,6 +16,7 @@ REVIEWER_NOTES = ROOT / "docs" / "extension_reviewer_notes.md"
 RELEASE_CHECKLIST = ROOT / "docs" / "extension_release_checklist.md"
 PACKAGE_SCRIPT = ROOT / "scripts" / "package_extension_release.py"
 MANIFEST = ROOT / "extension" / "manifest.json"
+PUBLIC_PRIVACY_POLICY_URL = "https://erenozen.github.io/AECCS/privacy-policy.html"
 
 
 def test_privacy_policy_matches_release_behavior() -> None:
@@ -34,6 +35,7 @@ def test_privacy_policy_matches_release_behavior() -> None:
     assert "build_extension_tracker_index.py" in text
     assert "https://github.com/erenozen/AECCS" in text
     assert "https://github.com/erenozen/AECCS/issues" in text
+    assert PUBLIC_PRIVACY_POLICY_URL in text
 
 
 def test_release_docs_cover_store_and_reviewer_workflows() -> None:
@@ -48,10 +50,14 @@ def test_release_docs_cover_store_and_reviewer_workflows() -> None:
     assert "Chrome Web Store" in chrome_text
     assert "Single Purpose" in chrome_text
     assert "no remote code" in chrome_text.lower()
-    assert "privacy-policy.html" in chrome_text
+    assert PUBLIC_PRIVACY_POLICY_URL in chrome_text
 
     assert "Firefox Add-ons" in firefox_text
+    assert PUBLIC_PRIVACY_POLICY_URL in firefox_text
     assert "listed add-on" in checklist_text
+    assert "Submit Firefox First" in checklist_text
+    assert "Submit Chrome Immediately After" in checklist_text
+    assert "440x280" in checklist_text
     assert "generated static assets" in firefox_text.lower()
 
     assert "`cookies`" in reviewer_text
@@ -60,10 +66,11 @@ def test_release_docs_cover_store_and_reviewer_workflows() -> None:
     assert "`<all_urls>`" in reviewer_text
     assert "study-snapshot.js" in reviewer_text
     assert "tracker-index.js" in reviewer_text
+    assert PUBLIC_PRIVACY_POLICY_URL in reviewer_text
 
     assert "deferred publishing" in checklist_text.lower()
-    assert "GitHub Pages" in checklist_text
     assert "package_extension_release.py" in checklist_text
+    assert PUBLIC_PRIVACY_POLICY_URL in checklist_text
 
 
 def test_release_packaging_script_builds_expected_archives(tmp_path: Path) -> None:
@@ -97,6 +104,7 @@ def test_release_packaging_script_builds_expected_archives(tmp_path: Path) -> No
     assert manifest_payload["chromePackage"] == chrome_zip.name
     assert manifest_payload["firefoxPackage"] == firefox_zip.name
     assert manifest_payload["reviewerSourcePackage"] == reviewer_zip.name
+    assert manifest_payload["privacyPolicyUrl"] == PUBLIC_PRIVACY_POLICY_URL
 
     with zipfile.ZipFile(chrome_zip) as zf:
         names = set(zf.namelist())

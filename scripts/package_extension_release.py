@@ -15,6 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 EXTENSION_DIR = ROOT / "extension"
 MANIFEST_PATH = EXTENSION_DIR / "manifest.json"
 DEFAULT_OUTPUT_DIR = ROOT / "dist" / "extension-release"
+HOMEPAGE_URL = "https://github.com/erenozen/AECCS"
+SUPPORT_URL = "https://github.com/erenozen/AECCS/issues"
+PRIVACY_POLICY_URL = "https://erenozen.github.io/AECCS/privacy-policy.html"
 
 REVIEWER_SOURCE_FILES = [
     "extension",
@@ -81,8 +84,9 @@ def build_release_manifest(output_path: Path, version: str, files: dict[str, str
         "chromePackage": files["chrome"],
         "firefoxPackage": files["firefox"],
         "reviewerSourcePackage": files["reviewer"],
-        "homepageUrl": "https://github.com/erenozen/AECCS",
-        "supportUrl": "https://github.com/erenozen/AECCS/issues",
+        "homepageUrl": HOMEPAGE_URL,
+        "supportUrl": SUPPORT_URL,
+        "privacyPolicyUrl": PRIVACY_POLICY_URL,
         "privacyPolicyPath": "docs/privacy-policy.html",
     }
     output_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

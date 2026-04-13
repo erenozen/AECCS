@@ -1,76 +1,108 @@
 # AECCS Extension Release Checklist
 
+## Release Baseline
+
+- Release target: `1.0.0` if no more code changes are made before submission
+- Publisher identity: personal publisher account, using AECCS as the product brand
+- Release model: listed add-on / public extension on both Firefox AMO and Chrome Web Store
+- Product posture:
+  - passive local auditor
+  - no blocking
+  - no auto-clicking
+  - no remote scan
+  - no telemetry
+  - no new permissions beyond `cookies`, `activeTab`, `scripting`, and `<all_urls>`
+
 ## Public URLs
 
 - Homepage URL: `https://github.com/erenozen/AECCS`
 - Support URL: `https://github.com/erenozen/AECCS/issues`
-- Privacy policy URL: host `docs/privacy-policy.html` at a stable HTTPS URL before submission
-- Recommended hosting path if using GitHub Pages: `https://erenozen.github.io/AECCS/privacy-policy.html`
+- Privacy policy URL: `https://erenozen.github.io/AECCS/privacy-policy.html`
 
-## Before Packaging
+## Freeze The Release Candidate
 
-1. Update `extension/manifest.json` version for the release.
-2. Confirm `docs/privacy-policy.html` still matches the extension’s real behavior.
-3. Confirm `docs/extension_store_listing.md`, `docs/extension_store_listing_chrome.md`, and `docs/extension_store_listing_firefox.md` use the same product framing.
-4. Confirm `docs/extension_reviewer_notes.md` still matches permissions and generated assets.
-5. Collect store screenshots:
-   - popup score / cookie breakdown / trackers
+1. Use the current extension behavior and current permission set as the first public release.
+2. If code changes after this point, bump `extension/manifest.json` before packaging.
+3. Submit both stores from the same commit and the same packaged extension contents.
+
+## Store Assets
+
+1. Prepare 4 real popup screenshots:
+   - score + cookie breakdown + trackers
    - consent analysis + accept vs reject UX comparison
    - dark-pattern cards + criteria breakdown
    - expanded `AECCS Study Insights`
+2. Prepare Chrome promo art:
+   - small promo tile `440x280`
+3. Recheck that screenshots match the shipped UI and combined-study wording.
 
-## Build And Verify
+## Build Submission Artifacts
 
 1. Run:
-   - `python scripts/package_extension_release.py --version X.Y.Z`
-2. This should:
-   - regenerate `study-snapshot.js`
-   - regenerate `tracker-index.js`
-   - build Chrome and Firefox upload ZIPs from `extension/`
-   - build a reviewer/source archive
-3. Run focused verification:
+   - `python scripts/package_extension_release.py --version 1.0.0`
+2. Confirm this generates into `dist/extension-release/`:
+   - Chrome upload ZIP
+   - Firefox upload ZIP
+   - reviewer/source ZIP
+   - release manifest JSON
+3. Keep the reviewer/source ZIP ready for Firefox even if AMO does not require it immediately.
+
+## Verify Before Submission
+
+1. Run focused verification:
    - `node --check extension/lib/tracker-data.js`
    - `node --check extension/popup/popup.js`
-   - `pytest -q tests/test_extension_scanner.py`
-4. Manually load the packaged extension in Chrome and Firefox and confirm:
+   - `pytest -q tests/test_extension_scanner.py tests/test_extension_release.py`
+2. Manually install the packaged extension in Chrome and Firefox.
+3. Confirm:
    - popup opens
-   - analysis still works on demand
-   - permission prompts are expected
-   - privacy-policy URL is ready for store submission
+   - analysis runs only on demand
+   - permissions shown match expectations
+   - `manifest.json` is at the ZIP root
+   - generated static assets are bundled
+   - privacy policy URL opens correctly
 
-## Chrome Web Store Submission
+## Submit Firefox First
 
-1. Create or open the Chrome Web Store developer account.
-2. Upload the Chrome ZIP built from `extension/`.
-3. Use the Chrome store copy from `docs/extension_store_listing_chrome.md`.
-4. In privacy answers and reviewer text, state:
-   - passive local auditor
+1. Open AMO Developer Hub and create a **listed add-on** submission.
+2. Upload the Firefox ZIP from `dist/extension-release/`.
+3. If source code is requested, answer **Yes** and upload the reviewer/source ZIP.
+4. Fill the listing using `docs/extension_store_listing_firefox.md`.
+5. Paste reviewer notes from `docs/extension_reviewer_notes.md`.
+6. Use Firefox desktop as the compatible platform.
+7. Do not mark the add-on experimental unless reduced visibility is intentional.
+8. Be ready for reviewer questions about:
+   - why `cookies`, `activeTab`, `scripting`, and `<all_urls>` are needed
+   - generated static assets `study-snapshot.js` and `tracker-index.js`
+   - local-only privacy posture with no data transmission
+
+## Submit Chrome Immediately After
+
+1. Open the Chrome Web Store Developer Dashboard and choose **Add new item**.
+2. Upload the Chrome ZIP from `dist/extension-release/`.
+3. Fill the listing using `docs/extension_store_listing_chrome.md`.
+4. In the Privacy tab, use these exact justifications:
+   - `cookies`: read cookies for the current site so they can be classified and counted
+   - `activeTab`: access the current page URL when the user clicks the extension
+   - `scripting`: inject the consent scanner only on demand into the active tab
+   - `<all_urls>`: required for the cookies API to read cookies for the active page; not used for remote requests
+5. Privacy answers should state:
+   - no off-device transfer
+   - no sale of user data
+   - no analytics or telemetry
    - no remote code
-   - no telemetry
-   - no off-device data transmission
-   - permissions are required only for current-page analysis
-5. Use deferred publishing so approval does not go live before Firefox is ready.
-
-## Firefox AMO Submission
-
-1. Create or open the AMO developer account.
-2. Submit the Firefox ZIP as a listed add-on.
-3. Use the Firefox listing copy from `docs/extension_store_listing_firefox.md`.
-4. Paste reviewer notes from `docs/extension_reviewer_notes.md`.
-5. Be ready to answer manual review questions about:
-   - generated static assets
-   - large tracker index file
-   - local-only privacy model
+   - privacy policy URL: `https://erenozen.github.io/AECCS/privacy-policy.html`
+6. Use deferred publishing so Chrome approval does not go live before Firefox is ready.
 
 ## Launch Window
 
-1. Submit Firefox slightly earlier if timing needs help.
-2. Keep Chrome deferred until Firefox is approved or close to approval.
-3. Publish both stores on the same day.
+1. Wait for Firefox approval, or at least for Firefox review to be near completion.
+2. Publish Chrome from deferred state and publish Firefox on the same day.
+3. Save both public store URLs into repo docs after launch.
 4. Tag the repo release after both listings are live.
 
 ## First-Week Monitoring
 
-1. Watch store review feedback and policy messages.
+1. Watch AMO and Chrome review feedback closely.
 2. Watch GitHub issues for user support.
-3. Avoid adding permissions or changing privacy posture until the first release stabilizes.
+3. Avoid privacy-posture or permission changes until the first release stabilizes.
