@@ -10,15 +10,17 @@
  *   6. Return full analysis to popup
  */
 
-importScripts(
-  "../lib/browser-polyfill.js",
-  "../lib/study-snapshot.js",
-  "../lib/tracker-data.js",
-  "../lib/tracker-index.js",
-  "../lib/domain-utils.js",
-  "../lib/classifier.js",
-  "../lib/scorer.js"
-);
+if (typeof importScripts === "function") {
+  importScripts(
+    "../lib/browser-polyfill.js",
+    "../lib/study-snapshot.js",
+    "../lib/tracker-data.js",
+    "../lib/tracker-index.js",
+    "../lib/domain-utils.js",
+    "../lib/classifier.js",
+    "../lib/scorer.js"
+  );
+}
 
 browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action !== "analyze") return;

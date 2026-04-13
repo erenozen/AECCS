@@ -37,5 +37,7 @@ These files are not downloaded at runtime, do not execute remote code, and do no
 
 - Upload package: archive of the `extension/` directory only, with `manifest.json` at the root of the ZIP
 - Reviewer/source package: include `extension/`, `scripts/build_extension_study_snapshot.py`, `scripts/build_extension_tracker_index.py`, `docs/privacy-policy.html`, and release docs
+- Firefox submission package adds `background.scripts` only as a Firefox compatibility fallback; Chrome continues to use the MV3 `background.service_worker` manifest shape
+- `browser_specific_settings.gecko.data_collection_permissions.required = ["none"]` explicitly declares that the extension does not collect or transmit data off-device
 - Store listing and privacy policy are aligned with the actual runtime behavior in the shipped extension
 - Public privacy policy URL for store submission: `https://erenozen.github.io/AECCS/privacy-policy.html`

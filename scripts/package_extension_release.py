@@ -7,6 +7,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -18,6 +19,16 @@ DEFAULT_OUTPUT_DIR = ROOT / "dist" / "extension-release"
 HOMEPAGE_URL = "https://github.com/erenozen/AECCS"
 SUPPORT_URL = "https://github.com/erenozen/AECCS/issues"
 PRIVACY_POLICY_URL = "https://erenozen.github.io/AECCS/privacy-policy.html"
+FIREFOX_BACKGROUND_SCRIPTS = [
+    "lib/browser-polyfill.js",
+    "lib/study-snapshot.js",
+    "lib/tracker-data.js",
+    "lib/tracker-index.js",
+    "lib/domain-utils.js",
+    "lib/classifier.js",
+    "lib/scorer.js",
+    "background/service-worker.js",
+]
 
 REVIEWER_SOURCE_FILES = [
     "extension",
@@ -41,6 +52,10 @@ def write_manifest(manifest: dict) -> None:
     MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 
+def write_manifest_to_path(path: Path, manifest: dict) -> None:
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+
 def bump_version(version: str | None) -> str:
     manifest = load_manifest()
     if version:
@@ -62,9 +77,29 @@ def add_tree_to_zip(zf: zipfile.ZipFile, base_dir: Path, root_in_zip: Path | Non
         zf.write(path, (root_in_zip / relative).as_posix())
 
 
-def build_extension_zip(output_path: Path) -> None:
+def build_extension_zip(output_path: Path, source_dir: Path = EXTENSION_DIR) -> None:
     with zipfile.ZipFile(output_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        add_tree_to_zip(zf, EXTENSION_DIR)
+        add_tree_to_zip(zf, source_dir)
+
+
+def build_firefox_manifest(manifest: dict) -> dict:
+    firefox_manifest = json.loads(json.dumps(manifest))
+    background = firefox_manifest.setdefault("background", {})
+    background["scripts"] = FIREFOX_BACKGROUND_SCRIPTS
+
+    gecko = firefox_manifest.setdefault("browser_specific_settings", {}).setdefault("gecko", {})
+    gecko["data_collection_permissions"] = {"required": ["none"]}
+    return firefox_manifest
+
+
+def build_firefox_zip(output_path: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="aeccs-firefox-package-") as tmp_dir:
+      staged_dir = Path(tmp_dir) / "extension"
+      shutil.copytree(EXTENSION_DIR, staged_dir)
+      manifest_path = staged_dir / "manifest.json"
+      manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+      write_manifest_to_path(manifest_path, build_firefox_manifest(manifest))
+      build_extension_zip(output_path, staged_dir)
 
 
 def build_reviewer_source_zip(output_path: Path) -> None:
@@ -113,7 +148,7 @@ def main() -> None:
     manifest_json = args.output_dir / f"aeccs-extension-release-{version}.json"
 
     build_extension_zip(chrome_zip)
-    shutil.copyfile(chrome_zip, firefox_zip)
+    build_firefox_zip(firefox_zip)
     build_reviewer_source_zip(reviewer_zip)
     build_release_manifest(
         manifest_json,
