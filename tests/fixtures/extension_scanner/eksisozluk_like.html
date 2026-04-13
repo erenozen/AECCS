@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Eksisozluk-like Consent Banner</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f7;
+      font-family: sans-serif;
+    }
+
+    .consent-modal {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      width: 720px;
+      padding: 28px;
+      background: #ffffff;
+      color: #1f2937;
+      border-radius: 22px;
+      box-shadow: 0 18px 60px rgba(15, 23, 42, 0.24);
+    }
+
+    .consent-modal h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+
+    .consent-modal p {
+      margin: 0 0 14px;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    .consent-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .consent-actions button {
+      min-width: 240px;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .manage-btn {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .accept-btn {
+      background: #2563eb;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <section class="consent-modal" role="dialog" aria-modal="true">
+    <h2>eksisozluk.com size daha iyi reklam deneyimi sunabilmek icin izninizi istiyor</h2>
+    <p>
+      Kisisellestirilmis reklam ve icerik, reklam ve icerik olcumu,
+      hedef kitle arastirmasi ve hizmetlerin gelistirilmesi icin cerez kullanilir.
+    </p>
+    <p>
+      Bazi tedarikciler, tercihlerinizi yoneterek itiraz edebileceginiz mesru menfaat
+      dayali olarak veri isleyebilir.
+    </p>
+
+    <div class="consent-actions">
+      <button class="manage-btn">Seçenekleri yönetin</button>
+      <button class="accept-btn">İzin ver</button>
+    </div>
+  </section>
+</body>
+</html>

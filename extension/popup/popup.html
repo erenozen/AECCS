@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+  <title>AECCS Compliance Checker</title>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">
+        <svg class="logo" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L3 7v6c0 5.25 3.83 10.15 9 11.25C17.17 23.15 21 18.25 21 13V7l-9-5z"
+                fill="#6366f1" opacity="0.2"/>
+          <path d="M12 2L3 7v6c0 5.25 3.83 10.15 9 11.25C17.17 23.15 21 18.25 21 13V7l-9-5z"
+                stroke="#6366f1" stroke-width="2" fill="none"/>
+          <path d="M9 12l2 2 4-4" stroke="#6366f1" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round"/>
+        </svg>
+        <span>AECCS Compliance Checker</span>
+      </div>
+      <div class="site-domain" id="siteDomain">—</div>
+    </header>
+
+    <!-- Loading state -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <span>Analyzing compliance...</span>
+    </div>
+
+    <!-- Error state -->
+    <div id="errorState" class="error-state hidden">
+      <span class="error-icon">!</span>
+      <span id="errorMsg">An error occurred.</span>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden">
+
+      <!-- Government domain alert -->
+      <div id="govAlert" class="gov-alert hidden">
+        <span class="gov-icon">&#127963;</span>
+        <div>
+          <strong>Government / Public Sector Site</strong>
+          <div class="gov-note" id="govNote">Public bodies have stricter GDPR obligations, so consent failures on these domains may be especially serious.</div>
+        </div>
+      </div>
+
+      <!-- Score badge -->
+      <section class="score-card">
+        <div class="grade-badge" id="gradeBadge">
+          <span class="grade-letter" id="gradeLetter">-</span>
+        </div>
+        <div class="score-info">
+          <div class="score-value"><span id="scoreValue">-</span><span class="score-max">/100</span></div>
+          <div class="score-label">GDPR Compliance Score</div>
+        </div>
+      </section>
+
+      <!-- Cookie breakdown -->
+      <section class="section">
+        <h2 class="section-title">Cookie Breakdown</h2>
+        <div class="cookie-bar" id="cookieBar"></div>
+        <div class="cookie-counts" id="cookieCounts"></div>
+        <div class="cookie-meta" id="cookieMeta"></div>
+      </section>
+
+      <!-- Trackers -->
+      <section class="section" id="trackerSection">
+        <h2 class="section-title">Detected Trackers</h2>
+        <div id="trackerList"></div>
+      </section>
+
+      <!-- Consent Banner + CMP -->
+      <section class="section">
+        <h2 class="section-title">Consent Banner Analysis</h2>
+        <div id="consentInfo"></div>
+        <div id="cmpInfo" class="hidden"></div>
+      </section>
+
+      <!-- Accept vs Reject UX Comparison (unique to AECCS) -->
+      <section class="section" id="buttonCompSection">
+        <h2 class="section-title">Accept vs Reject UX Comparison</h2>
+        <div id="buttonComparison"></div>
+      </section>
+
+      <!-- Dark Patterns (with GDPR article references) -->
+      <section class="section" id="darkPatternSection">
+        <h2 class="section-title">Dark Pattern Analysis</h2>
+        <div id="darkPatternDetails"></div>
+      </section>
+
+      <!-- Criteria breakdown -->
+      <section class="section">
+        <h2 class="section-title">Criteria Breakdown</h2>
+        <table class="criteria-table" id="criteriaTable">
+          <thead>
+            <tr><th>Criterion</th><th>Score</th><th></th></tr>
+          </thead>
+          <tbody id="criteriaBody"></tbody>
+        </table>
+      </section>
+
+      <!-- PET Recommendations (unique to AECCS) -->
+      <section class="section" id="petSection">
+        <h2 class="section-title">Recommended Privacy Tools</h2>
+        <div class="pet-subtitle" id="petSubtitle">Guidance combines this page's live findings with the AECCS 1000-site combined study (861 successful crawls, March 6, 2026)</div>
+        <div id="petList"></div>
+      </section>
+
+      <details class="section study-insights hidden" id="studyInsightsSection">
+        <summary class="study-insights-toggle">
+          <span>AECCS Study Insights</span>
+          <span class="study-insights-meta">Why this extension is different</span>
+        </summary>
+        <div id="studyInsightsContent" class="study-insights-content"></div>
+      </details>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="footerNote">
+      AECCS &mdash; Passive local audit &middot; 1000-site combined study snapshot &middot; March 6, 2026
+    </footer>
+  </div>
+
+  <script src="../lib/browser-polyfill.js"></script>
+  <script src="../lib/study-snapshot.js"></script>
+  <script src="../lib/tracker-data.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Attribute Label Banner</title>
+  <style>
+    .privacy-dialog {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      width: 420px;
+      padding: 18px;
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid #cbd5e1;
+      font-family: sans-serif;
+    }
+
+    .privacy-dialog .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .privacy-dialog button,
+    .privacy-dialog input {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="privacy-dialog" role="dialog">
+    <p>This site uses cookies for analytics and privacy preferences.</p>
+    <div class="actions">
+      <button title="Reject All"></button>
+      <input type="submit" value="Accept All">
+    </div>
+  </div>
+</body>
+</html>
