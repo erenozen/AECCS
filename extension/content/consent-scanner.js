@@ -73,9 +73,17 @@
     "configurar",
     "impostazioni",
     "ayarlar",
+    "secenekleri yonetin",
+    "secenekleri yonet",
+    "tercihleri yonetin",
+    "tercihleri yonet",
+    "cerez tercihleri",
+    "gizlilik tercihleri",
+    "izin secenekleri",
+    "secenekler",
   ];
 
-  const CONSENT_TEXT_RE = /cookie|consent|gdpr|privacy|data protection|datenschutz/i;
+  const CONSENT_TEXT_RE = /cookie|cookies|consent|gdpr|privacy|data protection|datenschutz|cerez|gizlilik/i;
   const ATTR_HINT_RE = /cookie|consent|gdpr|privacy|cmp|tcf|onetrust|didomi|trustarc|cookiebot/i;
   const ACTIONABLE_SELECTOR = [
     "button",
@@ -91,6 +99,7 @@
   const MAX_ANCESTOR_DEPTH = 6;
   const DEFAULT_SCAN_ATTEMPTS = 4;
   const DEFAULT_SCAN_DELAY_MS = 160;
+  const MAX_PRESENTATION_DESCENDANTS = 32;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -100,6 +109,13 @@
       .replace(/[\u201C\u201D]/g, "\"")
       .replace(/\s+/g, " ")
       .trim();
+  }
+
+  function normalizeForMatch(value) {
+    return normalizeText(value)
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
   }
 
   function parsePx(value) {
@@ -214,25 +230,37 @@
     return options[0];
   }
 
+  const ACCEPT_BUTTON_KEYWORDS = AECCS.CONSENT_BUTTON_KEYWORDS.accept
+    .map(normalizeForMatch)
+    .filter(Boolean);
+  const REJECT_BUTTON_KEYWORDS = AECCS.CONSENT_BUTTON_KEYWORDS.reject
+    .map(normalizeForMatch)
+    .filter(Boolean);
+  const SETTINGS_BUTTON_KEYWORDS = SETTINGS_KEYWORDS
+    .map(normalizeForMatch)
+    .filter(Boolean);
+  const ALL_CONSENT_ACTION_KEYWORDS = Array.from(new Set([
+    ...ACCEPT_BUTTON_KEYWORDS,
+    ...REJECT_BUTTON_KEYWORDS,
+    ...SETTINGS_BUTTON_KEYWORDS,
+  ]));
+
+  function hasKeywordMatch(text, keywords, { exactOnly = false } = {}) {
+    if (!text) return false;
+    if (keywords.includes(text)) return true;
+    if (exactOnly) return false;
+    return keywords.some(kw => text.includes(kw));
+  }
+
   function classifyButtonText(text) {
-    const normalized = normalizeText(text).toLowerCase();
+    const normalized = normalizeForMatch(text);
     if (!normalized) return "unknown";
 
-    for (const kw of AECCS.CONSENT_BUTTON_KEYWORDS.accept) {
-      if (kw.toLowerCase() === normalized) return "accept";
-    }
-    for (const kw of AECCS.CONSENT_BUTTON_KEYWORDS.reject) {
-      if (kw.toLowerCase() === normalized) return "reject";
-    }
-    for (const kw of AECCS.CONSENT_BUTTON_KEYWORDS.reject) {
-      if (normalized.includes(kw.toLowerCase())) return "reject";
-    }
-    for (const kw of AECCS.CONSENT_BUTTON_KEYWORDS.accept) {
-      if (normalized.includes(kw.toLowerCase())) return "accept";
-    }
-    for (const kw of SETTINGS_KEYWORDS) {
-      if (normalized.includes(kw)) return "settings";
-    }
+    if (hasKeywordMatch(normalized, REJECT_BUTTON_KEYWORDS, { exactOnly: true })) return "reject";
+    if (hasKeywordMatch(normalized, ACCEPT_BUTTON_KEYWORDS, { exactOnly: true })) return "accept";
+    if (hasKeywordMatch(normalized, REJECT_BUTTON_KEYWORDS)) return "reject";
+    if (hasKeywordMatch(normalized, ACCEPT_BUTTON_KEYWORDS)) return "accept";
+    if (hasKeywordMatch(normalized, SETTINGS_BUTTON_KEYWORDS)) return "settings";
     return "unknown";
   }
 
@@ -252,27 +280,21 @@
 
   function elementAttributeHaystack(el) {
     if (!el) return "";
-    return [
+    return normalizeForMatch([
       el.id || "",
       el.className || "",
       el.getAttribute && el.getAttribute("role"),
       el.getAttribute && el.getAttribute("aria-label"),
       el.getAttribute && el.getAttribute("data-testid"),
       el.getAttribute && el.getAttribute("data-test-id"),
-    ].join(" ").toLowerCase();
+    ].join(" "));
   }
 
   function hasConsentLikeText(text) {
-    if (!text) return false;
-    if (CONSENT_TEXT_RE.test(text)) return true;
-
-    const lower = text.toLowerCase();
-    const allKeywords = [
-      ...AECCS.CONSENT_BUTTON_KEYWORDS.accept,
-      ...AECCS.CONSENT_BUTTON_KEYWORDS.reject,
-      ...SETTINGS_KEYWORDS,
-    ];
-    return allKeywords.some(kw => lower.includes(kw.toLowerCase()));
+    const normalized = normalizeForMatch(text);
+    if (!normalized) return false;
+    if (CONSENT_TEXT_RE.test(normalized)) return true;
+    return hasKeywordMatch(normalized, ALL_CONSENT_ACTION_KEYWORDS);
   }
 
   function collectActionableElements(root, { includeHidden = false } = {}) {
@@ -334,6 +356,286 @@
     };
   }
 
+  function isTransparentColor(value) {
+    if (!value) return true;
+    const parsed = parseRgb(value);
+    if (!parsed) {
+      const normalized = String(value).trim().toLowerCase();
+      return normalized === "" || normalized === "transparent";
+    }
+    return parsed.alpha <= 0.05;
+  }
+
+  function hasVisibleBorder(style) {
+    const widths = [
+      parsePx(style.borderTopWidth),
+      parsePx(style.borderRightWidth),
+      parsePx(style.borderBottomWidth),
+      parsePx(style.borderLeftWidth),
+    ];
+    const styles = [
+      style.borderTopStyle,
+      style.borderRightStyle,
+      style.borderBottomStyle,
+      style.borderLeftStyle,
+    ].map(value => String(value || "").toLowerCase());
+
+    return widths.some((width, index) => width > 0 && styles[index] !== "none");
+  }
+
+  function hasRoundedCorners(style) {
+    return [
+      style.borderTopLeftRadius,
+      style.borderTopRightRadius,
+      style.borderBottomRightRadius,
+      style.borderBottomLeftRadius,
+    ].some(value => parsePx(value) > 0);
+  }
+
+  function getVisualStyleFlags(style) {
+    const backgroundImage = String(style.backgroundImage || "").toLowerCase();
+    const hasBackgroundImage = backgroundImage !== "" && backgroundImage !== "none";
+    const hasSolidBackground = !isTransparentColor(style.backgroundColor);
+    const visibleBorder = hasVisibleBorder(style);
+    const roundedCorners = hasRoundedCorners(style);
+    const boxShadow = String(style.boxShadow || "").toLowerCase();
+    const hasBoxShadow = boxShadow !== "" && boxShadow !== "none";
+
+    return {
+      hasBackgroundImage,
+      hasSolidBackground,
+      visibleBorder,
+      roundedCorners,
+      hasBoxShadow,
+    };
+  }
+
+  function hasMeaningfulPaint(flags) {
+    return flags.hasSolidBackground ||
+      flags.hasBackgroundImage ||
+      flags.visibleBorder ||
+      flags.roundedCorners ||
+      flags.hasBoxShadow;
+  }
+
+  function getRectArea(rect) {
+    if (!rect) return 0;
+    return Math.max(0, rect.width) * Math.max(0, rect.height);
+  }
+
+  function getIntersectionArea(a, b) {
+    if (!a || !b) return 0;
+    const left = Math.max(a.left, b.left);
+    const right = Math.min(a.right, b.right);
+    const top = Math.max(a.top, b.top);
+    const bottom = Math.min(a.bottom, b.bottom);
+
+    if (right <= left || bottom <= top) return 0;
+    return (right - left) * (bottom - top);
+  }
+
+  function describeStyleSource(el, pseudo = null) {
+    const base = describeElement(el) || "element";
+    return pseudo ? `${base}${pseudo}` : base;
+  }
+
+  function textMatchesAction(candidateEl, actionLabel) {
+    if (!candidateEl || !actionLabel) return false;
+    const candidateLabel = normalizeForMatch(getElementLabel(candidateEl) || getElementText(candidateEl));
+    if (!candidateLabel) return false;
+    return candidateLabel.includes(actionLabel) || actionLabel.includes(candidateLabel);
+  }
+
+  function collectActionTextRects(actionEl, actionLabel) {
+    if (!actionEl || !actionLabel) return [];
+
+    const rects = [];
+    const seen = new Set();
+
+    const maybeAdd = el => {
+      if (!el || seen.has(el) || !isElementVisible(el) || !textMatchesAction(el, actionLabel)) return;
+      const rect = el.getBoundingClientRect();
+      if (getRectArea(rect) === 0) return;
+      seen.add(el);
+      rects.push(rect);
+    };
+
+    maybeAdd(actionEl);
+
+    if (actionEl.querySelectorAll) {
+      for (const el of actionEl.querySelectorAll("*")) {
+        maybeAdd(el);
+      }
+    }
+
+    return rects;
+  }
+
+  function buildPresentationCandidate(element, pseudo = null) {
+    if (!element || !isElementVisible(element)) return null;
+
+    const rect = element.getBoundingClientRect();
+    const area = getRectArea(rect);
+    if (area <= 0) return null;
+
+    const style = pseudo ? getComputedStyle(element, pseudo) : getComputedStyle(element);
+    const flags = getVisualStyleFlags(style);
+
+    if (pseudo) {
+      const content = String(style.content || "").trim().toLowerCase();
+      if (content === "none" && !hasMeaningfulPaint(flags)) {
+        return null;
+      }
+    }
+
+    return {
+      element,
+      pseudo,
+      rect,
+      area,
+      style,
+      flags,
+      styleSource: describeStyleSource(element, pseudo),
+    };
+  }
+
+  function scorePresentationCandidate(candidate, {
+    actionEl,
+    actionLabel,
+    actionRect,
+    actionArea,
+    textRects,
+  }) {
+    if (!candidate) return Number.NEGATIVE_INFINITY;
+
+    const { element, pseudo, rect, area, style, flags } = candidate;
+    const areaRatio = area / Math.max(1, actionArea);
+    const actionCoverage = getIntersectionArea(rect, actionRect) / Math.max(1, actionArea);
+    const labelMatch = textMatchesAction(element, actionLabel);
+    const paintedLike = hasMeaningfulPaint(flags);
+
+    let bestTextOverlap = 0;
+    for (const textRect of textRects) {
+      const overlap = getIntersectionArea(rect, textRect) / Math.max(1, getRectArea(textRect));
+      if (overlap > bestTextOverlap) {
+        bestTextOverlap = overlap;
+      }
+    }
+
+    let score = pseudo ? 1 : (element === actionEl ? 2 : 0);
+    if (labelMatch) score += 4;
+    if (paintedLike) score += 6;
+    if (flags.hasSolidBackground) score += 4;
+    if (flags.hasBackgroundImage) score += 4;
+    if (flags.visibleBorder) score += 2;
+    if (flags.roundedCorners) score += 2;
+    if (flags.hasBoxShadow) score += 1;
+    if (String(style.cursor || "").toLowerCase() === "pointer") score += 1;
+
+    const fg = parseRgb(style.color);
+    const bg = parseRgb(style.backgroundColor);
+    if (fg && bg && bg.alpha > 0.05) {
+      const cr = contrastRatio(fg.rgb, bg.rgb);
+      if (cr >= 3.0) score += 1;
+    }
+
+    if (actionCoverage >= 0.6) score += 4;
+    else if (actionCoverage >= 0.3) score += 2;
+
+    if (bestTextOverlap >= 0.5) score += 4;
+    else if (bestTextOverlap >= 0.15) score += 2;
+
+    if (areaRatio >= 0.35 && areaRatio <= 1.25) score += 2;
+    if (areaRatio >= 0.55 && areaRatio <= 1.05) score += 2;
+    else if (areaRatio < 0.08) score -= 2;
+    else if (areaRatio > 1.5) score -= 1;
+
+    if (!paintedLike && !labelMatch) score -= 8;
+    if (!labelMatch && bestTextOverlap === 0 && actionCoverage < 0.25) score -= 4;
+
+    return score;
+  }
+
+  function resolvePresentationSource(actionEl) {
+    if (!actionEl || !isElementVisible(actionEl)) return null;
+
+    const actionLabel = normalizeForMatch(getElementLabel(actionEl) || getElementText(actionEl));
+    const actionRect = actionEl.getBoundingClientRect();
+    const actionArea = Math.max(1, getRectArea(actionRect));
+    const textRects = collectActionTextRects(actionEl, actionLabel);
+    const elements = [actionEl];
+
+    if (actionEl.querySelectorAll) {
+      const descendants = Array.from(actionEl.querySelectorAll("*")).slice(0, MAX_PRESENTATION_DESCENDANTS);
+      for (const el of descendants) {
+        if (isElementVisible(el)) {
+          elements.push(el);
+        }
+      }
+    }
+
+    const candidates = [];
+    for (const el of elements) {
+      for (const pseudo of [null, "::before", "::after"]) {
+        const candidate = buildPresentationCandidate(el, pseudo);
+        if (candidate) {
+          candidates.push(candidate);
+        }
+      }
+    }
+
+    let best = buildPresentationCandidate(actionEl);
+    let bestScore = scorePresentationCandidate(best, {
+      actionEl,
+      actionLabel,
+      actionRect,
+      actionArea,
+      textRects,
+    });
+
+    for (const candidate of candidates) {
+      const score = scorePresentationCandidate(candidate, {
+        actionEl,
+        actionLabel,
+        actionRect,
+        actionArea,
+        textRects,
+      });
+      if (score > bestScore) {
+        best = candidate;
+        bestScore = score;
+      }
+    }
+
+    return best;
+  }
+
+  function buildButtonPreview(buttonEl, clicksRequired) {
+    if (!buttonEl) return null;
+
+    const presentation = resolvePresentationSource(buttonEl) || buildPresentationCandidate(buttonEl);
+    const style = presentation ? presentation.style : getComputedStyle(buttonEl);
+    const rect = presentation ? presentation.rect : buttonEl.getBoundingClientRect();
+    const flags = presentation ? presentation.flags : getVisualStyleFlags(style);
+
+    return {
+      text: getElementLabel(buttonEl),
+      width: Math.round(rect.width || parsePx(style.width)),
+      height: Math.round(rect.height || parsePx(style.height)),
+      fontSize: Math.round(parsePx(style.fontSize)),
+      fontWeight: parseFontWeight(style.fontWeight),
+      background: style.background,
+      bgColor: style.backgroundColor,
+      color: style.color,
+      border: style.border,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      clicksRequired: typeof clicksRequired === "number" ? clicksRequired : null,
+      styleSource: presentation ? presentation.styleSource : describeElement(buttonEl),
+      plainLinkLike: !hasMeaningfulPaint(flags),
+    };
+  }
+
   // ── CMP Detection ────────────────────────────────────────────────────────
 
   function detectCMP() {
@@ -368,7 +670,7 @@
       try {
         const elements = document.querySelectorAll(selector);
         for (const el of elements) {
-          const text = getElementText(el).toLowerCase();
+          const text = getElementText(el);
           const attrs = elementAttributeHaystack(el);
           if (hasConsentLikeText(text) || ATTR_HINT_RE.test(attrs)) {
             maybeAdd(el);
@@ -385,7 +687,7 @@
       const style = getComputedStyle(el);
       const rect = el.getBoundingClientRect();
       const attrs = elementAttributeHaystack(el);
-      const text = getElementText(el).toLowerCase();
+      const text = getElementText(el);
       const summary = summarizeButtons(el, { includeHidden: false });
 
       const fixedLike = style.position === "fixed" || style.position === "sticky";
@@ -421,14 +723,14 @@
     const rect = el.getBoundingClientRect();
     const style = getComputedStyle(el);
     const text = getElementText(el);
-    const textLower = text.toLowerCase();
+    const matchText = normalizeForMatch(text);
     const attrs = elementAttributeHaystack(el);
     const summary = summarizeButtons(el, { includeHidden: false });
 
     let score = 0;
 
-    if (hasConsentLikeText(textLower)) score += 5;
-    if (CONSENT_TEXT_RE.test(textLower)) score += 3;
+    if (hasConsentLikeText(text)) score += 5;
+    if (CONSENT_TEXT_RE.test(matchText)) score += 3;
     if (ATTR_HINT_RE.test(attrs)) score += 3;
 
     if (summary.acceptCount > 0) score += 7;
@@ -584,7 +886,7 @@
   // ── Dark Pattern: Asymmetric Buttons ─────────────────────────────────────
   // Port of detector.py detect_asymmetric_buttons (lines 158-246)
 
-  function detectAsymmetricButtons(acceptBtn, rejectBtn) {
+  function detectAsymmetricButtons(acceptPreview, rejectPreview) {
     const result = {
       detected: false,
       sizeRatio: null,
@@ -592,21 +894,18 @@
       contrastIssue: false,
     };
 
-    if (!acceptBtn || !rejectBtn) return result;
+    if (!acceptPreview || !rejectPreview) return result;
 
-    const aStyle = getComputedStyle(acceptBtn);
-    const rStyle = getComputedStyle(rejectBtn);
+    const aW = acceptPreview.width || 0;
+    const aH = acceptPreview.height || 0;
+    const rW = rejectPreview.width || 0;
+    const rH = rejectPreview.height || 0;
 
-    const aW = parsePx(aStyle.width);
-    const aH = parsePx(aStyle.height);
-    const rW = parsePx(rStyle.width);
-    const rH = parsePx(rStyle.height);
+    const aFs = acceptPreview.fontSize || 0;
+    const rFs = rejectPreview.fontSize || 0;
 
-    const aFs = parsePx(aStyle.fontSize);
-    const rFs = parsePx(rStyle.fontSize);
-
-    const aFw = parseFontWeight(aStyle.fontWeight);
-    const rFw = parseFontWeight(rStyle.fontWeight);
+    const aFw = acceptPreview.fontWeight || 400;
+    const rFw = rejectPreview.fontWeight || 400;
 
     const aArea = aW * aH;
     const rArea = rW * rH;
@@ -618,8 +917,8 @@
 
     const fwDiff = aFw - rFw;
 
-    const rFg = parseRgb(rStyle.color);
-    const rBg = parseRgb(rStyle.backgroundColor);
+    const rFg = parseRgb(rejectPreview.color);
+    const rBg = parseRgb(rejectPreview.bgColor);
     if (rFg && rBg) {
       const cr = contrastRatio(rFg.rgb, rBg.rgb);
       if (cr < 3.0) result.contrastIssue = true;
@@ -772,57 +1071,40 @@
 
   // ── Accept vs Reject Button UX Comparison ────────────────────────────────
 
-  function compareButtons(acceptBtn, rejectBtn, settingsBtn) {
+  function compareButtons(acceptPreview, rejectPreview, settingsPreview) {
     const result = {
       available: false,
       accept: null,
       reject: null,
       settings: null,
+      rejectSource: "missing",
       issues: [],
     };
 
-    if (!acceptBtn) return result;
+    if (!acceptPreview) return result;
     result.available = true;
 
-    const aStyle = getComputedStyle(acceptBtn);
-    result.accept = {
-      text: getElementLabel(acceptBtn),
-      width: Math.round(parsePx(aStyle.width)),
-      height: Math.round(parsePx(aStyle.height)),
-      fontSize: Math.round(parsePx(aStyle.fontSize)),
-      fontWeight: parseFontWeight(aStyle.fontWeight),
-      bgColor: aStyle.backgroundColor,
-      color: aStyle.color,
-      borderRadius: aStyle.borderRadius,
-    };
+    result.accept = acceptPreview;
 
-    if (settingsBtn) {
-      result.settings = {
-        text: getElementLabel(settingsBtn),
-      };
+    if (settingsPreview) {
+      result.settings = settingsPreview;
     }
 
-    if (!rejectBtn) {
+    if (rejectPreview) {
+      result.reject = rejectPreview;
+      result.rejectSource = "direct";
+    } else if (settingsPreview) {
+      result.reject = settingsPreview;
+      result.rejectSource = "settings";
+      const clicks = typeof settingsPreview.clicksRequired === "number" && settingsPreview.clicksRequired < 999
+        ? ` (${settingsPreview.clicksRequired} clicks total)`
+        : "";
+      result.issues.push(`Reject requires opening settings/preferences first${clicks}`);
+    } else {
       result.reject = null;
-      if (settingsBtn) {
-        result.issues.push("Reject requires opening settings/preferences first");
-      } else {
-        result.issues.push("No reject button found — users cannot decline cookies");
-      }
+      result.issues.push("No reject button found — users cannot decline cookies");
       return result;
     }
-
-    const rStyle = getComputedStyle(rejectBtn);
-    result.reject = {
-      text: getElementLabel(rejectBtn),
-      width: Math.round(parsePx(rStyle.width)),
-      height: Math.round(parsePx(rStyle.height)),
-      fontSize: Math.round(parsePx(rStyle.fontSize)),
-      fontWeight: parseFontWeight(rStyle.fontWeight),
-      bgColor: rStyle.backgroundColor,
-      color: rStyle.color,
-      borderRadius: rStyle.borderRadius,
-    };
 
     const aArea = result.accept.width * result.accept.height;
     const rArea = result.reject.width * result.reject.height;
@@ -836,8 +1118,7 @@
       result.issues.push("Accept button is bolder than reject button");
     }
 
-    const bgColor = (rStyle.backgroundColor || "").toLowerCase();
-    if (bgColor === "transparent" || bgColor === "rgba(0, 0, 0, 0)") {
+    if (result.reject.plainLinkLike) {
       result.issues.push("Reject is styled as a plain link, not a button");
     }
 
@@ -867,8 +1148,12 @@
       rejectClicksRequired,
     } = buttonData;
 
+    const acceptPreview = buildButtonPreview(acceptButton, acceptClicksRequired);
+    const rejectPreview = buildButtonPreview(rejectButton, rejectClicksRequired);
+    const settingsPreview = buildButtonPreview(settingsButton, rejectClicksRequired);
+
     const preselected = detectPreselectedCheckboxes(bannerEl);
-    const asymmetric = detectAsymmetricButtons(acceptButton, rejectButton);
+    const asymmetric = detectAsymmetricButtons(acceptPreview, rejectPreview);
     const hiddenReject = detectHiddenReject(hiddenRejectButton || rejectButton);
     const confusing = detectConfusingLanguage(bannerEl);
     const forcedAction = detectForcedAction();
@@ -881,7 +1166,7 @@
     if (forcedAction.detected) darkPatterns.push("Forced action / Cookie wall");
 
     const transparency = checkTransparency(bannerEl);
-    const buttonComparison = compareButtons(acceptButton, rejectButton, settingsButton);
+    const buttonComparison = compareButtons(acceptPreview, rejectPreview, settingsPreview);
     const bannerText = bannerEl
       ? (bannerEl.innerText || bannerEl.textContent || "").substring(0, 500)
       : "";

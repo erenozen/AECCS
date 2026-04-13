@@ -248,23 +248,29 @@
 
     els.buttonCompSection.classList.remove("hidden");
 
+    const rejectLabel = comp.rejectSource === "settings" ? "Reject via Settings" : "Reject";
+    const rejectMetaSuffix =
+      comp.reject && comp.rejectSource === "settings" && comp.reject.clicksRequired > 1
+        ? ` | ${comp.reject.clicksRequired} clicks via settings`
+        : "";
+
     let html = '<div class="btn-compare">';
 
     // Accept button preview
     html += '<div class="btn-preview">';
     html += '<div class="btn-preview-label">Accept</div>';
     if (comp.accept) {
-      html += `<div class="btn-mock" style="background:${esc(comp.accept.bgColor)};color:${esc(comp.accept.color)};font-size:${comp.accept.fontSize}px;font-weight:${comp.accept.fontWeight};border-radius:${esc(comp.accept.borderRadius)}">${esc(comp.accept.text)}</div>`;
+      html += `<div class="btn-mock" style="${buttonMockStyle(comp.accept)}">${esc(comp.accept.text)}</div>`;
       html += `<div class="btn-meta">${comp.accept.width}x${comp.accept.height}px | ${comp.accept.fontSize}px | wt ${comp.accept.fontWeight}</div>`;
     }
     html += '</div>';
 
     // Reject button preview
     html += '<div class="btn-preview">';
-    html += '<div class="btn-preview-label">Reject</div>';
+    html += `<div class="btn-preview-label">${esc(rejectLabel)}</div>`;
     if (comp.reject) {
-      html += `<div class="btn-mock" style="background:${esc(comp.reject.bgColor)};color:${esc(comp.reject.color)};font-size:${comp.reject.fontSize}px;font-weight:${comp.reject.fontWeight};border-radius:${esc(comp.reject.borderRadius)}">${esc(comp.reject.text)}</div>`;
-      html += `<div class="btn-meta">${comp.reject.width}x${comp.reject.height}px | ${comp.reject.fontSize}px | wt ${comp.reject.fontWeight}</div>`;
+      html += `<div class="btn-mock" style="${buttonMockStyle(comp.reject)}">${esc(comp.reject.text)}</div>`;
+      html += `<div class="btn-meta">${comp.reject.width}x${comp.reject.height}px | ${comp.reject.fontSize}px | wt ${comp.reject.fontWeight}${esc(rejectMetaSuffix)}</div>`;
     } else {
       html += '<div class="btn-missing">Missing</div>';
     }
@@ -368,6 +374,48 @@
     if (score >= 60) return "#eab308";
     if (score >= 40) return "#f97316";
     return "#ef4444";
+  }
+
+  function isTransparentBackgroundValue(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (!normalized) return true;
+    return normalized === "transparent" ||
+      normalized === "rgba(0, 0, 0, 0)" ||
+      normalized === "rgba(0,0,0,0)" ||
+      normalized.startsWith("rgba(0, 0, 0, 0) none") ||
+      normalized.startsWith("rgba(0,0,0,0) none");
+  }
+
+  function resolveButtonBackground(button) {
+    const background = String(button.background || "").trim();
+    const bgColor = String(button.bgColor || "").trim();
+
+    if (background && !isTransparentBackgroundValue(background)) {
+      return background;
+    }
+    if (bgColor && !isTransparentBackgroundValue(bgColor)) {
+      return bgColor;
+    }
+    return background || bgColor || "transparent";
+  }
+
+  function buttonMockStyle(button) {
+    const style = [
+      `background:${esc(resolveButtonBackground(button))}`,
+      `color:${esc(button.color || "inherit")}`,
+      `font-size:${button.fontSize}px`,
+      `font-weight:${button.fontWeight}`,
+      `border-radius:${esc(button.borderRadius || "4px")}`,
+    ];
+
+    if (button.border) {
+      style.push(`border:${esc(button.border)}`);
+    }
+    if (button.boxShadow && button.boxShadow !== "none") {
+      style.push(`box-shadow:${esc(button.boxShadow)}`);
+    }
+
+    return style.join(";");
   }
 
   function esc(str) {

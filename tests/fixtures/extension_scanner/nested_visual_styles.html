@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Nested Visual Styles Banner</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f3f4f6;
+      font-family: sans-serif;
+    }
+
+    .consent-shell {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      width: 760px;
+      padding: 28px;
+      background: #ffffff;
+      color: #111827;
+      border-radius: 24px;
+      box-shadow: 0 20px 64px rgba(15, 23, 42, 0.22);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .action-shell {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #111827;
+      cursor: pointer;
+    }
+
+    .action-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 220px;
+      min-height: 56px;
+      padding: 16px 24px;
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 8px 22px rgba(37, 99, 235, 0.15);
+    }
+
+    .settings-pill {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .accept-pill {
+      background: #2563eb;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <section class="consent-shell" role="dialog" aria-modal="true">
+    <h2>eksisozluk.com size daha iyi reklam deneyimi sunabilmek icin izninizi istiyor</h2>
+    <p>
+      Kisisellestirilmis reklam ve icerik, reklam ve icerik olcumu,
+      hedef kitle arastirmasi ve hizmetlerin gelistirilmesi icin cerez kullanilir.
+    </p>
+
+    <div class="actions">
+      <button class="action-shell">
+        <span class="action-pill settings-pill">Seçenekleri yönetin</span>
+      </button>
+      <button class="action-shell">
+        <span class="action-pill accept-pill">İzin ver</span>
+      </button>
+    </div>
+  </section>
+</body>
+</html>

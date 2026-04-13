@@ -110,7 +110,7 @@ const AECCS = (() => {
       // Italian
       "Accetta", "Accetta tutto", "Accetta tutti",
       // Turkish
-      "Kabul Et", "Tümünü Kabul Et",
+      "Kabul Et", "Tümünü Kabul Et", "İzin Ver",
     ],
     reject: [
       // English
