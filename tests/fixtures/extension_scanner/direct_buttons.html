@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Direct Buttons Banner</title>
+  <style>
+    #cookie-banner {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      right: 24px;
+      padding: 20px;
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      font-family: sans-serif;
+    }
+
+    #cookie-banner button {
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+    }
+
+    .accept {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .reject {
+      background: #4b5563;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="cookie-banner">
+    <div>
+      We use cookies for analytics and advertising. Review our privacy policy before choosing.
+    </div>
+    <div>
+      <button class="reject">Reject All</button>
+      <button class="accept">Accept All</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -67,6 +67,23 @@ AECCS/
 │   ├── __init__.py
 │   └── detector.py                    # 7 dark pattern detectors
 │
+├── extension/
+│   ├── manifest.json                  # MV3 browser extension manifest
+│   ├── background/
+│   │   └── service-worker.js          # Extension analysis orchestrator
+│   ├── content/
+│   │   └── consent-scanner.js         # Live DOM consent and dark-pattern scan
+│   ├── lib/
+│   │   ├── tracker-data.js            # Ported constants and study metadata
+│   │   ├── classifier.js              # Cookie classification logic
+│   │   ├── scorer.js                  # Extension compliance scorer
+│   │   ├── domain-utils.js            # Lightweight registered-domain helper
+│   │   └── browser-polyfill.js        # `browser` namespace compatibility
+│   └── popup/
+│       ├── popup.html                 # Extension popup entrypoint
+│       ├── popup.js                   # Popup rendering logic
+│       └── popup.css                  # Popup styling
+│
 ├── pets_evaluation/
 │   ├── __init__.py
 │   ├── browser_pets.py                # Browser PET evaluation (7 configs)
@@ -101,7 +118,7 @@ AECCS/
     └── tracker_lists/                 # Downloaded filter lists (auto-fetched)
 ```
 
-Course deliverables are stored under `docs/`. The current report and presentation files are structured submission templates, but they still need to be updated with real-study results before final submission. A living project-status summary is maintained in `docs/project_status.md`.
+Course deliverables are stored under `docs/`. The current report and presentation files are structured submission templates, but they still need to be updated with real-study results before final submission. A living project-status summary is maintained in `docs/project_status.md`, and the browser extension handoff review lives in `docs/extension_review.md`.
 
 ## Prerequisites
 

@@ -49,6 +49,12 @@ const Scorer = (() => {
     if (consentScan.hasRejectButton) {
       return { score: 100, details: "Direct reject button available" };
     }
+    if (consentScan.hasSettingsButton && consentScan.rejectClicksRequired < 999) {
+      return {
+        score: 50,
+        details: `Reject available via ${consentScan.rejectClicksRequired} clicks (through settings)`,
+      };
+    }
     return { score: 0, details: "No reject option available" };
   }
 
@@ -60,21 +66,31 @@ const Scorer = (() => {
     if (!consentScan || consentScan.error) {
       return { score: 0, details: "Consent scan unavailable" };
     }
-    if (!consentScan.hasAcceptButton && !consentScan.hasRejectButton) {
+    const acceptClicks = typeof consentScan.acceptClicksRequired === "number"
+      ? consentScan.acceptClicksRequired
+      : (consentScan.hasAcceptButton ? 1 : 999);
+    const rejectClicks = typeof consentScan.rejectClicksRequired === "number"
+      ? consentScan.rejectClicksRequired
+      : (consentScan.hasRejectButton ? 1 : 999);
+
+    if (acceptClicks === 999 && rejectClicks === 999) {
       return { score: 0, details: "No functional accept/reject buttons" };
     }
-    if (!consentScan.hasRejectButton) {
+    if (rejectClicks === 999) {
       return { score: 0, details: "No reject option" };
     }
-    if (!consentScan.hasAcceptButton) {
+    if (acceptClicks === 999) {
       return { score: 100, details: "Reject available, no accept button" };
     }
-    // Both buttons exist — check for asymmetry dark pattern
-    const asym = consentScan.darkPatterns?.asymmetricButtons;
-    if (asym && asym.detected) {
-      return { score: 50, details: "Buttons exist but are visually asymmetric" };
+
+    const diff = rejectClicks - acceptClicks;
+    if (diff <= 0) {
+      return { score: 100, details: `Equal clicks: ${acceptClicks} vs ${rejectClicks}` };
     }
-    return { score: 100, details: "Both accept and reject buttons available" };
+    if (diff === 1) {
+      return { score: 50, details: `Reject requires 1 extra click (${acceptClicks} vs ${rejectClicks})` };
+    }
+    return { score: 20, details: `Reject requires ${diff} extra clicks (${acceptClicks} vs ${rejectClicks})` };
   }
 
   // ── Criterion 4: No dark patterns (weight 0.15) ─────────────────────────

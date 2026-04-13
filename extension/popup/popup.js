@@ -209,6 +209,13 @@
 
     if (scan.hasRejectButton) {
       els.consentInfo.innerHTML += row("ok", `Reject button: "${esc(scan.rejectButtonText)}"`);
+    } else if (scan.hasSettingsButton && scan.rejectClicksRequired < 999) {
+      const clickLabel = scan.rejectClicksRequired === 2 ? "2 clicks" : `${scan.rejectClicksRequired} clicks`;
+      const settingsLabel = scan.settingsButtonText || "Settings";
+      els.consentInfo.innerHTML += row(
+        "warn",
+        `Reject available via settings: "${esc(settingsLabel)}" (${clickLabel})`
+      );
     } else {
       els.consentInfo.innerHTML += row("bad", "No reject button found");
     }
@@ -238,6 +245,8 @@
       els.buttonCompSection.classList.add("hidden");
       return;
     }
+
+    els.buttonCompSection.classList.remove("hidden");
 
     let html = '<div class="btn-compare">';
 
