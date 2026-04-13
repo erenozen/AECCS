@@ -129,7 +129,7 @@
       if (els.studyInsightsSection.open) {
         renderStudyInsights(data);
       } else if (els.studyInsightsContent) {
-        els.studyInsightsContent.innerHTML = "";
+        clearNode(els.studyInsightsContent);
       }
     }
   }
@@ -287,10 +287,14 @@
     const total = data.totalCookies || 0;
 
     const order = ["Analytics", "Advertising", "Social", "Fingerprinting", "Functional", "Unknown"];
-    els.cookieBar.innerHTML = "";
+    clearNode(els.cookieBar);
 
     if (total === 0) {
-      els.cookieBar.innerHTML = '<div style="flex:1;background:var(--bg);border-radius:5px;"></div>';
+      const filler = createElement("div");
+      filler.style.flex = "1";
+      filler.style.background = "var(--bg)";
+      filler.style.borderRadius = "5px";
+      els.cookieBar.appendChild(filler);
     } else {
       for (const cat of order) {
         const n = counts[cat] || 0;
@@ -305,13 +309,14 @@
       }
     }
 
-    els.cookieCounts.innerHTML = "";
+    clearNode(els.cookieCounts);
     for (const cat of order) {
       const n = counts[cat] || 0;
       if (n === 0) continue;
-      const item = document.createElement("div");
-      item.className = "cookie-count-item";
-      item.innerHTML = `<span class="cookie-dot" style="background:${CATEGORY_COLORS[cat]}"></span>${cat}: ${n}`;
+      const item = createElement("div", { className: "cookie-count-item" });
+      const dot = createElement("span", { className: "cookie-dot" });
+      dot.style.background = CATEGORY_COLORS[cat];
+      item.append(dot, document.createTextNode(`${cat}: ${n}`));
       els.cookieCounts.appendChild(item);
     }
 
@@ -322,19 +327,19 @@
   // ── Tracker List ──────────────────────────────────────────────────────────
 
   function renderTrackers(trackersByVendor) {
-    els.trackerList.innerHTML = "";
+    clearNode(els.trackerList);
     const vendors = Object.keys(trackersByVendor || {});
     if (vendors.length === 0) {
-      els.trackerList.innerHTML = '<div class="no-trackers">No trackers detected</div>';
+      els.trackerList.appendChild(createElement("div", { className: "no-trackers", text: "No trackers detected" }));
       return;
     }
     for (const vendor of vendors) {
       const cookies = trackersByVendor[vendor];
-      const group = document.createElement("div");
-      group.className = "tracker-group";
-      group.innerHTML =
-        `<div class="tracker-vendor">${esc(vendor)} (${cookies.length})</div>` +
-        `<div class="tracker-cookies">${cookies.map(esc).join(", ")}</div>`;
+      const group = createElement("div", { className: "tracker-group" });
+      group.append(
+        createElement("div", { className: "tracker-vendor", text: `${vendor} (${cookies.length})` }),
+        createElement("div", { className: "tracker-cookies", text: cookies.join(", ") })
+      );
       els.trackerList.appendChild(group);
     }
   }
@@ -342,68 +347,81 @@
   // ── Consent Banner + CMP Stats ────────────────────────────────────────────
 
   function renderConsent(scan, cmpStats, studyMetadata) {
-    els.consentInfo.innerHTML = "";
+    clearNode(els.consentInfo);
     els.cmpInfo.classList.add("hidden");
-    els.cmpInfo.innerHTML = "";
+    clearNode(els.cmpInfo);
 
     if (!scan || scan.error) {
-      els.consentInfo.innerHTML = row("warn", "Consent scan unavailable");
+      els.consentInfo.appendChild(buildConsentRow("warn", "Consent scan unavailable"));
       return;
     }
 
     if (scan.cmpDetected) {
-      els.consentInfo.innerHTML += row("ok", `CMP detected: <b>${esc(scan.cmpDetected)}</b>`);
+      els.consentInfo.appendChild(
+        buildConsentRow("ok", [
+          "CMP detected: ",
+          createElement("strong", { text: scan.cmpDetected }),
+        ])
+      );
     } else {
-      els.consentInfo.innerHTML += row("warn", "No known CMP detected");
+      els.consentInfo.appendChild(buildConsentRow("warn", "No known CMP detected"));
     }
 
     if (!scan.bannerFound) {
-      els.consentInfo.innerHTML += row("warn", "No consent banner found");
+      els.consentInfo.appendChild(buildConsentRow("warn", "No consent banner found"));
     } else {
-      els.consentInfo.innerHTML += row("ok", "Consent banner found");
+      els.consentInfo.appendChild(buildConsentRow("ok", "Consent banner found"));
     }
 
     if (scan.hasAcceptButton) {
-      els.consentInfo.innerHTML += row("ok", `Accept button: "${esc(scan.acceptButtonText)}"`);
+      els.consentInfo.appendChild(buildConsentRow("ok", `Accept button: "${scan.acceptButtonText}"`));
     } else {
-      els.consentInfo.innerHTML += row("warn", "No accept button found");
+      els.consentInfo.appendChild(buildConsentRow("warn", "No accept button found"));
     }
 
     if (scan.hasRejectButton) {
-      els.consentInfo.innerHTML += row("ok", `Reject button: "${esc(scan.rejectButtonText)}"`);
+      els.consentInfo.appendChild(buildConsentRow("ok", `Reject button: "${scan.rejectButtonText}"`));
     } else if (scan.hasSettingsButton && scan.rejectClicksRequired < 999) {
       const clickLabel = scan.rejectClicksRequired === 2 ? "2 clicks" : `${scan.rejectClicksRequired} clicks`;
       const settingsLabel = scan.settingsButtonText || "Settings";
-      els.consentInfo.innerHTML += row(
-        "warn",
-        `Reject available via settings: "${esc(settingsLabel)}" (${clickLabel})`
+      els.consentInfo.appendChild(
+        buildConsentRow("warn", `Reject available via settings: "${settingsLabel}" (${clickLabel})`)
       );
     } else {
-      els.consentInfo.innerHTML += row("bad", "No reject button found");
+      els.consentInfo.appendChild(buildConsentRow("bad", "No reject button found"));
     }
 
     if (cmpStats && scan.cmpDetected) {
       els.cmpInfo.classList.remove("hidden");
-      els.cmpInfo.innerHTML = `
-        <div class="cmp-stats">
-          <div class="cmp-stats-title">${esc(scan.cmpDetected)} in the ${studyMetadata?.sampleSize || 1000}-site AECCS combined snapshot</div>
-          <div class="cmp-stat-row"><span>Avg compliance score</span><span>${cmpStats.avgScore}/100</span></div>
-          <div class="cmp-stat-row"><span>Sites with reject button</span><span>${Math.round(cmpStats.rejectRate * 100)}%</span></div>
-          <div class="cmp-stat-row"><span>Sample size</span><span>${cmpStats.sampleSize} sites</span></div>
-          <div class="cmp-stat-row"><span>CMP PET score</span><span>${cmpStats.petScore}</span></div>
-        </div>
-      `;
+      const stats = createElement("div", { className: "cmp-stats" });
+      stats.append(
+        createElement("div", {
+          className: "cmp-stats-title",
+          text: `${scan.cmpDetected} in the ${studyMetadata?.sampleSize || 1000}-site AECCS combined snapshot`,
+        }),
+        buildLabeledValueRow("cmp-stat-row", "Avg compliance score", `${cmpStats.avgScore}/100`),
+        buildLabeledValueRow("cmp-stat-row", "Sites with reject button", `${Math.round(cmpStats.rejectRate * 100)}%`),
+        buildLabeledValueRow("cmp-stat-row", "Sample size", `${cmpStats.sampleSize} sites`),
+        buildLabeledValueRow("cmp-stat-row", "CMP PET score", `${cmpStats.petScore}`)
+      );
+      els.cmpInfo.appendChild(stats);
     }
   }
 
-  function row(type, html) {
-    const icons = { ok: "&#10003;", warn: "&#9679;", bad: "&#10007;" };
-    return `<div class="consent-row"><span class="consent-icon ${type}">${icons[type]}</span><span>${html}</span></div>`;
+  function buildConsentRow(type, content) {
+    const icons = { ok: "\u2713", warn: "\u25cf", bad: "\u2717" };
+    const row = createElement("div", { className: "consent-row" });
+    const icon = createElement("span", { className: `consent-icon ${type}`, text: icons[type] || "" });
+    const body = createElement("span");
+    appendParts(body, content);
+    row.append(icon, body);
+    return row;
   }
 
   // ── Accept vs Reject UX Comparison ────────────────────────────────────────
 
   function renderButtonComparison(comp) {
+    clearNode(els.buttonComparison);
     if (!comp || !comp.available) {
       els.buttonCompSection.classList.add("hidden");
       return;
@@ -417,90 +435,84 @@
         ? ` | ${comp.reject.clicksRequired} clicks via settings`
         : "";
 
-    let html = '<div class="btn-compare">';
+    const compare = createElement("div", { className: "btn-compare" });
+    compare.append(
+      buildButtonPreview("Accept", comp.accept),
+      buildButtonPreview(rejectLabel, comp.reject, rejectMetaSuffix)
+    );
+    els.buttonComparison.appendChild(compare);
 
-    // Accept button preview
-    html += '<div class="btn-preview">';
-    html += '<div class="btn-preview-label">Accept</div>';
-    if (comp.accept) {
-      html += `<div class="btn-mock" style="${buttonMockStyle(comp.accept)}">${esc(comp.accept.text)}</div>`;
-      html += `<div class="btn-meta">${comp.accept.width}x${comp.accept.height}px | ${comp.accept.fontSize}px | wt ${comp.accept.fontWeight}</div>`;
-    }
-    html += '</div>';
-
-    // Reject button preview
-    html += '<div class="btn-preview">';
-    html += `<div class="btn-preview-label">${esc(rejectLabel)}</div>`;
-    if (comp.reject) {
-      html += `<div class="btn-mock" style="${buttonMockStyle(comp.reject)}">${esc(comp.reject.text)}</div>`;
-      html += `<div class="btn-meta">${comp.reject.width}x${comp.reject.height}px | ${comp.reject.fontSize}px | wt ${comp.reject.fontWeight}${esc(rejectMetaSuffix)}</div>`;
-    } else {
-      html += '<div class="btn-missing">Missing</div>';
-    }
-    html += '</div>';
-    html += '</div>';
-
-    // UX issues
     if (comp.issues && comp.issues.length > 0) {
-      html += '<div class="btn-issues">';
+      const issues = createElement("div", { className: "btn-issues" });
       for (const issue of comp.issues) {
-        html += `<div class="btn-issue-item"><span>&#9888;</span> ${esc(issue)}</div>`;
+        const item = createElement("div", { className: "btn-issue-item" });
+        item.append(createElement("span", { text: "\u26a0" }), document.createTextNode(` ${issue}`));
+        issues.appendChild(item);
       }
-      html += '</div>';
+      els.buttonComparison.appendChild(issues);
     }
-
-    els.buttonComparison.innerHTML = html;
   }
 
   // ── Dark Pattern Details ──────────────────────────────────────────────────
 
   function renderDarkPatterns(dp) {
+    clearNode(els.darkPatternDetails);
     if (!dp || dp.count === 0) {
-      els.darkPatternDetails.innerHTML = '<div class="dp-none">No dark patterns detected</div>';
+      els.darkPatternDetails.appendChild(createElement("div", { className: "dp-none", text: "No dark patterns detected" }));
       return;
     }
 
-    let html = "";
     for (const name of dp.detected) {
       const info = AECCS.DARK_PATTERN_INFO[name];
       if (!info) {
-        html += `<div class="dp-card"><div class="dp-card-name">${esc(name)}</div></div>`;
+        const fallbackCard = createElement("div", { className: "dp-card" });
+        fallbackCard.appendChild(createElement("div", { className: "dp-card-name", text: name }));
+        els.darkPatternDetails.appendChild(fallbackCard);
         continue;
       }
 
-      html += `<div class="dp-card severity-${info.severity}">`;
-      html += `<div class="dp-card-header">`;
-      html += `<span class="dp-card-name">${esc(name)}</span>`;
-      html += `<span class="dp-severity ${info.severity}">${info.severity}</span>`;
-      html += `</div>`;
-      html += `<div class="dp-description">${esc(info.description)}</div>`;
-      html += `<div class="dp-gdpr-ref">${esc(info.gdprArticle)}</div>`;
-      html += `</div>`;
+      const card = createElement("div", { className: `dp-card severity-${info.severity}` });
+      const header = createElement("div", { className: "dp-card-header" });
+      header.append(
+        createElement("span", { className: "dp-card-name", text: name }),
+        createElement("span", { className: `dp-severity ${info.severity}`, text: info.severity })
+      );
+      card.append(
+        header,
+        createElement("div", { className: "dp-description", text: info.description }),
+        createElement("div", { className: "dp-gdpr-ref", text: info.gdprArticle })
+      );
+      els.darkPatternDetails.appendChild(card);
     }
-
-    els.darkPatternDetails.innerHTML = html;
   }
 
   // ── Criteria Breakdown ────────────────────────────────────────────────────
 
   function renderCriteria(criteria) {
-    els.criteriaBody.innerHTML = "";
+    clearNode(els.criteriaBody);
     for (const [key, { score, details }] of Object.entries(criteria)) {
       const label = CRITERIA_LABELS[key] || key;
       const color = scoreColor(score);
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>
-          <div class="criteria-name">${label}</div>
-          <div class="criteria-details">${esc(details)}</div>
-        </td>
-        <td style="color:${color}">${score}</td>
-        <td>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width:${score}%;background:${color}"></div>
-          </div>
-        </td>
-      `;
+      const tr = createElement("tr");
+
+      const detailsCell = createElement("td");
+      detailsCell.append(
+        createElement("div", { className: "criteria-name", text: label }),
+        createElement("div", { className: "criteria-details", text: details })
+      );
+
+      const scoreCell = createElement("td", { text: score });
+      scoreCell.style.color = color;
+
+      const progressCell = createElement("td");
+      const progressBar = createElement("div", { className: "progress-bar" });
+      const progressFill = createElement("div", { className: "progress-fill" });
+      progressFill.style.width = `${score}%`;
+      progressFill.style.background = color;
+      progressBar.appendChild(progressFill);
+      progressCell.appendChild(progressBar);
+
+      tr.append(detailsCell, scoreCell, progressCell);
       els.criteriaBody.appendChild(tr);
     }
   }
@@ -512,41 +524,66 @@
 
     if (!pets || pets.length === 0) {
       els.petSection.classList.add("hidden");
-      els.petList.innerHTML = "";
+      clearNode(els.petList);
       return;
     }
 
     els.petSection.classList.remove("hidden");
+    clearNode(els.petList);
 
-    let html = "";
     for (const [index, pet] of pets.entries()) {
       const color = petStudyColor(pet.studyTrackerReductionPct);
       const metricLabel = pet.studyMetricLabel || studyBadgeLabel(pet.studyTrackerReductionPct);
       const tooltipText = pet.studyTooltipText || buildPetStudyTooltipText(pet);
       const tooltipId = `pet-study-tooltip-${index}`;
-      html += `<div class="pet-card">`;
-      html += `<div class="pet-header">`;
-      html += `<div class="pet-title"><span class="pet-name">${esc(pet.name)}</span><span class="pet-type">${esc(pet.type)}</span></div>`;
+
+      const card = createElement("div", { className: "pet-card" });
+      const header = createElement("div", { className: "pet-header" });
+      const title = createElement("div", { className: "pet-title" });
+      title.append(
+        createElement("span", { className: "pet-name", text: pet.name }),
+        createElement("span", { className: "pet-type", text: pet.type })
+      );
+      header.appendChild(title);
+
       if (metricLabel || tooltipText) {
-        html += `<div class="pet-study">`;
+        const study = createElement("div", { className: "pet-study" });
         if (metricLabel) {
-          html += `<span class="pet-effectiveness" style="color:${color};border-color:${color}">${esc(metricLabel)}</span>`;
+          const badge = createElement("span", { className: "pet-effectiveness", text: metricLabel });
+          badge.style.color = color;
+          badge.style.borderColor = color;
+          study.appendChild(badge);
         }
         if (tooltipText) {
-          html += `<button type="button" class="pet-study-info" aria-label="${escAttr(`Explain study metric for ${pet.name}`)}" aria-expanded="false" aria-controls="${escAttr(tooltipId)}">i</button>`;
-          html += `<div class="pet-study-tooltip" id="${escAttr(tooltipId)}" role="tooltip" hidden>${esc(tooltipText)}</div>`;
-        }
-        html += `</div>`;
-      }
-      html += `</div>`;
-      html += `<div class="pet-desc">${esc(pet.description)}</div>`;
-      if (pet.whyRecommended) {
-        html += `<div class="pet-desc">Why recommended: ${esc(pet.whyRecommended)}</div>`;
-      }
-      html += `</div>`;
-    }
+          const button = createElement("button", { className: "pet-study-info", text: "i" });
+          button.type = "button";
+          button.setAttribute("aria-label", `Explain study metric for ${pet.name}`);
+          button.setAttribute("aria-expanded", "false");
+          button.setAttribute("aria-controls", tooltipId);
 
-    els.petList.innerHTML = html;
+          const tooltip = createElement("div", {
+            className: "pet-study-tooltip",
+            text: tooltipText,
+            attrs: { id: tooltipId, role: "tooltip" },
+          });
+          tooltip.hidden = true;
+
+          study.append(button, tooltip);
+        }
+        header.appendChild(study);
+      }
+
+      card.append(
+        header,
+        createElement("div", { className: "pet-desc", text: pet.description })
+      );
+
+      if (pet.whyRecommended) {
+        card.appendChild(createElement("div", { className: "pet-desc", text: `Why recommended: ${pet.whyRecommended}` }));
+      }
+
+      els.petList.appendChild(card);
+    }
   }
 
   function renderStudyInsights(data) {
@@ -555,98 +592,158 @@
     const key = buildInsightsKey(data);
     if (renderedInsightsKey === key) return;
     renderedInsightsKey = key;
+    clearNode(els.studyInsightsContent);
 
     const study = data.studyMetadata || AECCS.STUDY_METADATA || {};
     const petStudy = AECCS.PET_STUDY_RESULTS || [];
     const cmpStudy = AECCS.CMP_STUDY_RESULTS || [];
     const highlights = AECCS.RESEARCH_HIGHLIGHTS || [];
     const guardrails = AECCS.CLAIM_GUARDRAILS || {};
+    const fragment = document.createDocumentFragment();
 
-    let html = "";
-    html += `<div class="insight-badge">${esc(study.label || "AECCS 1000-site combined study snapshot")} · ${esc(study.snapshotDateLabel || "March 6, 2026")}</div>`;
-    html += `<div class="insight-intro">This popup audits the current page locally. The cards below add frozen AECCS study context without introducing extra scans, clicks, or network requests.</div>`;
+    fragment.append(
+      createElement("div", {
+        className: "insight-badge",
+        text: `${study.label || "AECCS 1000-site combined study snapshot"} · ${study.snapshotDateLabel || "March 6, 2026"}`,
+      }),
+      createElement("div", {
+        className: "insight-intro",
+        text: "This popup audits the current page locally. The cards below add frozen AECCS study context without introducing extra scans, clicks, or network requests.",
+      })
+    );
 
-    html += `<div class="insight-card">`;
-    html += `<div class="insight-card-title">Why AECCS is Different</div>`;
-    html += `<div class="insight-card-copy">${esc(guardrails.positioning || "AECCS is a passive, research-grounded cookie-consent auditor.")}</div>`;
+    const positioningCard = buildInsightCard("Why AECCS is Different");
+    positioningCard.appendChild(
+      createElement("div", {
+        className: "insight-card-copy",
+        text: guardrails.positioning || "AECCS is a passive, research-grounded cookie-consent auditor.",
+      })
+    );
     if (highlights.length > 0) {
-      html += `<div class="insight-list">`;
+      const highlightList = createElement("div", { className: "insight-list" });
       for (const item of highlights) {
-        html += `<div class="insight-list-item"><strong>${esc(item.title)}</strong> — ${esc(item.summary)}</div>`;
+        const listItem = createElement("div", { className: "insight-list-item" });
+        listItem.append(
+          createElement("strong", { text: item.title }),
+          document.createTextNode(` — ${item.summary}`)
+        );
+        highlightList.appendChild(listItem);
       }
-      html += `</div>`;
+      positioningCard.appendChild(highlightList);
     }
-    html += `</div>`;
+    fragment.appendChild(positioningCard);
 
-    html += `<div class="insight-card">`;
-    html += `<div class="insight-card-title">Snapshot Metrics</div>`;
-    html += `<div class="insight-kv"><span>Run ID</span><strong>${esc(study.runId || "combined-1000")}</strong></div>`;
-    html += `<div class="insight-kv"><span>Study baseline</span><strong>${study.sampleSize || 1000} sites / ${study.successfulCrawls || 861} successful crawls</strong></div>`;
-    html += `<div class="insight-kv"><span>Sites with banners</span><strong>${study.bannerSites || 595}</strong></div>`;
-    html += `<div class="insight-kv"><span>Average compliance score</span><strong>${study.avgCompliance || 27.4}/100</strong></div>`;
-    html += `<div class="insight-kv"><span>Missing reject rate</span><strong>${formatPercent(study.missingRejectRate)}</strong></div>`;
-    html += `<div class="insight-kv"><span>Multi-layer rejection</span><strong>${formatPercent(study.multiLayerRate)}</strong></div>`;
-    html += `<div class="insight-kv"><span>Reject reduces trackers</span><strong>${formatPercent(study.rejectReducesTrackersRate)}</strong></div>`;
-    html += `<div class="insight-kv"><span>Reject eliminates trackers</span><strong>${formatPercent(study.rejectEliminatesTrackersRate)}</strong></div>`;
-    html += `</div>`;
+    const snapshotCard = buildInsightCard("Snapshot Metrics");
+    snapshotCard.append(
+      buildLabeledValueRow("insight-kv", "Run ID", study.runId || "combined-1000"),
+      buildLabeledValueRow("insight-kv", "Study baseline", `${study.sampleSize || 1000} sites / ${study.successfulCrawls || 861} successful crawls`, "strong"),
+      buildLabeledValueRow("insight-kv", "Sites with banners", `${study.bannerSites || 595}`, "strong"),
+      buildLabeledValueRow("insight-kv", "Average compliance score", `${study.avgCompliance || 27.4}/100`, "strong"),
+      buildLabeledValueRow("insight-kv", "Missing reject rate", formatPercent(study.missingRejectRate), "strong"),
+      buildLabeledValueRow("insight-kv", "Multi-layer rejection", formatPercent(study.multiLayerRate), "strong"),
+      buildLabeledValueRow("insight-kv", "Reject reduces trackers", formatPercent(study.rejectReducesTrackersRate), "strong"),
+      buildLabeledValueRow("insight-kv", "Reject eliminates trackers", formatPercent(study.rejectEliminatesTrackersRate), "strong")
+    );
+    fragment.appendChild(snapshotCard);
 
-    html += `<div class="insight-card">`;
-    html += `<div class="insight-card-title">PET Guidance For This Page</div>`;
+    const guidanceCard = buildInsightCard("PET Guidance For This Page");
     if (data.petRecommendations && data.petRecommendations.length > 0) {
-      html += `<div class="insight-card-copy">Recommendations stay passive: they are tied to the issues found on this page, then grounded in the shared AECCS combined-study snapshot rather than live PET simulation.</div>`;
-      html += `<div class="insight-list">`;
+      guidanceCard.appendChild(
+        createElement("div", {
+          className: "insight-card-copy",
+          text: "Recommendations stay passive: they are tied to the issues found on this page, then grounded in the shared AECCS combined-study snapshot rather than live PET simulation.",
+        })
+      );
+      const list = createElement("div", { className: "insight-list" });
       for (const pet of data.petRecommendations) {
         const rationale = pet.whyRecommended || pet.studyLabel || "Study-backed recommendation";
-        html += `<div class="insight-list-item"><strong>${esc(pet.name)}</strong> — ${esc(rationale)}</div>`;
+        const item = createElement("div", { className: "insight-list-item" });
+        item.append(createElement("strong", { text: pet.name }), document.createTextNode(` — ${rationale}`));
+        list.appendChild(item);
       }
-      html += `</div>`;
+      guidanceCard.appendChild(list);
     } else {
-      html += `<div class="insight-card-copy">No PET recommendation was needed for this page, but the extension still uses the same shared AECCS combined-study snapshot for context.</div>`;
+      guidanceCard.appendChild(
+        createElement("div", {
+          className: "insight-card-copy",
+          text: "No PET recommendation was needed for this page, but the extension still uses the same shared AECCS combined-study snapshot for context.",
+        })
+      );
     }
-    html += `</div>`;
+    fragment.appendChild(guidanceCard);
 
-    html += `<div class="insight-card">`;
-    html += `<div class="insight-card-title">Six PETs, One Study Snapshot</div>`;
-    html += `<div class="insight-card-copy">AECCS keeps Brave Shields, Firefox ETP Standard, Firefox ETP Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic in one comparable combined-study surface.</div>`;
-    html += `<div class="insight-list">`;
+    const petStudyCard = buildInsightCard("Six PETs, One Study Snapshot");
+    petStudyCard.appendChild(
+      createElement("div", {
+        className: "insight-card-copy",
+        text: "AECCS keeps Brave Shields, Firefox ETP Standard, Firefox ETP Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic in one comparable combined-study surface.",
+      })
+    );
+    const petList = createElement("div", { className: "insight-list" });
     for (const pet of petStudy) {
-      html += `<div class="insight-list-item"><strong>${esc(pet.name)}</strong> — ${esc(pet.studyLabel)}. ${esc(pet.highlight)}</div>`;
+      const item = createElement("div", { className: "insight-list-item" });
+      item.append(
+        createElement("strong", { text: pet.name }),
+        document.createTextNode(` — ${pet.studyLabel}. ${pet.highlight}`)
+      );
+      petList.appendChild(item);
     }
-    html += `</div>`;
-    html += `</div>`;
+    petStudyCard.appendChild(petList);
+    fragment.appendChild(petStudyCard);
 
-    html += `<div class="insight-card">`;
-    html += `<div class="insight-card-title">CMP And Public-Sector Context</div>`;
+    const cmpCard = buildInsightCard("CMP And Public-Sector Context");
     if (data.consentScan?.cmpDetected && data.cmpStats) {
-      html += `<div class="insight-card-copy">Detected CMP: <strong>${esc(data.consentScan.cmpDetected)}</strong>. In the shared snapshot it averaged ${data.cmpStats.avgScore}/100 with a reject rate of ${formatPercent(data.cmpStats.rejectRate)}.</div>`;
+      const copy = createElement("div", { className: "insight-card-copy" });
+      copy.append(
+        document.createTextNode("Detected CMP: "),
+        createElement("strong", { text: data.consentScan.cmpDetected }),
+        document.createTextNode(`. In the shared snapshot it averaged ${data.cmpStats.avgScore}/100 with a reject rate of ${formatPercent(data.cmpStats.rejectRate)}.`)
+      );
+      cmpCard.appendChild(copy);
     } else {
-      html += `<div class="insight-card-copy">When a known CMP is detected, AECCS adds shared CMP study context instead of sending data to an external service.</div>`;
+      cmpCard.appendChild(
+        createElement("div", {
+          className: "insight-card-copy",
+          text: "When a known CMP is detected, AECCS adds shared CMP study context instead of sending data to an external service.",
+        })
+      );
     }
-    html += `<div class="insight-divider"></div>`;
-    html += `<div class="insight-kv"><span>Best CMP in study</span><strong>${esc((cmpStudy[0] && cmpStudy[0].name) || "Didomi")}</strong></div>`;
-    html += `<div class="insight-kv"><span>Current page is public sector</span><strong>${data.isGovDomain ? "Yes" : "No"}</strong></div>`;
-    html += `<div class="insight-card-copy">The combined corpus included ${study.publicSector?.successfulSites || 77} successful government/public-sector sites. That subset averaged ${study.publicSector?.avgCompliance || 30.9}/100 compliance, and ${formatPercent(study.publicSector?.preConsentTrackerRate ?? 0.753)} showed pre-consent trackers.</div>`;
-    html += `</div>`;
+    cmpCard.append(
+      createElement("div", { className: "insight-divider" }),
+      buildLabeledValueRow("insight-kv", "Best CMP in study", (cmpStudy[0] && cmpStudy[0].name) || "Didomi", "strong"),
+      buildLabeledValueRow("insight-kv", "Current page is public sector", data.isGovDomain ? "Yes" : "No", "strong"),
+      createElement("div", {
+        className: "insight-card-copy",
+        text: `The combined corpus included ${study.publicSector?.successfulSites || 77} successful government/public-sector sites. That subset averaged ${study.publicSector?.avgCompliance || 30.9}/100 compliance, and ${formatPercent(study.publicSector?.preConsentTrackerRate ?? 0.753)} showed pre-consent trackers.`,
+      })
+    );
+    fragment.appendChild(cmpCard);
 
-    html += `<div class="insight-card">`;
-    html += `<div class="insight-card-title">Methodology And Guardrails</div>`;
-    html += `<div class="insight-card-copy">Pipeline: crawl → classify → dark-pattern detect → score → CMP analysis → PET comparison → reporting.</div>`;
+    const guardrailsCard = buildInsightCard("Methodology And Guardrails");
+    guardrailsCard.appendChild(
+      createElement("div", {
+        className: "insight-card-copy",
+        text: "Pipeline: crawl → classify → dark-pattern detect → score → CMP analysis → PET comparison → reporting.",
+      })
+    );
     if (guardrails.supportedClaims && guardrails.supportedClaims.length > 0) {
-      html += `<div class="insight-list">`;
+      const claimsList = createElement("div", { className: "insight-list" });
       for (const claim of guardrails.supportedClaims) {
-        html += `<div class="insight-list-item"><strong>Claims:</strong> ${esc(claim)}</div>`;
+        const item = createElement("div", { className: "insight-list-item" });
+        item.append(createElement("strong", { text: "Claims:" }), document.createTextNode(` ${claim}`));
+        claimsList.appendChild(item);
       }
-      html += `</div>`;
+      guardrailsCard.appendChild(claimsList);
     }
     if (guardrails.notThis && guardrails.notThis.length > 0) {
-      html += `<div class="insight-divider"></div>`;
+      guardrailsCard.appendChild(createElement("div", { className: "insight-divider" }));
       for (const item of guardrails.notThis) {
-        html += `<div class="insight-list-item">${esc(item)}</div>`;
+        guardrailsCard.appendChild(createElement("div", { className: "insight-list-item", text: item }));
       }
     }
-    html += `</div>`;
+    fragment.appendChild(guardrailsCard);
 
-    els.studyInsightsContent.innerHTML = html;
+    els.studyInsightsContent.appendChild(fragment);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -722,38 +819,101 @@
     return background || bgColor || "transparent";
   }
 
-  function buttonMockStyle(button) {
-    const style = [
-      `background:${esc(resolveButtonBackground(button))}`,
-      `color:${esc(button.color || "inherit")}`,
-      `font-size:${button.fontSize}px`,
-      `font-weight:${button.fontWeight}`,
-      `border-radius:${esc(button.borderRadius || "4px")}`,
-    ];
+  function buildButtonPreview(label, button, metaSuffix = "") {
+    const preview = createElement("div", { className: "btn-preview" });
+    preview.appendChild(createElement("div", { className: "btn-preview-label", text: label }));
 
+    if (!button) {
+      preview.appendChild(createElement("div", { className: "btn-missing", text: "Missing" }));
+      return preview;
+    }
+
+    const mock = createElement("div", { className: "btn-mock", text: button.text || "" });
+    applyButtonMockStyles(mock, button);
+    preview.append(
+      mock,
+      createElement(
+        "div",
+        {
+          className: "btn-meta",
+          text: `${button.width}x${button.height}px | ${button.fontSize}px | wt ${button.fontWeight}${metaSuffix}`,
+        }
+      )
+    );
+    return preview;
+  }
+
+  function applyButtonMockStyles(element, button) {
+    element.style.background = resolveButtonBackground(button);
+    element.style.color = button.color || "inherit";
+    if (typeof button.fontSize === "number") {
+      element.style.fontSize = `${button.fontSize}px`;
+    }
+    if (button.fontWeight !== undefined && button.fontWeight !== null) {
+      element.style.fontWeight = String(button.fontWeight);
+    }
+    element.style.borderRadius = button.borderRadius || "4px";
     if (button.border) {
-      style.push(`border:${esc(button.border)}`);
+      element.style.border = button.border;
     }
     if (button.boxShadow && button.boxShadow !== "none") {
-      style.push(`box-shadow:${esc(button.boxShadow)}`);
+      element.style.boxShadow = button.boxShadow;
     }
-
-    return style.join(";");
   }
 
-  function esc(str) {
-    const d = document.createElement("div");
-    d.textContent = str || "";
-    return d.innerHTML;
+  function buildInsightCard(title) {
+    const card = createElement("div", { className: "insight-card" });
+    card.appendChild(createElement("div", { className: "insight-card-title", text: title }));
+    return card;
   }
 
-  function escAttr(str) {
-    return String(str || "")
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+  function buildLabeledValueRow(className, label, value, valueTag = "span") {
+    const row = createElement("div", { className });
+    row.append(
+      createElement("span", { text: label }),
+      createElement(valueTag, { text: value })
+    );
+    return row;
+  }
+
+  function clearNode(node) {
+    if (node) {
+      node.replaceChildren();
+    }
+  }
+
+  function createElement(tagName, options = {}) {
+    const element = document.createElement(tagName);
+    if (options.className) {
+      element.className = options.className;
+    }
+    if (options.text !== undefined && options.text !== null) {
+      element.textContent = String(options.text);
+    }
+    if (options.attrs) {
+      for (const [name, value] of Object.entries(options.attrs)) {
+        if (value !== undefined && value !== null) {
+          element.setAttribute(name, String(value));
+        }
+      }
+    }
+    return element;
+  }
+
+  function appendParts(parent, content) {
+    const parts = Array.isArray(content) ? content : [content];
+    for (const part of parts) {
+      if (part === null || part === undefined) continue;
+      if (Array.isArray(part)) {
+        appendParts(parent, part);
+        continue;
+      }
+      if (part instanceof Node) {
+        parent.appendChild(part);
+        continue;
+      }
+      parent.appendChild(document.createTextNode(String(part)));
+    }
   }
 
   // ── Start ─────────────────────────────────────────────────────────────────

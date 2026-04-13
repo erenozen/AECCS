@@ -16,7 +16,18 @@ REVIEWER_NOTES = ROOT / "docs" / "extension_reviewer_notes.md"
 RELEASE_CHECKLIST = ROOT / "docs" / "extension_release_checklist.md"
 PACKAGE_SCRIPT = ROOT / "scripts" / "package_extension_release.py"
 MANIFEST = ROOT / "extension" / "manifest.json"
+POPUP = ROOT / "extension" / "popup" / "popup.js"
 PUBLIC_PRIVACY_POLICY_URL = "https://erenozen.github.io/AECCS/privacy-policy.html"
+FIREFOX_BACKGROUND_SCRIPTS = [
+    "lib/browser-polyfill.js",
+    "lib/study-snapshot.js",
+    "lib/tracker-data.js",
+    "lib/tracker-index.js",
+    "lib/domain-utils.js",
+    "lib/classifier.js",
+    "lib/scorer.js",
+    "background/service-worker.js",
+]
 
 
 def test_privacy_policy_matches_release_behavior() -> None:
@@ -66,6 +77,8 @@ def test_release_docs_cover_store_and_reviewer_workflows() -> None:
     assert "`<all_urls>`" in reviewer_text
     assert "study-snapshot.js" in reviewer_text
     assert "tracker-index.js" in reviewer_text
+    assert "background.scripts" in reviewer_text
+    assert 'data_collection_permissions.required = ["none"]' in reviewer_text
     assert PUBLIC_PRIVACY_POLICY_URL in reviewer_text
 
     assert "deferred publishing" in checklist_text.lower()
@@ -108,10 +121,13 @@ def test_release_packaging_script_builds_expected_archives(tmp_path: Path) -> No
 
     with zipfile.ZipFile(chrome_zip) as zf:
         names = set(zf.namelist())
+        chrome_manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
     assert "manifest.json" in names
     assert "popup/popup.js" in names
     assert "background/service-worker.js" in names
     assert "icons/icon-128.png" in names
+    assert chrome_manifest["background"]["service_worker"] == "background/service-worker.js"
+    assert "scripts" not in chrome_manifest["background"]
 
     with zipfile.ZipFile(reviewer_zip) as zf:
         names = set(zf.namelist())
@@ -120,3 +136,24 @@ def test_release_packaging_script_builds_expected_archives(tmp_path: Path) -> No
     assert "docs/extension_reviewer_notes.md" in names
     assert "scripts/build_extension_study_snapshot.py" in names
     assert "scripts/build_extension_tracker_index.py" in names
+
+    with zipfile.ZipFile(firefox_zip) as zf:
+        firefox_manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
+
+    assert firefox_manifest["background"]["service_worker"] == "background/service-worker.js"
+    assert firefox_manifest["background"]["scripts"] == FIREFOX_BACKGROUND_SCRIPTS
+    assert firefox_manifest["browser_specific_settings"]["gecko"]["data_collection_permissions"] == {
+        "required": ["none"]
+    }
+
+
+def test_source_manifest_declares_no_firefox_data_collection() -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert manifest["browser_specific_settings"]["gecko"]["data_collection_permissions"] == {
+        "required": ["none"]
+    }
+
+
+def test_popup_renderer_no_longer_uses_runtime_innerhtml() -> None:
+    popup_text = POPUP.read_text(encoding="utf-8")
+    assert ".innerHTML" not in popup_text
