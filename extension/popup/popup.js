@@ -36,6 +36,7 @@
 
   let currentAnalysis = null;
   let renderedInsightsKey = null;
+  let activePetTooltipTrigger = null;
 
   // ── DOM refs ──────────────────────────────────────────────────────────────
 
@@ -77,6 +78,7 @@
   async function init() {
     try {
       bindStudyInsights();
+      bindPetTooltips();
 
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (!tab) return showError("No active tab found.");
@@ -139,6 +141,111 @@
         renderStudyInsights(currentAnalysis);
       }
     });
+  }
+
+  function bindPetTooltips() {
+    if (!els.petList || els.petList.dataset.tooltipsBound === "true") return;
+    els.petList.dataset.tooltipsBound = "true";
+
+    els.petList.addEventListener("click", onPetTooltipClick);
+    els.petList.addEventListener("focusin", onPetTooltipFocusIn);
+    els.petList.addEventListener("focusout", onPetTooltipFocusOut);
+    els.petList.addEventListener("mouseover", onPetTooltipMouseOver);
+    els.petList.addEventListener("mouseout", onPetTooltipMouseOut);
+
+    document.addEventListener("click", onDocumentClickForPetTooltip);
+    document.addEventListener("keydown", onDocumentKeydownForPetTooltip);
+  }
+
+  function onPetTooltipClick(event) {
+    const button = event.target.closest(".pet-study-info");
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openPetTooltip(button);
+  }
+
+  function onPetTooltipFocusIn(event) {
+    const button = event.target.closest(".pet-study-info");
+    if (!button) return;
+    openPetTooltip(button);
+  }
+
+  function onPetTooltipFocusOut(event) {
+    const container = event.target.closest(".pet-study");
+    if (!container) return;
+    const nextTarget = event.relatedTarget;
+    if (nextTarget && container.contains(nextTarget)) return;
+    closePetTooltip(container.querySelector(".pet-study-info"));
+  }
+
+  function onPetTooltipMouseOver(event) {
+    const container = event.target.closest(".pet-study");
+    if (!container) return;
+    const related = event.relatedTarget;
+    if (related && container.contains(related)) return;
+    openPetTooltip(container.querySelector(".pet-study-info"));
+  }
+
+  function onPetTooltipMouseOut(event) {
+    const container = event.target.closest(".pet-study");
+    if (!container) return;
+    const related = event.relatedTarget;
+    if (related && container.contains(related)) return;
+    const button = container.querySelector(".pet-study-info");
+    if (document.activeElement === button) return;
+    closePetTooltip(button);
+  }
+
+  function onDocumentClickForPetTooltip(event) {
+    if (event.target.closest(".pet-study")) return;
+    closeActivePetTooltip();
+  }
+
+  function onDocumentKeydownForPetTooltip(event) {
+    if (event.key !== "Escape" || !activePetTooltipTrigger) return;
+    event.preventDefault();
+    const trigger = activePetTooltipTrigger;
+    closeActivePetTooltip();
+    if (trigger && typeof trigger.focus === "function") {
+      trigger.focus();
+    }
+  }
+
+  function openPetTooltip(button) {
+    if (!button) return;
+    if (activePetTooltipTrigger && activePetTooltipTrigger !== button) {
+      closePetTooltip(activePetTooltipTrigger);
+    }
+    const tooltip = tooltipForButton(button);
+    if (!tooltip) return;
+    button.setAttribute("aria-expanded", "true");
+    tooltip.hidden = false;
+    button.closest(".pet-study")?.classList.add("open");
+    activePetTooltipTrigger = button;
+  }
+
+  function closePetTooltip(button) {
+    if (!button) return;
+    const tooltip = tooltipForButton(button);
+    button.setAttribute("aria-expanded", "false");
+    if (tooltip) {
+      tooltip.hidden = true;
+    }
+    button.closest(".pet-study")?.classList.remove("open");
+    if (activePetTooltipTrigger === button) {
+      activePetTooltipTrigger = null;
+    }
+  }
+
+  function closeActivePetTooltip() {
+    if (!activePetTooltipTrigger) return;
+    closePetTooltip(activePetTooltipTrigger);
+  }
+
+  function tooltipForButton(button) {
+    const tooltipId = button?.getAttribute("aria-controls");
+    return tooltipId ? document.getElementById(tooltipId) : null;
   }
 
   function renderStudyCopy(studyMetadata) {
@@ -401,29 +508,41 @@
   // ── PET Recommendations ───────────────────────────────────────────────────
 
   function renderPetRecommendations(pets) {
+    closeActivePetTooltip();
+
     if (!pets || pets.length === 0) {
       els.petSection.classList.add("hidden");
+      els.petList.innerHTML = "";
       return;
     }
 
     els.petSection.classList.remove("hidden");
 
     let html = "";
-    for (const pet of pets) {
-      const badge = studyBadgeLabel(pet.studyTrackerReductionPct);
+    for (const [index, pet] of pets.entries()) {
       const color = petStudyColor(pet.studyTrackerReductionPct);
+      const metricLabel = pet.studyMetricLabel || studyBadgeLabel(pet.studyTrackerReductionPct);
+      const tooltipText = pet.studyTooltipText || buildPetStudyTooltipText(pet);
+      const tooltipId = `pet-study-tooltip-${index}`;
       html += `<div class="pet-card">`;
-      html += `<div class="pet-effectiveness" style="color:${color};border-color:${color}">${esc(badge)}</div>`;
-      html += `<div class="pet-info">`;
-      html += `<div><span class="pet-name">${esc(pet.name)}</span><span class="pet-type">${pet.type}</span></div>`;
+      html += `<div class="pet-header">`;
+      html += `<div class="pet-title"><span class="pet-name">${esc(pet.name)}</span><span class="pet-type">${esc(pet.type)}</span></div>`;
+      if (metricLabel || tooltipText) {
+        html += `<div class="pet-study">`;
+        if (metricLabel) {
+          html += `<span class="pet-effectiveness" style="color:${color};border-color:${color}">${esc(metricLabel)}</span>`;
+        }
+        if (tooltipText) {
+          html += `<button type="button" class="pet-study-info" aria-label="${escAttr(`Explain study metric for ${pet.name}`)}" aria-expanded="false" aria-controls="${escAttr(tooltipId)}">i</button>`;
+          html += `<div class="pet-study-tooltip" id="${escAttr(tooltipId)}" role="tooltip" hidden>${esc(tooltipText)}</div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
       html += `<div class="pet-desc">${esc(pet.description)}</div>`;
       if (pet.whyRecommended) {
         html += `<div class="pet-desc">Why recommended: ${esc(pet.whyRecommended)}</div>`;
       }
-      if (pet.studyLabel) {
-        html += `<div class="pet-desc">Study snapshot: ${esc(pet.studyLabel)}</div>`;
-      }
-      html += `</div>`;
       html += `</div>`;
     }
 
@@ -557,11 +676,22 @@
 
   function studyBadgeLabel(value) {
     if (typeof value !== "number" || Number.isNaN(value)) {
-      return "study";
+      return null;
     }
     const rounded = Math.round(value * 10) / 10;
     const sign = rounded > 0 ? "+" : "";
     return `${sign}${rounded.toFixed(1)}%`;
+  }
+
+  function buildPetStudyTooltipText(pet) {
+    const studyLabel = AECCS?.STUDY_METADATA?.label || "AECCS 1000-site combined study snapshot";
+    if (pet.studyMetricLabel && pet.studySitesTested) {
+      return `${studyLabel}: ${pet.name} averaged ${pet.studyMetricLabel} tracker reduction across ${pet.studySitesTested} tested sites. This is not a live measurement for the current page.`;
+    }
+    if (pet.studyLabel) {
+      return `${studyLabel}: ${pet.studyLabel}. This is not a live measurement for the current page.`;
+    }
+    return `${studyLabel}: study-backed context only. This is not a live measurement for the current page.`;
   }
 
   function formatPercent(value) {
@@ -615,6 +745,15 @@
     const d = document.createElement("div");
     d.textContent = str || "";
     return d.innerHTML;
+  }
+
+  function escAttr(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   // ── Start ─────────────────────────────────────────────────────────────────

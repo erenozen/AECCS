@@ -469,7 +469,11 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
                 "type": "browser",
                 "description": "Built-in browser protection with the strongest average tracker reduction in the combined study.",
                 "studyTrackerReductionPct": 22.8,
+                "studySitesTested": 878,
+                "studyRank": 1,
+                "studyMetricLabel": "+22.8%",
                 "studyLabel": "+22.8% avg tracker reduction in study",
+                "studyTooltipText": "AECCS 1000-site combined study snapshot: Brave Shields averaged +22.8% tracker reduction across 878 tested sites. This is not a live measurement for the current page.",
                 "whyRecommended": "Helps with pre-consent trackers and analytics trackers.",
             }
         ],
@@ -503,6 +507,10 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
                 cmpInfo: document.getElementById("cmpInfo").textContent,
                 petList: document.getElementById("petList").textContent,
                 petBadge: document.querySelector(".pet-effectiveness")?.textContent || "",
+                petBadges: Array.from(document.querySelectorAll(".pet-effectiveness")).map(el => el.textContent),
+                petInfoLabel: document.querySelector(".pet-study-info")?.getAttribute("aria-label") || "",
+                petTooltipText: document.querySelector(".pet-study-tooltip")?.textContent || "",
+                petTooltipHidden: document.querySelector(".pet-study-tooltip")?.hidden ?? true,
                 studyInsightsOpen: document.getElementById("studyInsightsSection").open,
                 studyInsightsContent: document.getElementById("studyInsightsContent").textContent,
             })"""
@@ -521,12 +529,145 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
     assert "41%" in content["cmpInfo"]
     assert "138 sites" in content["cmpInfo"]
     assert "24.1" in content["cmpInfo"]
-    assert "+22.8% avg tracker reduction in study" in content["petList"]
     assert "Why recommended:" in content["petList"]
+    assert "Study snapshot:" not in content["petList"]
     assert "95%" not in content["petList"]
     assert content["petBadge"] == "+22.8%"
+    assert "study" not in {badge.lower() for badge in content["petBadges"]}
+    assert content["petInfoLabel"] == "Explain study metric for Brave Shields"
+    assert "AECCS 1000-site combined study snapshot" in content["petTooltipText"]
+    assert "878 tested sites" in content["petTooltipText"]
+    assert "not a live measurement for the current page" in content["petTooltipText"]
+    assert content["petTooltipHidden"] is True
     assert content["studyInsightsOpen"] is False
     assert content["studyInsightsContent"] == ""
+
+
+def test_popup_pet_tooltip_supports_hover_focus_click_and_escape() -> None:
+    popup_result = {
+        "isGovDomain": False,
+        "studyMetadata": {
+            "label": "AECCS 1000-site combined study snapshot",
+            "runId": "combined-1000",
+            "sampleSize": 1000,
+            "successfulCrawls": 861,
+            "bannerSites": 595,
+            "snapshotDateLabel": "March 6, 2026",
+        },
+        "score": {"grade": "C", "overall_score": 61, "criteria": {}},
+        "categoryCounts": {},
+        "totalCookies": 0,
+        "thirdPartyCount": 0,
+        "trackerCount": 0,
+        "trackersByVendor": {},
+        "cmpStats": None,
+        "petRecommendations": [
+            {
+                "name": "Brave Shields",
+                "type": "browser",
+                "description": "Built-in browser protection with the strongest average tracker reduction in the combined study.",
+                "studyTrackerReductionPct": 22.8,
+                "studySitesTested": 878,
+                "studyRank": 1,
+                "studyMetricLabel": "+22.8%",
+                "studyTooltipText": "AECCS 1000-site combined study snapshot: Brave Shields averaged +22.8% tracker reduction across 878 tested sites. This is not a live measurement for the current page.",
+                "whyRecommended": "Helps with pre-consent trackers.",
+            },
+            {
+                "name": "Consent-O-Matic",
+                "type": "extension",
+                "description": "Automates reject flows when a site exposes a usable path, rather than blocking requests directly.",
+                "studyTrackerReductionPct": -11.2,
+                "studySitesTested": 896,
+                "studyRank": 5,
+                "studyMetricLabel": "-11.2%",
+                "studyTooltipText": "AECCS 1000-site combined study snapshot: Consent-O-Matic averaged -11.2% tracker reduction across 896 tested sites. This is not a live measurement for the current page.",
+                "whyRecommended": "Helps with dark patterns and reject friction.",
+            },
+        ],
+        "consentScan": {
+            "cmpDetected": None,
+            "bannerFound": False,
+            "hasAcceptButton": False,
+            "hasRejectButton": False,
+            "hasSettingsButton": False,
+            "acceptButtonText": None,
+            "rejectButtonText": None,
+            "settingsButtonText": None,
+            "acceptClicksRequired": 0,
+            "rejectClicksRequired": 0,
+            "transparency": {},
+            "darkPatterns": {"count": 0, "detected": []},
+            "buttonComparison": None,
+        },
+    }
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _render_popup(page, popup_result)
+        page.wait_for_selector("#petList .pet-study-info")
+
+        initial = page.evaluate(
+            """() => ({
+                expanded: document.querySelector(".pet-study-info")?.getAttribute("aria-expanded"),
+                hidden: document.querySelector(".pet-study-tooltip")?.hidden
+            })"""
+        )
+
+        page.hover(".pet-study")
+        after_hover = page.evaluate(
+            """() => ({
+                expanded: document.querySelector(".pet-study-info")?.getAttribute("aria-expanded"),
+                hidden: document.querySelector(".pet-study-tooltip")?.hidden
+            })"""
+        )
+
+        page.hover("#footerNote")
+        after_mouse_leave = page.evaluate(
+            """() => document.querySelector(".pet-study-tooltip")?.hidden"""
+        )
+
+        page.focus(".pet-study-info")
+        after_focus = page.evaluate(
+            """() => document.querySelector(".pet-study-tooltip")?.hidden"""
+        )
+
+        page.keyboard.press("Escape")
+        after_escape = page.evaluate(
+            """() => document.querySelector(".pet-study-tooltip")?.hidden"""
+        )
+
+        page.click(".pet-study-info")
+        after_click = page.evaluate(
+            """() => document.querySelector(".pet-study-tooltip")?.hidden"""
+        )
+
+        page.click(".pet-card:nth-child(2) .pet-study-info")
+        after_second_click = page.evaluate(
+            """() => ({
+                expanded: Array.from(document.querySelectorAll(".pet-study-info")).map(el => el.getAttribute("aria-expanded")),
+                visible: Array.from(document.querySelectorAll(".pet-study-tooltip")).map(el => !el.hidden)
+            })"""
+        )
+
+        page.click("#footerNote")
+        after_outside_click = page.evaluate(
+            """() => Array.from(document.querySelectorAll(".pet-study-tooltip")).every(el => el.hidden)"""
+        )
+        browser.close()
+
+    assert initial["expanded"] == "false"
+    assert initial["hidden"] is True
+    assert after_hover["expanded"] == "true"
+    assert after_hover["hidden"] is False
+    assert after_mouse_leave is True
+    assert after_focus is False
+    assert after_escape is True
+    assert after_click is False
+    assert after_second_click["expanded"] == ["false", "true"]
+    assert after_second_click["visible"] == [False, True]
+    assert after_outside_click is True
 
 
 def test_popup_study_insights_lazy_render_combined_snapshot_content() -> None:
@@ -652,6 +793,7 @@ def test_extension_combined_study_snapshot_matches_authoritative_values() -> Non
             """() => ({
                 study: AECCS.STUDY_METADATA,
                 bestPet: AECCS.PET_STUDY_RESULTS[0],
+                bestPetProfile: AECCS.PET_PROFILES.find(p => p.name === "Brave Shields"),
                 bestCmp: AECCS.CMP_STUDY_RESULTS[0],
                 cmpStats: AECCS.CMP_STATS.Didomi
             })"""
@@ -672,6 +814,10 @@ def test_extension_combined_study_snapshot_matches_authoritative_values() -> Non
     assert result["study"]["publicSector"]["successfulSites"] == 77
     assert result["bestPet"]["name"] == "Brave Shields"
     assert result["bestPet"]["trackerReductionPct"] == 22.8
+    assert result["bestPetProfile"]["studySitesTested"] == 878
+    assert result["bestPetProfile"]["studyRank"] == 1
+    assert result["bestPetProfile"]["studyMetricLabel"] == "+22.8%"
+    assert "not a live measurement for the current page" in result["bestPetProfile"]["studyTooltipText"]
     assert result["bestCmp"]["name"] == "Didomi"
     assert result["bestCmp"]["petScore"] == 24.9
     assert result["cmpStats"]["sampleSize"] == 49

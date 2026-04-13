@@ -358,6 +358,25 @@ const AECCS = (() => {
 
   const STUDY_METADATA = SNAPSHOT.metadata;
   const PET_STUDY_RESULTS = SNAPSHOT.petStudyResults;
+  const PET_STUDY_BY_NAME = Object.fromEntries(PET_STUDY_RESULTS.map(item => [item.name, item]));
+
+  function formatStudyMetric(value) {
+    if (typeof value !== "number" || Number.isNaN(value)) return null;
+    const rounded = Math.round(value * 10) / 10;
+    const sign = rounded > 0 ? "+" : "";
+    return `${sign}${rounded.toFixed(1)}%`;
+  }
+
+  function buildPetStudyTooltipText(name, studyMetricLabel, studySitesTested) {
+    const studyLabel = STUDY_METADATA.label || "AECCS 1000-site combined study snapshot";
+    if (studyMetricLabel && studySitesTested) {
+      return `${studyLabel}: ${name} averaged ${studyMetricLabel} tracker reduction across ${studySitesTested} tested sites. This is not a live measurement for the current page.`;
+    }
+    if (studyMetricLabel) {
+      return `${studyLabel}: ${name} averaged ${studyMetricLabel} tracker reduction in the study. This is not a live measurement for the current page.`;
+    }
+    return `${studyLabel}: study-backed context only. This is not a live measurement for the current page.`;
+  }
 
   // ── PET Recommendations (grounded in the combined 1000-site snapshot) ───
   // Relevance is still page-specific, but the static study copy must stay
@@ -430,7 +449,27 @@ const AECCS = (() => {
       recommendationWeight: 50,
       url: "https://consentomatic.au.dk",
     },
-  ];
+  ].map(profile => {
+    const study = PET_STUDY_BY_NAME[profile.name] || {};
+    const studyTrackerReductionPct = typeof study.trackerReductionPct === "number"
+      ? study.trackerReductionPct
+      : profile.studyTrackerReductionPct;
+    const studySitesTested = Number.isFinite(study.sitesTested) ? study.sitesTested : null;
+    const studyRank = Number.isFinite(study.studyRank) ? study.studyRank : profile.studyRank;
+    const studyMetricLabel = formatStudyMetric(studyTrackerReductionPct);
+
+    return {
+      ...profile,
+      type: study.type || profile.type,
+      studyTrackerReductionPct,
+      studySitesTested,
+      studyRank,
+      studyMetricLabel,
+      studyLabel: study.studyLabel || profile.studyLabel || null,
+      studyTooltipText: buildPetStudyTooltipText(profile.name, studyMetricLabel, studySitesTested),
+      highlight: study.highlight || profile.highlight || null,
+    };
+  });
 
   const CMP_STUDY_RESULTS = SNAPSHOT.cmpStudyResults;
 
