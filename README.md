@@ -65,6 +65,16 @@ It is intentionally different from banner auto-clickers and generic remediation 
 
 Draft store-listing copy for the extension lives in `docs/extension_store_listing.md`.
 
+Release-facing extension materials also live in `docs/`:
+
+- `docs/privacy-policy.html` — public privacy policy page to host over HTTPS
+- `docs/extension_store_listing_chrome.md` — Chrome Web Store ready copy
+- `docs/extension_store_listing_firefox.md` — Firefox AMO ready copy
+- `docs/extension_reviewer_notes.md` — reviewer trust package notes
+- `docs/extension_release_checklist.md` — step-by-step release runbook
+
+The packaging workflow is scripted in `scripts/package_extension_release.py`. It can optionally bump `extension/manifest.json`, regenerate the frozen study assets, and build Chrome, Firefox, and reviewer/source archives into `dist/extension-release/`.
+
 ## Project Structure
 
 ```
@@ -118,6 +128,7 @@ AECCS/
 │   ├── __init__.py
 │   ├── build_extension_study_snapshot.py  # Generate extension study snapshot
 │   ├── build_extension_tracker_index.py   # Generate compact tracker index
+│   ├── package_extension_release.py       # Build Chrome/Firefox/reviewer release archives
 │   └── run_pipeline.py                # Unified mock/real pipeline runner
 │
 ├── reporting/

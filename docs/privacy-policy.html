@@ -221,7 +221,7 @@
         <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round"/>
       </svg>
-      Academic Research Extension
+      Passive Local Extension
     </div>
     <h1>Privacy Policy</h1>
     <p class="header-subtitle">AECCS Cookie Compliance Checker &mdash; Browser Extension</p>
@@ -233,16 +233,16 @@
 
   <h2>Overview</h2>
   <p>
-    AECCS (Automated Cookie Consent Compliance Scanner) is an academic research
-    extension developed as part of a CS475 Privacy-Enhancing Technologies course
-    project.  It analyzes the GDPR cookie consent compliance of websites you
-    visit &mdash; entirely within your browser.
+    AECCS (Automated Cookie Consent Compliance Scanner) is a passive,
+    research-grounded browser extension that analyzes the GDPR cookie-consent
+    compliance of the website you are currently viewing &mdash; entirely within
+    your browser.
   </p>
 
   <div class="highlight-box">
     <p>
-      <strong>The short version:</strong> AECCS does not collect, store, or
-      transmit any personal data.  All analysis happens locally in your browser
+      <strong>The short version:</strong> AECCS does not collect, sell, store,
+      or transmit personal data. All analysis happens locally in your browser
       and is discarded when you close the popup.
     </p>
   </div>
@@ -284,7 +284,13 @@
       </tr>
       <tr>
         <td>Analysis results</td>
-        <td>Shown in the popup (compliance score, cookie breakdown, dark patterns found, etc.).</td>
+        <td>Shown in the popup (compliance score, cookie breakdown, dark patterns found, PET guidance, and study-backed context).</td>
+        <td class="status-no">No</td>
+        <td class="status-no">No</td>
+      </tr>
+      <tr>
+        <td>Bundled study snapshot</td>
+        <td>Static AECCS reference data bundled in the extension package (<code>study-snapshot.js</code>, <code>tracker-index.js</code>) to provide frozen study context without making network requests.</td>
         <td class="status-no">No</td>
         <td class="status-no">No</td>
       </tr>
@@ -294,7 +300,7 @@
   <p>
     All data listed above is processed in-memory, displayed in the extension
     popup, and discarded as soon as the popup is closed.  Nothing is written to
-    disk, local storage, or any remote server.
+    disk, local storage, sync storage, or any remote server.
   </p>
 
   <h2>Permissions</h2>
@@ -303,7 +309,7 @@
     <li><strong><code>cookies</code></strong> &mdash; Read cookies set by the current website so they can be classified and counted.</li>
     <li><strong><code>activeTab</code></strong> &mdash; Access the URL of the currently active tab when you click the extension icon.</li>
     <li><strong><code>scripting</code></strong> &mdash; Inject the consent-scanner content script into the active tab on demand (only when you click the extension).</li>
-    <li><strong><code>host_permissions: &lt;all_urls&gt;</code></strong> &mdash; Required by the <code>cookies</code> API, which needs a host permission matching the URL whose cookies are being read.  The extension never makes network requests to any URL.</li>
+    <li><strong><code>host_permissions: &lt;all_urls&gt;</code></strong> &mdash; Required by the <code>cookies</code> API, which needs a host permission matching the URL whose cookies are being read. The extension never fetches or sends data to those URLs.</li>
   </ul>
 
   <h2>No Network Requests</h2>
@@ -313,6 +319,16 @@
     whatsoever.  The extension is fully self-contained: all classification rules,
     scoring weights, and study reference data are bundled in the extension
     package itself.
+  </p>
+
+  <h2>No Remote Code</h2>
+  <p>
+    AECCS does not download executable code, load remote scripts, or depend on
+    remote configuration at runtime. The large study-reference assets bundled
+    with the extension are generated locally from the repository using
+    <code>scripts/build_extension_study_snapshot.py</code> and
+    <code>scripts/build_extension_tracker_index.py</code>, then shipped as
+    static files inside the extension package.
   </p>
 
   <h2>No Tracking or Analytics</h2>
@@ -328,10 +344,18 @@
     third-party service.  It has no external dependencies at runtime.
   </p>
 
+  <h2>Data Retention and Sharing</h2>
+  <p>
+    AECCS does not retain browsing data after the popup closes, does not share
+    browsing data with any third party, and does not sell personal information.
+    Because the extension does not transmit browsing data off-device, there is
+    no server-side account system, no cloud storage, and no data broker access.
+  </p>
+
   <h2>Academic Context</h2>
   <p>
-    This extension was developed as part of an academic study examining GDPR
-    cookie consent compliance across 1,000 popular websites.  The study data referenced
+    This extension was developed from an academic study examining GDPR cookie
+    consent compliance across 1,000 popular websites. The study data referenced
     in the extension (compliance statistics, PET effectiveness scores, CMP
     rankings) is a frozen snapshot from a controlled research crawl and is
     bundled statically &mdash; it is not updated or fetched at runtime.
@@ -340,6 +364,30 @@
     The source code is publicly available at
     <a href="https://github.com/erenozen/AECCS" target="_blank" rel="noopener">github.com/erenozen/AECCS</a>.
   </p>
+
+  <h2>Public Links and Support</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Purpose</th>
+        <th>URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Project homepage / source</td>
+        <td><a href="https://github.com/erenozen/AECCS" target="_blank" rel="noopener">https://github.com/erenozen/AECCS</a></td>
+      </tr>
+      <tr>
+        <td>Support / issue tracker</td>
+        <td><a href="https://github.com/erenozen/AECCS/issues" target="_blank" rel="noopener">https://github.com/erenozen/AECCS/issues</a></td>
+      </tr>
+      <tr>
+        <td>Privacy policy</td>
+        <td>This page when hosted at a stable HTTPS URL for browser-store submission.</td>
+      </tr>
+    </tbody>
+  </table>
 
   <div class="divider"></div>
 
