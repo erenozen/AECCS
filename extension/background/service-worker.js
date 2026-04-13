@@ -13,6 +13,7 @@
 importScripts(
   "../lib/browser-polyfill.js",
   "../lib/tracker-data.js",
+  "../lib/tracker-index.js",
   "../lib/domain-utils.js",
   "../lib/classifier.js",
   "../lib/scorer.js"
@@ -126,6 +127,7 @@ async function handleAnalyze(tabId) {
     consentScan,
     score,
     isGovDomain,
+    studyMetadata: AECCS.STUDY_METADATA,
     cmpStats,
     petRecommendations,
   };
@@ -139,6 +141,7 @@ async function handleAnalyze(tabId) {
 function buildPetRecommendations(classified, consentScan, score) {
   const issues = new Set();
   const trackerCategories = new Set();
+  const issueLabels = [];
 
   // Identify the site's specific problems
   for (const c of classified) {
@@ -149,7 +152,9 @@ function buildPetRecommendations(classified, consentScan, score) {
   }
 
   if (consentScan && !consentScan.error) {
-    if (!consentScan.hasRejectButton) issues.add("reject_effort");
+    if (!consentScan.hasRejectButton || consentScan.rejectClicksRequired > consentScan.acceptClicksRequired) {
+      issues.add("reject_effort");
+    }
     if (consentScan.darkPatterns?.count > 0) {
       issues.add("dark_patterns");
       issues.add("reject_effort");
@@ -158,17 +163,58 @@ function buildPetRecommendations(classified, consentScan, score) {
 
   if (issues.size === 0) return [];
 
+  if (issues.has("pre_consent_trackers")) issueLabels.push("pre-consent trackers");
+  if (issues.has("dark_patterns")) issueLabels.push("dark patterns");
+  if (issues.has("reject_effort")) issueLabels.push("unequal reject path");
+
   // Score each PET by how many of the site's issues it addresses
   return AECCS.PET_PROFILES
     .map(pet => {
       let relevance = 0;
+      const matchedReasons = [];
       for (const help of pet.helpsWith) {
-        if (issues.has(help)) relevance += 2;
-        if (trackerCategories.has(help)) relevance += 1;
+        if (issues.has(help)) {
+          relevance += 2;
+          matchedReasons.push(labelForIssue(help));
+        }
+        if (trackerCategories.has(help)) {
+          relevance += 1;
+          matchedReasons.push(labelForIssue(help));
+        }
       }
-      return { ...pet, relevance };
+      return {
+        ...pet,
+        relevance,
+        matchedReasons: Array.from(new Set(matchedReasons)).slice(0, 3),
+        whyRecommended: buildWhyRecommended(Array.from(new Set(matchedReasons)).slice(0, 3), issueLabels),
+      };
     })
     .filter(p => p.relevance > 0)
-    .sort((a, b) => b.relevance - a.relevance || b.effectiveness - a.effectiveness)
+    .sort((a, b) =>
+      b.relevance - a.relevance ||
+      (b.recommendationWeight || 0) - (a.recommendationWeight || 0) ||
+      (b.studyTrackerReductionPct || 0) - (a.studyTrackerReductionPct || 0)
+    )
     .slice(0, 3); // top 3 recommendations
+}
+
+function labelForIssue(issue) {
+  const labels = {
+    pre_consent_trackers: "pre-consent trackers",
+    dark_patterns: "dark patterns",
+    reject_effort: "reject friction",
+    analytics: "analytics trackers",
+    advertising: "advertising trackers",
+    social: "social trackers",
+    fingerprinting: "fingerprinting signals",
+  };
+  return labels[issue] || issue.replace(/_/g, " ");
+}
+
+function buildWhyRecommended(matchedReasons, fallbackReasons) {
+  const reasons = matchedReasons.length > 0 ? matchedReasons : fallbackReasons;
+  if (!reasons || reasons.length === 0) return null;
+  if (reasons.length === 1) return `Helps with ${reasons[0]}.`;
+  if (reasons.length === 2) return `Helps with ${reasons[0]} and ${reasons[1]}.`;
+  return `Helps with ${reasons[0]}, ${reasons[1]}, and ${reasons[2]}.`;
 }

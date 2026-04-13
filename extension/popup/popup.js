@@ -34,6 +34,9 @@
     transparent_information:    "Transparent Information",
   };
 
+  let currentAnalysis = null;
+  let renderedInsightsKey = null;
+
   // ── DOM refs ──────────────────────────────────────────────────────────────
 
   const $ = id => document.getElementById(id);
@@ -45,6 +48,7 @@
     results:           $("results"),
     siteDomain:        $("siteDomain"),
     govAlert:          $("govAlert"),
+    govNote:           $("govNote"),
     gradeBadge:        $("gradeBadge"),
     gradeLetter:       $("gradeLetter"),
     scoreValue:        $("scoreValue"),
@@ -61,13 +65,19 @@
     darkPatternDetails: $("darkPatternDetails"),
     criteriaBody:      $("criteriaBody"),
     petSection:        $("petSection"),
+    petSubtitle:       $("petSubtitle"),
     petList:           $("petList"),
+    studyInsightsSection: $("studyInsightsSection"),
+    studyInsightsContent: $("studyInsightsContent"),
+    footerNote:        $("footerNote"),
   };
 
   // ── Init ──────────────────────────────────────────────────────────────────
 
   async function init() {
     try {
+      bindStudyInsights();
+
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (!tab) return showError("No active tab found.");
 
@@ -92,6 +102,8 @@
   // ── Render ────────────────────────────────────────────────────────────────
 
   function render(data) {
+    currentAnalysis = data;
+    renderedInsightsKey = null;
     els.loading.classList.add("hidden");
     els.results.classList.remove("hidden");
 
@@ -100,14 +112,54 @@
       els.govAlert.classList.remove("hidden");
     }
 
+    renderStudyCopy(data.studyMetadata);
     renderScore(data.score);
     renderCookies(data);
     renderTrackers(data.trackersByVendor);
-    renderConsent(data.consentScan, data.cmpStats);
+    renderConsent(data.consentScan, data.cmpStats, data.studyMetadata);
     renderButtonComparison(data.consentScan?.buttonComparison);
     renderDarkPatterns(data.consentScan?.darkPatterns);
     renderCriteria(data.score.criteria);
     renderPetRecommendations(data.petRecommendations);
+
+    if (els.studyInsightsSection) {
+      els.studyInsightsSection.classList.remove("hidden");
+      if (els.studyInsightsSection.open) {
+        renderStudyInsights(data);
+      } else if (els.studyInsightsContent) {
+        els.studyInsightsContent.innerHTML = "";
+      }
+    }
+  }
+
+  function bindStudyInsights() {
+    if (!els.studyInsightsSection) return;
+    els.studyInsightsSection.addEventListener("toggle", () => {
+      if (els.studyInsightsSection.open && currentAnalysis) {
+        renderStudyInsights(currentAnalysis);
+      }
+    });
+  }
+
+  function renderStudyCopy(studyMetadata) {
+    const snapshotDateLabel = studyMetadata?.snapshotDateLabel || "March 1, 2026";
+    const sampleSize = studyMetadata?.sampleSize || 100;
+    const successfulCrawls = studyMetadata?.successfulCrawls || 97;
+
+    if (els.govNote) {
+      els.govNote.textContent =
+        "Public bodies have stricter GDPR obligations, so consent failures on these domains may be especially serious.";
+    }
+
+    if (els.petSubtitle) {
+      els.petSubtitle.textContent =
+        `Based on this site's specific compliance issues (${sampleSize}-site snapshot, ${successfulCrawls} successful crawls, ${snapshotDateLabel})`;
+    }
+
+    if (els.footerNote) {
+      els.footerNote.textContent =
+        `AECCS · CS475 Privacy-Enhancing Technologies · ${snapshotDateLabel} study snapshot`;
+    }
   }
 
   // ── Score Badge ───────────────────────────────────────────────────────────
@@ -181,8 +233,10 @@
 
   // ── Consent Banner + CMP Stats ────────────────────────────────────────────
 
-  function renderConsent(scan, cmpStats) {
+  function renderConsent(scan, cmpStats, studyMetadata) {
     els.consentInfo.innerHTML = "";
+    els.cmpInfo.classList.add("hidden");
+    els.cmpInfo.innerHTML = "";
 
     if (!scan || scan.error) {
       els.consentInfo.innerHTML = row("warn", "Consent scan unavailable");
@@ -220,14 +274,15 @@
       els.consentInfo.innerHTML += row("bad", "No reject button found");
     }
 
-    // CMP statistics from our 1000-site study
     if (cmpStats && scan.cmpDetected) {
       els.cmpInfo.classList.remove("hidden");
       els.cmpInfo.innerHTML = `
         <div class="cmp-stats">
-          <div class="cmp-stats-title">AECCS Study: ${esc(scan.cmpDetected)} across ${cmpStats.sampleSize} sites</div>
+          <div class="cmp-stats-title">${esc(scan.cmpDetected)} in the ${studyMetadata?.sampleSize || 100}-site AECCS snapshot</div>
           <div class="cmp-stat-row"><span>Avg compliance score</span><span>${cmpStats.avgScore}/100</span></div>
           <div class="cmp-stat-row"><span>Sites with reject button</span><span>${Math.round(cmpStats.rejectRate * 100)}%</span></div>
+          <div class="cmp-stat-row"><span>Sample size</span><span>${cmpStats.sampleSize} sites</span></div>
+          <div class="cmp-stat-row"><span>CMP PET score</span><span>${cmpStats.petScore}</span></div>
         </div>
       `;
     }
@@ -350,15 +405,23 @@
       return;
     }
 
+    els.petSection.classList.remove("hidden");
+
     let html = "";
     for (const pet of pets) {
-      const pct = Math.round(pet.effectiveness * 100);
-      const color = scoreColor(pct);
+      const badge = studyBadgeLabel(pet.studyTrackerReductionPct);
+      const color = petStudyColor(pet.studyTrackerReductionPct);
       html += `<div class="pet-card">`;
-      html += `<div class="pet-effectiveness" style="color:${color};border-color:${color}">${pct}%</div>`;
+      html += `<div class="pet-effectiveness" style="color:${color};border-color:${color}">${esc(badge)}</div>`;
       html += `<div class="pet-info">`;
       html += `<div><span class="pet-name">${esc(pet.name)}</span><span class="pet-type">${pet.type}</span></div>`;
       html += `<div class="pet-desc">${esc(pet.description)}</div>`;
+      if (pet.whyRecommended) {
+        html += `<div class="pet-desc">Why recommended: ${esc(pet.whyRecommended)}</div>`;
+      }
+      if (pet.studyLabel) {
+        html += `<div class="pet-desc">Study snapshot: ${esc(pet.studyLabel)}</div>`;
+      }
       html += `</div>`;
       html += `</div>`;
     }
@@ -366,7 +429,113 @@
     els.petList.innerHTML = html;
   }
 
+  function renderStudyInsights(data) {
+    if (!els.studyInsightsContent) return;
+
+    const key = buildInsightsKey(data);
+    if (renderedInsightsKey === key) return;
+    renderedInsightsKey = key;
+
+    const study = data.studyMetadata || AECCS.STUDY_METADATA || {};
+    const petStudy = AECCS.PET_STUDY_RESULTS || [];
+    const cmpStudy = AECCS.CMP_STUDY_RESULTS || [];
+    const highlights = AECCS.RESEARCH_HIGHLIGHTS || [];
+    const guardrails = AECCS.CLAIM_GUARDRAILS || {};
+
+    let html = "";
+    html += `<div class="insight-badge">${esc(study.label || "AECCS study snapshot")} · ${esc(study.snapshotDateLabel || "March 1, 2026")}</div>`;
+    html += `<div class="insight-intro">This popup audits the current page locally. The cards below add frozen AECCS study context without introducing extra scans, clicks, or network requests.</div>`;
+
+    html += `<div class="insight-card">`;
+    html += `<div class="insight-card-title">Why AECCS is Different</div>`;
+    html += `<div class="insight-card-copy">${esc(guardrails.positioning || "AECCS is a passive, research-grounded cookie-consent auditor.")}</div>`;
+    if (highlights.length > 0) {
+      html += `<div class="insight-list">`;
+      for (const item of highlights) {
+        html += `<div class="insight-list-item"><strong>${esc(item.title)}</strong> — ${esc(item.summary)}</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="insight-card">`;
+    html += `<div class="insight-card-title">Snapshot Metrics</div>`;
+    html += `<div class="insight-kv"><span>Study baseline</span><strong>${study.sampleSize || 100} sites / ${study.successfulCrawls || 97} successful crawls</strong></div>`;
+    html += `<div class="insight-kv"><span>Average compliance score</span><strong>${study.avgCompliance || 33.1}/100</strong></div>`;
+    html += `<div class="insight-kv"><span>Missing reject rate</span><strong>${formatPercent(study.missingRejectRate)}</strong></div>`;
+    html += `<div class="insight-kv"><span>Multi-layer rejection</span><strong>${formatPercent(study.multiLayerRate)}</strong></div>`;
+    html += `<div class="insight-kv"><span>Reject reduces trackers</span><strong>${formatPercent(study.rejectReducesTrackersRate)}</strong></div>`;
+    html += `<div class="insight-kv"><span>Reject eliminates trackers</span><strong>${formatPercent(study.rejectEliminatesTrackersRate)}</strong></div>`;
+    html += `</div>`;
+
+    html += `<div class="insight-card">`;
+    html += `<div class="insight-card-title">PET Guidance For This Page</div>`;
+    if (data.petRecommendations && data.petRecommendations.length > 0) {
+      html += `<div class="insight-card-copy">Recommendations stay passive: they are tied to the issues found on this page, then grounded in the shared AECCS PET snapshot rather than live PET simulation.</div>`;
+      html += `<div class="insight-list">`;
+      for (const pet of data.petRecommendations) {
+        const rationale = pet.whyRecommended || pet.studyLabel || "Study-backed recommendation";
+        html += `<div class="insight-list-item"><strong>${esc(pet.name)}</strong> — ${esc(rationale)}</div>`;
+      }
+      html += `</div>`;
+    } else {
+      html += `<div class="insight-card-copy">No PET recommendation was needed for this page, but the extension still uses the same shared PET study snapshot for context.</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="insight-card">`;
+    html += `<div class="insight-card-title">Six PETs, One Study Snapshot</div>`;
+    html += `<div class="insight-card-copy">AECCS keeps Brave Shields, Firefox ETP Standard, Firefox ETP Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic in one comparable surface.</div>`;
+    html += `<div class="insight-list">`;
+    for (const pet of petStudy) {
+      html += `<div class="insight-list-item"><strong>${esc(pet.name)}</strong> — ${esc(pet.studyLabel)}. ${esc(pet.highlight)}</div>`;
+    }
+    html += `</div>`;
+    html += `</div>`;
+
+    html += `<div class="insight-card">`;
+    html += `<div class="insight-card-title">CMP And Public-Sector Context</div>`;
+    if (data.consentScan?.cmpDetected && data.cmpStats) {
+      html += `<div class="insight-card-copy">Detected CMP: <strong>${esc(data.consentScan.cmpDetected)}</strong>. In the shared snapshot it averaged ${data.cmpStats.avgScore}/100 with a reject rate of ${formatPercent(data.cmpStats.rejectRate)}.</div>`;
+    } else {
+      html += `<div class="insight-card-copy">When a known CMP is detected, AECCS adds shared CMP study context instead of sending data to an external service.</div>`;
+    }
+    html += `<div class="insight-divider"></div>`;
+    html += `<div class="insight-kv"><span>Best CMP in snapshot</span><strong>${esc((cmpStudy[0] && cmpStudy[0].name) || "OneTrust")}</strong></div>`;
+    html += `<div class="insight-kv"><span>Current page is public sector</span><strong>${data.isGovDomain ? "Yes" : "No"}</strong></div>`;
+    html += `<div class="insight-card-copy">The AECCS corpus includes government/public-sector domains because those sites face stronger consent obligations, not weaker ones.</div>`;
+    html += `</div>`;
+
+    html += `<div class="insight-card">`;
+    html += `<div class="insight-card-title">Methodology And Guardrails</div>`;
+    html += `<div class="insight-card-copy">Pipeline: crawl → classify → dark-pattern detect → score → CMP analysis → PET comparison → reporting.</div>`;
+    if (guardrails.supportedClaims && guardrails.supportedClaims.length > 0) {
+      html += `<div class="insight-list">`;
+      for (const claim of guardrails.supportedClaims) {
+        html += `<div class="insight-list-item"><strong>Claims:</strong> ${esc(claim)}</div>`;
+      }
+      html += `</div>`;
+    }
+    if (guardrails.notThis && guardrails.notThis.length > 0) {
+      html += `<div class="insight-divider"></div>`;
+      for (const item of guardrails.notThis) {
+        html += `<div class="insight-list-item">${esc(item)}</div>`;
+      }
+    }
+    html += `</div>`;
+
+    els.studyInsightsContent.innerHTML = html;
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  function buildInsightsKey(data) {
+    const site = data.site || data.url || "";
+    const cmp = data.consentScan?.cmpDetected || "";
+    const grade = data.score?.grade || "";
+    const openPatterns = (data.consentScan?.darkPatterns?.detected || []).join("|");
+    return [site, cmp, grade, openPatterns].join("::");
+  }
 
   function scoreColor(score) {
     if (score >= 90) return "#22c55e";
@@ -374,6 +543,27 @@
     if (score >= 60) return "#eab308";
     if (score >= 40) return "#f97316";
     return "#ef4444";
+  }
+
+  function petStudyColor(value) {
+    if (typeof value !== "number") return "#6b7280";
+    if (value > 0) return "#22c55e";
+    if (value > -10) return "#f59e0b";
+    return "#ef4444";
+  }
+
+  function studyBadgeLabel(value) {
+    if (typeof value !== "number" || Number.isNaN(value)) {
+      return "study";
+    }
+    const rounded = Math.round(value);
+    const sign = rounded > 0 ? "+" : "";
+    return `${sign}${rounded}%`;
+  }
+
+  function formatPercent(value) {
+    if (typeof value !== "number" || Number.isNaN(value)) return "n/a";
+    return `${Math.round(value * 1000) / 10}%`;
   }
 
   function isTransparentBackgroundValue(value) {

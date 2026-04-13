@@ -208,65 +208,201 @@ const AECCS = (() => {
     "div[data-testid*='consent']",
   ];
 
-  // ── PET Recommendations (from AECCS 1000-site study, 2025) ────────────────
-  // Effectiveness data: average tracker-request reduction measured across
-  // 1000 EU websites in the AECCS study.  Used to recommend PETs based on
-  // the specific compliance issues found on the current site.
+  // ── Frozen extension study snapshot (100 sites, 1 March 2026) ───────────
+  // These values are a lightweight, static summary used only for popup copy
+  // and CMP/PET provenance inside the extension.
+
+  const STUDY_METADATA = {
+    label: "AECCS 100-site study snapshot",
+    snapshotDate: "2026-03-01",
+    snapshotDateLabel: "March 1, 2026",
+    sampleSize: 100,
+    successfulCrawls: 97,
+    bannerSites: 72,
+    avgCompliance: 33.1,
+    missingRejectRate: 0.69,
+    multiLayerRate: 0.14,
+    rejectReducesTrackersRate: 0.072,
+    rejectEliminatesTrackersRate: 0.093,
+  };
+
+  const PET_STUDY_RESULTS = [
+    {
+      name: "Brave Shields",
+      type: "browser",
+      studyRank: 1,
+      trackerReductionPct: 14.7,
+      studyLabel: "+14.7% avg tracker reduction in study",
+      highlight: "Best average tracker reduction in the AECCS 100-site snapshot.",
+    },
+    {
+      name: "Firefox ETP Strict",
+      type: "browser",
+      studyRank: 2,
+      trackerReductionPct: -8.7,
+      studyLabel: "-8.7% avg tracker reduction in study",
+      highlight: "Widely deployed browser protection with mixed results in the snapshot.",
+    },
+    {
+      name: "uBlock Origin",
+      type: "extension",
+      studyRank: 3,
+      trackerReductionPct: -13.7,
+      studyLabel: "-13.7% avg tracker reduction in study",
+      highlight: "Strong site-level wins, but a negative snapshot-wide average in this methodology.",
+    },
+    {
+      name: "Firefox ETP Standard",
+      type: "browser",
+      studyRank: 4,
+      trackerReductionPct: -16.3,
+      studyLabel: "-16.3% avg tracker reduction in study",
+      highlight: "Represents the default Firefox experience in the PET comparison.",
+    },
+    {
+      name: "Consent-O-Matic",
+      type: "extension",
+      studyRank: 5,
+      trackerReductionPct: -17.7,
+      studyLabel: "-17.7% avg tracker reduction in study",
+      highlight: "Relevant as a consent-flow tool rather than a network blocker.",
+    },
+    {
+      name: "Privacy Badger",
+      type: "extension",
+      studyRank: 6,
+      trackerReductionPct: -18.4,
+      studyLabel: "-18.4% avg tracker reduction in study",
+      highlight: "Heuristic blocker with site-specific wins but a negative snapshot average.",
+    },
+  ];
+
+  // ── PET Recommendations (frozen to the March 1, 2026 study snapshot) ────
+  // The extension keeps a lightweight ranking model for relevance, while the
+  // study-backed fields shown to users come from the final 100-site run.
 
   const PET_PROFILES = [
     {
       name: "Brave Shields",
       type: "browser",
-      effectiveness: 0.95,   // 95% avg tracker-request reduction
-      description: "Built-in Brave browser shields — most effective single PET in our study.",
+      description: "Built-in browser protection with the best average tracker reduction in the study.",
       helpsWith: ["pre_consent_trackers", "advertising", "fingerprinting", "analytics"],
+      studyTrackerReductionPct: 14.7,
+      studyRank: 1,
+      studyLabel: "+14.7% avg tracker reduction in study",
+      recommendationWeight: 100,
       url: "https://brave.com",
     },
     {
       name: "uBlock Origin",
       type: "extension",
-      effectiveness: 0.89,
-      description: "Open-source content blocker with comprehensive filter lists.",
+      description: "Open-source blocker with strong site-level wins, but a negative study-wide average.",
       helpsWith: ["pre_consent_trackers", "advertising", "analytics"],
+      studyTrackerReductionPct: -13.7,
+      studyRank: 3,
+      studyLabel: "-13.7% avg tracker reduction in study",
+      recommendationWeight: 90,
       url: "https://ublockorigin.com",
     },
     {
       name: "Firefox ETP Strict",
       type: "browser",
-      effectiveness: 0.78,
-      description: "Firefox Enhanced Tracking Protection in Strict mode.",
+      description: "Firefox's stricter built-in protection, with mixed real-study results.",
       helpsWith: ["pre_consent_trackers", "fingerprinting", "social"],
+      studyTrackerReductionPct: -8.7,
+      studyRank: 2,
+      studyLabel: "-8.7% avg tracker reduction in study",
+      recommendationWeight: 80,
       url: "https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop",
     },
     {
       name: "Privacy Badger",
       type: "extension",
-      effectiveness: 0.67,
-      description: "EFF's heuristic tracker blocker — learns as you browse.",
+      description: "EFF's heuristic tracker blocker with site-specific wins but a negative study average.",
       helpsWith: ["pre_consent_trackers", "fingerprinting"],
+      studyTrackerReductionPct: -18.4,
+      studyRank: 6,
+      studyLabel: "-18.4% avg tracker reduction in study",
+      recommendationWeight: 65,
       url: "https://privacybadger.org",
     },
     {
       name: "Firefox ETP Standard",
       type: "browser",
-      effectiveness: 0.55,
-      description: "Firefox default tracking protection — moderate effectiveness.",
+      description: "Firefox's default tracker protection with modest friction and mixed study outcomes.",
       helpsWith: ["pre_consent_trackers", "social"],
+      studyTrackerReductionPct: -16.3,
+      studyRank: 4,
+      studyLabel: "-16.3% avg tracker reduction in study",
+      recommendationWeight: 55,
       url: "https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop",
     },
     {
       name: "Consent-O-Matic",
       type: "extension",
-      effectiveness: 0.40,
-      description: "Auto-rejects consent banners. Effective when CMP actually honors rejection.",
+      description: "Auto-rejects banners when a site exposes a usable reject path.",
       helpsWith: ["dark_patterns", "reject_effort"],
+      studyTrackerReductionPct: -17.7,
+      studyRank: 5,
+      studyLabel: "-17.7% avg tracker reduction in study",
+      recommendationWeight: 50,
       url: "https://consentomatic.au.dk",
+    },
+  ];
+
+  const CMP_STUDY_RESULTS = [
+    {
+      name: "OneTrust",
+      sampleSize: 26,
+      avgScore: 45.1,
+      rejectRate: 0.615,
+      petScore: 33.4,
+      highlight: "Best-performing CMP in the AECCS snapshot.",
+    },
+    {
+      name: "TrustArc",
+      sampleSize: 17,
+      avgScore: 37.2,
+      rejectRate: 0.471,
+      petScore: 24.1,
+      highlight: "Second-best CMP with a visible reject path on nearly half the sampled sites.",
+    },
+    {
+      name: "Cookiebot",
+      sampleSize: 6,
+      avgScore: 18.8,
+      rejectRate: 0.0,
+      petScore: 5.6,
+      highlight: "Low-score snapshot result with no sampled direct reject availability.",
+    },
+    {
+      name: "Usercentrics",
+      sampleSize: 1,
+      avgScore: 16.5,
+      rejectRate: 0.0,
+      petScore: 5.0,
+      highlight: "Single-site sample in the snapshot; included for provenance completeness.",
+    },
+    {
+      name: "Didomi",
+      sampleSize: 3,
+      avgScore: 14.0,
+      rejectRate: 0.0,
+      petScore: 4.0,
+      highlight: "Low-score snapshot result with no sampled direct reject availability.",
+    },
+    {
+      name: "Quantcast",
+      sampleSize: 1,
+      avgScore: 18.5,
+      rejectRate: 0.0,
+      petScore: 2.2,
+      highlight: "Lowest CMP PET score in the AECCS snapshot.",
     },
   ];
 
   // ── Government domain suffixes ───────────────────────────────────────────
   // Government / public-sector sites have stricter GDPR obligations.
-  // Our study found ~90% non-compliance among .gov domains.
 
   const GOV_SUFFIXES = [
     ".gov", ".gov.uk", ".gov.au", ".gov.tr", ".gov.br", ".gov.in",
@@ -277,16 +413,15 @@ const AECCS = (() => {
     ".gov.mt", ".gov.cy",
   ];
 
-  // ── CMP compliance statistics (from AECCS 1000-site study) ──────────────
-  // Average GDPR compliance scores per CMP, measured across 1000 EU sites.
+  // ── CMP compliance statistics (100-site final study snapshot) ───────────
 
   const CMP_STATS = {
-    "OneTrust":     { avgScore: 42, sampleSize: 187, rejectRate: 0.68 },
-    "Cookiebot":    { avgScore: 51, sampleSize: 134, rejectRate: 0.78 },
-    "Quantcast":    { avgScore: 35, sampleSize: 89,  rejectRate: 0.52 },
-    "TrustArc":     { avgScore: 38, sampleSize: 67,  rejectRate: 0.61 },
-    "Didomi":       { avgScore: 47, sampleSize: 43,  rejectRate: 0.72 },
-    "Usercentrics": { avgScore: 53, sampleSize: 56,  rejectRate: 0.82 },
+    "OneTrust":     { avgScore: 45.1, sampleSize: 26, rejectRate: 0.615, petScore: 33.4 },
+    "Cookiebot":    { avgScore: 18.8, sampleSize: 6,  rejectRate: 0.0,   petScore: 5.6 },
+    "Quantcast":    { avgScore: 18.5, sampleSize: 1,  rejectRate: 0.0,   petScore: 2.2 },
+    "TrustArc":     { avgScore: 37.2, sampleSize: 17, rejectRate: 0.471, petScore: 24.1 },
+    "Didomi":       { avgScore: 14.0, sampleSize: 3,  rejectRate: 0.0,   petScore: 4.0 },
+    "Usercentrics": { avgScore: 16.5, sampleSize: 1,  rejectRate: 0.0,   petScore: 5.0 },
   };
 
   // ── Dark pattern explanations ───────────────────────────────────────────
@@ -308,6 +443,16 @@ const AECCS = (() => {
       gdprArticle: "Art. 7(3) — Withdrawal of consent must be as easy as giving it.",
       severity: "high",
     },
+    "Missing reject option": {
+      description: "The banner offers no direct reject option, so users cannot decline tracking in one step.",
+      gdprArticle: "Art. 7(3) — Refusing consent must be as easy as giving it.",
+      severity: "high",
+    },
+    "Multi-layer rejection": {
+      description: "Rejecting cookies takes more clicks than accepting them, creating unequal effort.",
+      gdprArticle: "Art. 7(3) — Withdrawal of consent must be as easy as giving it.",
+      severity: "medium",
+    },
     "Confusing language": {
       description: "Banner text uses guilt-tripping, double negatives, or ambiguous button labels to manipulate choice.",
       gdprArticle: "Art. 12(1) — Information must be concise, transparent, and in clear language.",
@@ -318,6 +463,47 @@ const AECCS = (() => {
       gdprArticle: "Art. 7(4), EDPB Guidelines 05/2020 — consent is not freely given if access is conditional.",
       severity: "critical",
     },
+  };
+
+  const RESEARCH_HIGHLIGHTS = [
+    {
+      title: "PETs × Dark Patterns",
+      summary: "AECCS combines live consent-banner findings with study-backed PET guidance instead of treating them as separate problems.",
+    },
+    {
+      title: "Six PETs, One Snapshot",
+      summary: "The extension references one shared 100-site snapshot spanning Brave Shields, Firefox ETP Standard/Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic.",
+    },
+    {
+      title: "Government/Public-Sector Coverage",
+      summary: "The underlying AECCS corpus includes public-sector domains, which matters because those sites face stronger consent obligations.",
+    },
+    {
+      title: "Reproducible Pipeline",
+      summary: "The released pipeline runs crawl → classify → dark-pattern detect → score → CMP analysis → PET comparison → reporting.",
+    },
+  ];
+
+  const CLAIM_GUARDRAILS = {
+    positioning:
+      "AECCS is a passive, research-grounded cookie-consent auditor for the current page.",
+    supportedClaims: [
+      "Combines dark-pattern findings with study-backed PET guidance",
+      "Surfaces six end-user PETs in one shared study snapshot",
+      "Includes government/public-sector context and a March 1, 2026 post-DMA snapshot",
+      "Built on a reproducible open-source measurement pipeline",
+    ],
+    unsupportedClaims: [
+      "First to detect dark patterns",
+      "First to measure pre-consent tracking",
+      "First CMP study",
+      "First legal analysis of GDPR violations",
+    ],
+    notThis: [
+      "Not a blocker or auto-clicker",
+      "Not a remote scanner",
+      "Not a generic site-fix or copy-paste remediation tool",
+    ],
   };
 
   return {
@@ -331,10 +517,15 @@ const AECCS = (() => {
     PURPOSE_KEYWORDS,
     VENDOR_KEYWORDS,
     BANNER_SELECTORS,
+    STUDY_METADATA,
+    PET_STUDY_RESULTS,
     PET_PROFILES,
+    CMP_STUDY_RESULTS,
     GOV_SUFFIXES,
     CMP_STATS,
     DARK_PATTERN_INFO,
+    RESEARCH_HIGHLIGHTS,
+    CLAIM_GUARDRAILS,
   };
 })();
 

@@ -969,6 +969,56 @@
     return result;
   }
 
+  // ── Dark Pattern: Missing Reject Option ──────────────────────────────────
+  // Port of detector.py detect_missing_reject (lines 310-328)
+
+  function detectMissingReject(bannerFound, buttonData) {
+    const result = { detected: false, description: null };
+    if (!bannerFound) return result;
+
+    if (!buttonData.hasRejectButton) {
+      result.detected = true;
+      result.description = "No reject button in consent banner";
+      return result;
+    }
+
+    if (buttonData.rejectClicksRequired === 999) {
+      result.detected = true;
+      result.description = "Reject path unreachable (999 clicks)";
+    }
+
+    return result;
+  }
+
+  // ── Dark Pattern: Multi-layer Rejection ──────────────────────────────────
+  // Port of detector.py detect_multi_layer_rejection (lines 407-425)
+
+  function detectMultiLayerRejection(bannerFound, acceptClicksRequired, rejectClicksRequired) {
+    const result = {
+      detected: false,
+      acceptClicks: null,
+      rejectClicks: null,
+      clickRatio: null,
+    };
+    if (!bannerFound) return result;
+
+    const acceptClicks = typeof acceptClicksRequired === "number" ? acceptClicksRequired : 999;
+    const rejectClicks = typeof rejectClicksRequired === "number" ? rejectClicksRequired : 999;
+
+    result.acceptClicks = acceptClicks;
+    result.rejectClicks = rejectClicks;
+
+    if (acceptClicks > 0 && rejectClicks > 0 && acceptClicks < 999) {
+      result.clickRatio = Math.round((rejectClicks / acceptClicks) * 100) / 100;
+    }
+
+    if (rejectClicks > acceptClicks && acceptClicks < 999) {
+      result.detected = true;
+    }
+
+    return result;
+  }
+
   // ── Dark Pattern: Confusing Language ─────────────────────────────────────
   // Port of detector.py detect_confusing_language (lines 432-460)
 
@@ -1155,15 +1205,25 @@
     const preselected = detectPreselectedCheckboxes(bannerEl);
     const asymmetric = detectAsymmetricButtons(acceptPreview, rejectPreview);
     const hiddenReject = detectHiddenReject(hiddenRejectButton || rejectButton);
+    const missingReject = detectMissingReject(bannerFound, buttonData);
     const confusing = detectConfusingLanguage(bannerEl);
-    const forcedAction = detectForcedAction();
+    const forcedAction = bannerFound ? detectForcedAction() : { detected: false, isCookieWall: false };
+    const multiLayerRejection = detectMultiLayerRejection(
+      bannerFound,
+      acceptClicksRequired,
+      rejectClicksRequired
+    );
 
     const darkPatterns = [];
-    if (preselected.detected) darkPatterns.push("Pre-selected checkboxes");
-    if (asymmetric.detected) darkPatterns.push("Asymmetric buttons");
-    if (hiddenReject.detected) darkPatterns.push("Hidden reject button");
-    if (confusing.detected) darkPatterns.push("Confusing language");
-    if (forcedAction.detected) darkPatterns.push("Forced action / Cookie wall");
+    if (bannerFound) {
+      if (preselected.detected) darkPatterns.push("Pre-selected checkboxes");
+      if (asymmetric.detected) darkPatterns.push("Asymmetric buttons");
+      if (hiddenReject.detected) darkPatterns.push("Hidden reject button");
+      if (missingReject.detected) darkPatterns.push("Missing reject option");
+      if (forcedAction.detected) darkPatterns.push("Forced action / Cookie wall");
+      if (multiLayerRejection.detected) darkPatterns.push("Multi-layer rejection");
+      if (confusing.detected) darkPatterns.push("Confusing language");
+    }
 
     const transparency = checkTransparency(bannerEl);
     const buttonComparison = compareButtons(acceptPreview, rejectPreview, settingsPreview);
@@ -1189,8 +1249,10 @@
         preselectedCheckboxes: preselected,
         asymmetricButtons: asymmetric,
         hiddenReject: hiddenReject,
+        missingReject: missingReject,
         confusingLanguage: confusing,
         forcedAction: forcedAction,
+        multiLayerRejection: multiLayerRejection,
       },
       transparency,
       buttonComparison,

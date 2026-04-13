@@ -551,6 +551,107 @@ body {
   color: var(--green);
 }
 
+/* ── Study Insights ─────────────────────────────────────────────────────── */
+
+.study-insights {
+  padding-top: 0;
+}
+
+.study-insights-toggle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.study-insights-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.study-insights-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.study-insights-content {
+  margin-top: 10px;
+}
+
+.insight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #c7d2fe;
+  margin-bottom: 8px;
+}
+
+.insight-intro {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.insight-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.insight-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.insight-card-copy {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.insight-list {
+  margin-top: 8px;
+}
+
+.insight-list-item {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.insight-kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.insight-kv strong,
+.insight-list-item strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.insight-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 
 .footer {

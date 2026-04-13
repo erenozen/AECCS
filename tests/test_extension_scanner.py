@@ -11,6 +11,7 @@ TRACKER_DATA = ROOT / "extension" / "lib" / "tracker-data.js"
 SCANNER = ROOT / "extension" / "content" / "consent-scanner.js"
 SCORER = ROOT / "extension" / "lib" / "scorer.js"
 POPUP = ROOT / "extension" / "popup" / "popup.js"
+POPUP_HTML = ROOT / "extension" / "popup" / "popup.html"
 
 
 def _scan_fixture(page, fixture_name: str) -> dict:
@@ -37,7 +38,7 @@ def _render_popup(page, result: dict) -> None:
           <div id="errorState" class="hidden"><span id="errorMsg"></span></div>
           <div id="results" class="hidden">
             <div id="siteDomain"></div>
-            <div id="govAlert" class="hidden"></div>
+            <div id="govAlert" class="hidden"><div id="govNote"></div></div>
             <div id="gradeBadge"></div>
             <div id="gradeLetter"></div>
             <div id="scoreValue"></div>
@@ -51,8 +52,9 @@ def _render_popup(page, result: dict) -> None:
             <section id="buttonCompSection" class="hidden"><div id="buttonComparison"></div></section>
             <section id="darkPatternSection"><div id="darkPatternDetails"></div></section>
             <table><tbody id="criteriaBody"></tbody></table>
-            <section id="petSection" class="hidden"><div id="petList"></div></section>
+            <section id="petSection" class="hidden"><div id="petSubtitle"></div><div id="petList"></div></section>
           </div>
+          <footer id="footerNote"></footer>
         </body>
         </html>
         """
@@ -125,6 +127,36 @@ def test_consent_scanner_detects_settings_path_without_direct_reject() -> None:
     assert result["buttonComparison"]["reject"]["text"] == "Manage Preferences"
 
 
+def test_consent_scanner_tracks_passive_parity_dark_patterns_for_direct_banner() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        result = _scan_fixture(page, "direct_buttons.html")
+        browser.close()
+
+    assert result["darkPatterns"]["missingReject"]["detected"] is False
+    assert result["darkPatterns"]["multiLayerRejection"]["detected"] is False
+    assert "Missing reject option" not in result["darkPatterns"]["detected"]
+    assert "Multi-layer rejection" not in result["darkPatterns"]["detected"]
+
+
+def test_consent_scanner_tracks_passive_parity_dark_patterns_for_settings_path() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        result = _scan_fixture(page, "settings_path.html")
+        browser.close()
+
+    assert result["darkPatterns"]["missingReject"]["detected"] is True
+    assert result["darkPatterns"]["missingReject"]["description"] == "No reject button in consent banner"
+    assert result["darkPatterns"]["multiLayerRejection"]["detected"] is True
+    assert result["darkPatterns"]["multiLayerRejection"]["acceptClicks"] == 1
+    assert result["darkPatterns"]["multiLayerRejection"]["rejectClicks"] == 2
+    assert result["darkPatterns"]["multiLayerRejection"]["clickRatio"] == 2.0
+    assert "Missing reject option" in result["darkPatterns"]["detected"]
+    assert "Multi-layer rejection" in result["darkPatterns"]["detected"]
+
+
 def test_consent_scanner_detects_turkish_accept_and_settings_path() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -144,6 +176,47 @@ def test_consent_scanner_detects_turkish_accept_and_settings_path() -> None:
     assert result["buttonComparison"]["rejectSource"] == "settings"
     assert result["buttonComparison"]["reject"]["text"] == "Seçenekleri yönetin"
     assert "settings/preferences" in result["buttonComparison"]["issues"][0]
+
+
+def test_consent_scanner_tracks_missing_reject_when_no_reject_path_exists() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        result = _scan_fixture(page, "no_reject_banner.html")
+        browser.close()
+
+    assert result["bannerFound"] is True
+    assert result["hasAcceptButton"] is True
+    assert result["hasRejectButton"] is False
+    assert result["hasSettingsButton"] is False
+    assert result["rejectClicksRequired"] == 999
+    assert result["darkPatterns"]["missingReject"]["detected"] is True
+    assert result["darkPatterns"]["multiLayerRejection"]["detected"] is True
+    assert "Missing reject option" in result["darkPatterns"]["detected"]
+
+
+def test_consent_scanner_keeps_no_banner_pages_at_zero_dark_patterns() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.set_content("<!DOCTYPE html><html><body><main>No consent banner here.</main></body></html>")
+        page.add_script_tag(path=str(TRACKER_DATA))
+        page.add_script_tag(path=str(SCANNER))
+        result = page.evaluate(
+            """async () => {
+                return await AECCSConsentScanner.scanPageWithRetries({
+                    attempts: 2,
+                    delayMs: 20
+                });
+            }"""
+        )
+        browser.close()
+
+    assert result["bannerFound"] is False
+    assert result["darkPatterns"]["count"] == 0
+    assert result["darkPatterns"]["detected"] == []
+    assert result["darkPatterns"]["missingReject"]["detected"] is False
+    assert result["darkPatterns"]["multiLayerRejection"]["detected"] is False
 
 
 def test_consent_scanner_uses_painted_nested_button_styles() -> None:
@@ -308,6 +381,95 @@ def test_popup_prefers_non_transparent_bg_color_over_background_shorthand() -> N
     assert styles[1]["color"] == "rgb(255, 255, 255)"
 
 
+def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
+    popup_result = {
+        "isGovDomain": True,
+        "studyMetadata": {
+            "sampleSize": 100,
+            "successfulCrawls": 97,
+            "snapshotDateLabel": "March 1, 2026",
+        },
+        "score": {"grade": "D", "overall_score": 45.1, "criteria": {}},
+        "categoryCounts": {},
+        "totalCookies": 0,
+        "thirdPartyCount": 0,
+        "trackerCount": 0,
+        "trackersByVendor": {},
+        "cmpStats": {
+            "avgScore": 45.1,
+            "sampleSize": 26,
+            "rejectRate": 0.615,
+            "petScore": 33.4,
+        },
+        "petRecommendations": [
+            {
+                "name": "Brave Shields",
+                "type": "browser",
+                "description": "Built-in browser protection with the best average tracker reduction in the study.",
+                "studyTrackerReductionPct": 14.7,
+                "studyLabel": "+14.7% avg tracker reduction in study",
+            }
+        ],
+        "consentScan": {
+            "cmpDetected": "OneTrust",
+            "bannerFound": True,
+            "hasAcceptButton": True,
+            "hasRejectButton": True,
+            "hasSettingsButton": False,
+            "acceptButtonText": "Accept All",
+            "rejectButtonText": "Reject All",
+            "settingsButtonText": None,
+            "acceptClicksRequired": 1,
+            "rejectClicksRequired": 1,
+            "transparency": {},
+            "darkPatterns": {"count": 0, "detected": []},
+            "buttonComparison": None,
+        },
+    }
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _render_popup(page, popup_result)
+        page.wait_for_selector("#petList .pet-effectiveness")
+        content = page.evaluate(
+            """() => ({
+                govNote: document.getElementById("govNote").textContent,
+                petSubtitle: document.getElementById("petSubtitle").textContent,
+                footer: document.getElementById("footerNote").textContent,
+                cmpInfo: document.getElementById("cmpInfo").textContent,
+                petList: document.getElementById("petList").textContent,
+                petBadge: document.querySelector(".pet-effectiveness")?.textContent || ""
+            })"""
+        )
+        browser.close()
+
+    assert "stricter GDPR obligations" in content["govNote"]
+    assert "~90%" not in content["govNote"]
+    assert "100-site snapshot" in content["petSubtitle"]
+    assert "97 successful crawls" in content["petSubtitle"]
+    assert "March 1, 2026" in content["footer"]
+    assert "OneTrust in the 100-site AECCS snapshot" in content["cmpInfo"]
+    assert "45.1/100" in content["cmpInfo"]
+    assert "62%" in content["cmpInfo"]
+    assert "26 sites" in content["cmpInfo"]
+    assert "33.4" in content["cmpInfo"]
+    assert "+14.7% avg tracker reduction in study" in content["petList"]
+    assert "95%" not in content["petList"]
+    assert content["petBadge"] == "+15%"
+
+
+def test_extension_copy_no_longer_contains_legacy_study_strings() -> None:
+    tracker_data_text = TRACKER_DATA.read_text(encoding="utf-8")
+    popup_html_text = POPUP_HTML.read_text(encoding="utf-8")
+    popup_js_text = POPUP.read_text(encoding="utf-8")
+
+    for text in (tracker_data_text, popup_html_text, popup_js_text):
+        assert "1000-site" not in text
+        assert "2025" not in text
+        assert "~90% non-compliance among government domains" not in text
+
+
 def test_scorer_distinguishes_direct_and_settings_reject_paths() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -340,12 +502,45 @@ def test_scorer_distinguishes_direct_and_settings_reject_paths() -> None:
                     transparency: {}
                 });
 
-                return { direct, settingsPath };
+                const noReject = Scorer.computeComplianceScore([], {
+                    bannerFound: true,
+                    hasAcceptButton: true,
+                    hasRejectButton: false,
+                    hasSettingsButton: false,
+                    acceptClicksRequired: 1,
+                    rejectClicksRequired: 999,
+                    darkPatterns: { count: 1, detected: ["Missing reject option"] },
+                    transparency: {}
+                });
+
+                const noBanner = Scorer.computeComplianceScore([], {
+                    bannerFound: false,
+                    hasAcceptButton: false,
+                    hasRejectButton: false,
+                    hasSettingsButton: false,
+                    acceptClicksRequired: 999,
+                    rejectClicksRequired: 999,
+                    darkPatterns: { count: 0, detected: [] },
+                    transparency: {}
+                });
+
+                return { direct, settingsPath, noReject, noBanner };
             }"""
         )
         browser.close()
 
     assert scores["direct"]["criteria"]["reject_option_available"]["score"] == 100
     assert scores["direct"]["criteria"]["equal_accept_reject_effort"]["score"] == 100
+    assert scores["direct"]["criteria"]["post_reject_compliance"]["score"] == 0
+    assert scores["direct"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
     assert scores["settingsPath"]["criteria"]["reject_option_available"]["score"] == 50
     assert scores["settingsPath"]["criteria"]["equal_accept_reject_effort"]["score"] == 50
+    assert scores["settingsPath"]["criteria"]["post_reject_compliance"]["score"] == 0
+    assert scores["settingsPath"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
+    assert scores["noReject"]["criteria"]["reject_option_available"]["score"] == 0
+    assert scores["noReject"]["criteria"]["equal_accept_reject_effort"]["score"] == 0
+    assert scores["noReject"]["criteria"]["post_reject_compliance"]["score"] == 0
+    assert scores["noReject"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
+    assert scores["noBanner"]["criteria"]["reject_option_available"]["score"] == 0
+    assert scores["noBanner"]["criteria"]["post_reject_compliance"]["score"] == 0
+    assert scores["noBanner"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"

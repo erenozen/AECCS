@@ -10,6 +10,67 @@
 const Classifier = (() => {
   "use strict";
 
+  const bloomCache = new Map();
+
+  function decodeBase64ToBytes(base64) {
+    if (!base64) return new Uint8Array(0);
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  }
+
+  function hashDomain(value, seed) {
+    let hash = seed >>> 0;
+    for (let i = 0; i < value.length; i++) {
+      hash ^= value.charCodeAt(i);
+      hash = Math.imul(hash, 16777619) >>> 0;
+    }
+    return hash >>> 0;
+  }
+
+  function getBloomMatcher(key) {
+    if (bloomCache.has(key)) return bloomCache.get(key);
+
+    const bloomData = globalThis.AECCSTrackerIndex && globalThis.AECCSTrackerIndex[key];
+    if (!bloomData) {
+      bloomCache.set(key, null);
+      return null;
+    }
+
+    const bitCount = bloomData.bitCount || 0;
+    const hashSeeds = bloomData.hashSeeds || [];
+    const bytes = decodeBase64ToBytes(bloomData.base64 || "");
+
+    const matcher = {
+      has(domain) {
+        if (!domain || !bitCount || hashSeeds.length === 0 || bytes.length === 0) {
+          return false;
+        }
+        for (const seed of hashSeeds) {
+          const position = hashDomain(domain, seed) % bitCount;
+          const byte = bytes[position >> 3];
+          const mask = 1 << (position & 7);
+          if ((byte & mask) === 0) {
+            return false;
+          }
+        }
+        return true;
+      },
+    };
+
+    bloomCache.set(key, matcher);
+    return matcher;
+  }
+
+  function matchesPrecompiledIndex(key, fullDomain, registeredDomain) {
+    const matcher = getBloomMatcher(key);
+    if (!matcher) return false;
+    return matcher.has(registeredDomain) || matcher.has(fullDomain);
+  }
+
   /**
    * Classify a single cookie.
    *
@@ -44,7 +105,7 @@ const Classifier = (() => {
       classification_source: "unknown",
     };
 
-    // Step 1: Check fallback tracker map by registered domain
+    // Step 1: Check tracker-domain map by registered/full domain
     const trackerMatch = AECCS.FALLBACK_TRACKERS[registeredDomain]
                       || AECCS.FALLBACK_TRACKERS[domain];
     if (trackerMatch) {
@@ -55,7 +116,22 @@ const Classifier = (() => {
       return result;
     }
 
-    // Step 2: Check cookie-name heuristics
+    // Step 2: Check the compact precompiled filter index
+    if (matchesPrecompiledIndex("easyprivacy", domain, registeredDomain)) {
+      result.category = "Analytics";
+      result.is_tracker = true;
+      result.classification_source = "easyprivacy";
+      return result;
+    }
+
+    if (matchesPrecompiledIndex("easylist", domain, registeredDomain)) {
+      result.category = "Advertising";
+      result.is_tracker = true;
+      result.classification_source = "easylist";
+      return result;
+    }
+
+    // Step 3: Check cookie-name heuristics
     for (const h of AECCS.COOKIE_HEURISTICS) {
       if (h.pattern.test(cookie.name)) {
         result.vendor = h.vendor;
@@ -66,7 +142,7 @@ const Classifier = (() => {
       }
     }
 
-    // Step 3: First-party heuristic defaults
+    // Step 4: First-party heuristic defaults
     if (!thirdParty) {
       if (/cdn|static|assets/i.test(domain)) {
         result.category = "Functional";

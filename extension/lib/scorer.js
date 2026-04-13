@@ -7,7 +7,7 @@
  *   2. Reject option available        (0.20)
  *   3. Equal accept/reject effort     (0.15)
  *   4. No dark patterns               (0.15)
- *   5. Post-reject compliance         (0.15)  — simplified for extension
+ *   5. Post-reject compliance         (0.15)
  *   6. Transparent information        (0.10)
  */
 
@@ -105,27 +105,51 @@ const Scorer = (() => {
     const namesStr = names.join(", ") || "none";
 
     if (count === 0) return { score: 100, details: "No dark patterns detected" };
-    if (count === 1) return { score: 60,  details: `1 dark pattern: ${namesStr}` };
-    if (count === 2) return { score: 30,  details: `2 dark patterns: ${namesStr}` };
-    return { score: 0, details: `${count} dark patterns: ${namesStr}` };
+    if (count === 1) return { score: 60,  details: `1 dark pattern detected: ${namesStr}` };
+    if (count === 2) return { score: 30,  details: `2 dark patterns detected: ${namesStr}` };
+    return { score: 0, details: `${count} dark patterns detected: ${namesStr}` };
   }
 
   // ── Criterion 5: Post-reject compliance (weight 0.15) ───────────────────
-  // Simplified for extension: we cannot click reject and re-scan.
-  // If reject button exists → 50 (benefit of the doubt).
-  // If not → 0.
+  // Passive extension mode does not click banners, so this criterion stays at
+  // zero unless a future verified post-reject dataset is explicitly attached.
+
+  function _scoreVerifiedPostRejectCompliance(postRejectData) {
+    if (!postRejectData || postRejectData.verified !== true) {
+      return null;
+    }
+
+    if (postRejectData.rejectAvailable === false) {
+      return { score: 0, details: "No reject option available" };
+    }
+    if (postRejectData.rejectSuccessful === false) {
+      return { score: 0, details: "Reject was not successful" };
+    }
+
+    const rejectSignals = Number(postRejectData.rejectTrackerSignals || 0);
+    const acceptSignals = Number(postRejectData.acceptTrackerSignals || 0);
+
+    if (rejectSignals === 0) {
+      return { score: 100, details: "No new trackers after rejection" };
+    }
+    if (acceptSignals > 0 && rejectSignals < acceptSignals) {
+      return { score: 50, details: "Some new trackers after reject, but fewer than accept" };
+    }
+
+    return { score: 30, details: `${rejectSignals} new tracker signals after rejection` };
+  }
 
   function _scorePostRejectCompliance(consentScan) {
     if (!consentScan || consentScan.error) {
       return { score: 0, details: "Consent scan unavailable" };
     }
-    if (!consentScan.bannerFound) {
-      return { score: 0, details: "No consent banner found" };
+
+    const verifiedScore = _scoreVerifiedPostRejectCompliance(consentScan.postRejectData);
+    if (verifiedScore) {
+      return verifiedScore;
     }
-    if (consentScan.hasRejectButton) {
-      return { score: 50, details: "Reject button available (cannot verify post-reject behavior in extension)" };
-    }
-    return { score: 0, details: "No reject option available" };
+
+    return { score: 0, details: "No post-reject data available" };
   }
 
   // ── Criterion 6: Transparent information (weight 0.10) ──────────────────

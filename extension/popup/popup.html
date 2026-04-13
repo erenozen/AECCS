@@ -43,7 +43,7 @@
         <span class="gov-icon">&#127963;</span>
         <div>
           <strong>Government / Public Sector Site</strong>
-          <div class="gov-note">Public bodies have stricter GDPR obligations. Our study found ~90% non-compliance among government domains.</div>
+          <div class="gov-note" id="govNote">Public bodies have stricter GDPR obligations, so consent failures on these domains may be especially serious.</div>
         </div>
       </div>
 
@@ -105,15 +105,23 @@
       <!-- PET Recommendations (unique to AECCS) -->
       <section class="section" id="petSection">
         <h2 class="section-title">Recommended Privacy Tools</h2>
-        <div class="pet-subtitle">Based on this site's specific compliance issues (from our 1000-site study)</div>
+        <div class="pet-subtitle" id="petSubtitle">Based on this site's specific compliance issues (100-site snapshot, 97 successful crawls, March 1, 2026)</div>
         <div id="petList"></div>
       </section>
+
+      <details class="section study-insights hidden" id="studyInsightsSection">
+        <summary class="study-insights-toggle">
+          <span>AECCS Study Insights</span>
+          <span class="study-insights-meta">Why this extension is different</span>
+        </summary>
+        <div id="studyInsightsContent" class="study-insights-content"></div>
+      </details>
 
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-      AECCS &mdash; CS475 Privacy-Enhancing Technologies &middot; 2025
+    <footer class="footer" id="footerNote">
+      AECCS &mdash; CS475 Privacy-Enhancing Technologies &middot; March 1, 2026 study snapshot
     </footer>
   </div>
 
