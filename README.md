@@ -67,7 +67,7 @@ Draft store-listing copy for the extension lives in `docs/extension_store_listin
 
 Release-facing extension materials also live in `docs/`:
 
-- `docs/privacy-policy.html` — public privacy policy page to host over HTTPS
+- `docs/privacy-policy.html` — public privacy policy page, currently published at `https://erenozen.github.io/AECCS/privacy-policy.html`
 - `docs/extension_store_listing_chrome.md` — Chrome Web Store ready copy
 - `docs/extension_store_listing_firefox.md` — Firefox AMO ready copy
 - `docs/extension_reviewer_notes.md` — reviewer trust package notes

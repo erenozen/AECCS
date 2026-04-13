@@ -46,4 +46,4 @@ AECCS is grounded in the completed 1000-site combined study snapshot (`combined-
 
 - Homepage: https://github.com/erenozen/AECCS
 - Support: https://github.com/erenozen/AECCS/issues
-- Privacy policy: publish `docs/privacy-policy.html` at a stable HTTPS URL before submission
+- Privacy policy: https://erenozen.github.io/AECCS/privacy-policy.html
