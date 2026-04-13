@@ -3,8 +3,9 @@
  *
  * Classification cascade:
  *   1. Fallback tracker map  (domain → vendor/category)
- *   2. Cookie-name heuristics (regex → vendor/category)
- *   3. First-party defaults   (CDN/session → Functional, else Unknown)
+ *   2. Precompiled tracker index (EasyPrivacy / EasyList Bloom filters)
+ *   3. Cookie-name heuristics (regex → vendor/category)
+ *   4. First-party defaults   (CDN/session → Functional, else Unknown)
  */
 
 const Classifier = (() => {

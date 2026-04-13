@@ -12,6 +12,7 @@
 
 importScripts(
   "../lib/browser-polyfill.js",
+  "../lib/study-snapshot.js",
   "../lib/tracker-data.js",
   "../lib/tracker-index.js",
   "../lib/domain-utils.js",
@@ -75,6 +76,7 @@ async function handleAnalyze(tabId) {
       target: { tabId: tab.id },
       files: [
         "lib/browser-polyfill.js",
+        "lib/study-snapshot.js",
         "lib/tracker-data.js",
         "content/consent-scanner.js",
       ],

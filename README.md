@@ -6,19 +6,20 @@
 
 This project provides an automated pipeline for assessing how well popular websites comply with GDPR cookie consent requirements. It crawls websites, captures cookies and network requests across three consent states (no interaction, accept all, reject all), classifies trackers, detects dark patterns in consent banners, computes per-site compliance scores, and evaluates multiple privacy-enhancing technologies (PETs) as countermeasures.
 
-The analysis covers browser-level PETs (uBlock Origin, Privacy Badger, Firefox ETP, Brave Shields, Consent-O-Matic), differential privacy mechanisms for publishing aggregate statistics, and consent management platform (CMP) effectiveness. The repository contains the completed 100-site real study (run ID `real-study-20260301-final`, 1 March 2026) with all findings, figures, and reports generated from real crawl data under `data/real/`. A reproducible synthetic demo dataset remains available under `data/mock/` for pipeline validation.
+The analysis covers browser-level PETs (uBlock Origin, Privacy Badger, Firefox ETP, Brave Shields, Consent-O-Matic), differential privacy mechanisms for publishing aggregate statistics, and consent management platform (CMP) effectiveness. The repository contains the completed 1000-site combined study snapshot (run ID `combined-1000`, generated 6 March 2026) under `data/real_combined/` and `reporting/real_combined/`. The browser extension uses that completed combined snapshot as its frozen study baseline. Earlier real-study artifacts remain in `data/real/` for traceability, and a reproducible synthetic demo dataset remains available under `data/mock/` for pipeline validation.
 
 Built as a course project for **CS475 — Privacy-Enhancing Technologies**.
 
 ## Data Modes
 
-The pipeline now separates demonstration data from the final study dataset:
+The pipeline now separates demonstration data, earlier real-study artifacts, and the completed combined-study dataset:
 
 - `data/mock/` and `reporting/mock/`: synthetic demo artifacts used for development and rehearsal
-- `data/real/` and `reporting/real/`: the final study target for real crawls and report generation
+- `data/real_combined/` and `reporting/real_combined/`: the completed 1000-site combined study snapshot used for extension-facing frozen study context
+- `data/real/` and `reporting/real/`: earlier real-study artifacts retained for traceability and comparison
 - `data/legacy/` and `reporting/legacy/`: quarantined historical root-level artifacts kept only for traceability
 
-`real` is the default mode for the crawler, analysis stages, PET modules, visualizer, and report generator.
+`real` remains the default mode for the crawler, analysis stages, PET modules, visualizer, and report generator. The browser extension's frozen study context is generated from `real_combined`.
 
 ## Team
 
@@ -43,6 +44,26 @@ The pipeline now separates demonstration data from the final study dataset:
 - **Unified PETs comparison** — synthesizes all PET evaluations with combination analysis and user recommendations
 - **11 report-ready visualizations** (300 DPI)
 - **Self-contained HTML report** with embedded images and auto-generated narrative
+
+## Browser Extension
+
+The `extension/` folder contains a lightweight Chrome/Firefox browser extension that turns AECCS into a passive, local cookie-consent auditor for the currently loaded page.
+
+- **Passive local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling
+- **No blocking and no auto-clicking** — the extension does not try to change consent state or fix a site for the user
+- **Live cookie/tracker evidence** — reads current cookies, classifies trackers, and highlights third-party and tracker-heavy pages
+- **Consent dark-pattern analysis** — detects CMPs, missing reject paths, multi-layer rejection, asymmetric buttons, hidden reject, preselected checkboxes, confusing language, forced action, and transparency signals
+- **Accept vs Reject UX comparison** — renders the visible accept/reject path so users can see unequal effort directly
+- **Study-backed PET guidance** — recommends relevant privacy tools based on live findings, then grounds those suggestions in the completed 1000-site combined AECCS study
+
+The extension’s static study context is generated from `data/real_combined/processed/` and frozen into small runtime assets:
+
+- `extension/lib/study-snapshot.js` — combined-study metadata, PET study results, and CMP study results
+- `extension/lib/tracker-index.js` — compact precompiled tracker index for lightweight cookie classification
+
+It is intentionally different from banner auto-clickers and generic remediation scanners: the value is live consent-audit evidence plus research-grounded context, not automatic interaction or copy-paste fixes.
+
+Draft store-listing copy for the extension lives in `docs/extension_store_listing.md`.
 
 ## Project Structure
 
@@ -75,6 +96,8 @@ AECCS/
 │   │   └── consent-scanner.js         # Live DOM consent and dark-pattern scan
 │   ├── lib/
 │   │   ├── tracker-data.js            # Ported constants and study metadata
+│   │   ├── study-snapshot.js          # Generated 1000-site combined-study snapshot
+│   │   ├── tracker-index.js           # Precompiled tracker Bloom filters
 │   │   ├── classifier.js              # Cookie classification logic
 │   │   ├── scorer.js                  # Extension compliance scorer
 │   │   ├── domain-utils.js            # Lightweight registered-domain helper
@@ -93,6 +116,8 @@ AECCS/
 │
 ├── scripts/
 │   ├── __init__.py
+│   ├── build_extension_study_snapshot.py  # Generate extension study snapshot
+│   ├── build_extension_tracker_index.py   # Generate compact tracker index
 │   └── run_pipeline.py                # Unified mock/real pipeline runner
 │
 ├── reporting/

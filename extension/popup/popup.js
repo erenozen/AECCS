@@ -142,23 +142,24 @@
   }
 
   function renderStudyCopy(studyMetadata) {
-    const snapshotDateLabel = studyMetadata?.snapshotDateLabel || "March 2026";
+    const snapshotDateLabel = studyMetadata?.snapshotDateLabel || "March 6, 2026";
     const sampleSize = studyMetadata?.sampleSize || 1000;
     const successfulCrawls = studyMetadata?.successfulCrawls || 861;
+    const publicSector = studyMetadata?.publicSector || {};
 
     if (els.govNote) {
       els.govNote.textContent =
-        "Public bodies have stricter GDPR obligations, so consent failures on these domains may be especially serious.";
+        `Public-sector sites were included in the combined corpus. In the successful government/public-sector category (${publicSector.successfulSites || 77} sites), average compliance was ${publicSector.avgCompliance || 30.9}/100 and ${formatPercent(publicSector.preConsentTrackerRate ?? 0.753)} showed pre-consent trackers.`;
     }
 
     if (els.petSubtitle) {
       els.petSubtitle.textContent =
-        `Based on this site's specific compliance issues (${sampleSize}-site snapshot, ${successfulCrawls} successful crawls, ${snapshotDateLabel})`;
+        `Guidance combines this page's live findings with the AECCS ${sampleSize}-site combined study (${successfulCrawls} successful crawls, ${snapshotDateLabel})`;
     }
 
     if (els.footerNote) {
       els.footerNote.textContent =
-        `AECCS · CS475 Privacy-Enhancing Technologies · ${snapshotDateLabel} study snapshot`;
+        `AECCS · Passive local audit · ${sampleSize}-site combined study snapshot · ${snapshotDateLabel}`;
     }
   }
 
@@ -278,7 +279,7 @@
       els.cmpInfo.classList.remove("hidden");
       els.cmpInfo.innerHTML = `
         <div class="cmp-stats">
-          <div class="cmp-stats-title">${esc(scan.cmpDetected)} in the ${studyMetadata?.sampleSize || 1000}-site AECCS snapshot</div>
+          <div class="cmp-stats-title">${esc(scan.cmpDetected)} in the ${studyMetadata?.sampleSize || 1000}-site AECCS combined snapshot</div>
           <div class="cmp-stat-row"><span>Avg compliance score</span><span>${cmpStats.avgScore}/100</span></div>
           <div class="cmp-stat-row"><span>Sites with reject button</span><span>${Math.round(cmpStats.rejectRate * 100)}%</span></div>
           <div class="cmp-stat-row"><span>Sample size</span><span>${cmpStats.sampleSize} sites</span></div>
@@ -443,7 +444,7 @@
     const guardrails = AECCS.CLAIM_GUARDRAILS || {};
 
     let html = "";
-    html += `<div class="insight-badge">${esc(study.label || "AECCS study snapshot")} · ${esc(study.snapshotDateLabel || "March 1, 2026")}</div>`;
+    html += `<div class="insight-badge">${esc(study.label || "AECCS 1000-site combined study snapshot")} · ${esc(study.snapshotDateLabel || "March 6, 2026")}</div>`;
     html += `<div class="insight-intro">This popup audits the current page locally. The cards below add frozen AECCS study context without introducing extra scans, clicks, or network requests.</div>`;
 
     html += `<div class="insight-card">`;
@@ -460,8 +461,10 @@
 
     html += `<div class="insight-card">`;
     html += `<div class="insight-card-title">Snapshot Metrics</div>`;
+    html += `<div class="insight-kv"><span>Run ID</span><strong>${esc(study.runId || "combined-1000")}</strong></div>`;
     html += `<div class="insight-kv"><span>Study baseline</span><strong>${study.sampleSize || 1000} sites / ${study.successfulCrawls || 861} successful crawls</strong></div>`;
-    html += `<div class="insight-kv"><span>Average compliance score</span><strong>${study.avgCompliance || 33.1}/100</strong></div>`;
+    html += `<div class="insight-kv"><span>Sites with banners</span><strong>${study.bannerSites || 595}</strong></div>`;
+    html += `<div class="insight-kv"><span>Average compliance score</span><strong>${study.avgCompliance || 27.4}/100</strong></div>`;
     html += `<div class="insight-kv"><span>Missing reject rate</span><strong>${formatPercent(study.missingRejectRate)}</strong></div>`;
     html += `<div class="insight-kv"><span>Multi-layer rejection</span><strong>${formatPercent(study.multiLayerRate)}</strong></div>`;
     html += `<div class="insight-kv"><span>Reject reduces trackers</span><strong>${formatPercent(study.rejectReducesTrackersRate)}</strong></div>`;
@@ -471,7 +474,7 @@
     html += `<div class="insight-card">`;
     html += `<div class="insight-card-title">PET Guidance For This Page</div>`;
     if (data.petRecommendations && data.petRecommendations.length > 0) {
-      html += `<div class="insight-card-copy">Recommendations stay passive: they are tied to the issues found on this page, then grounded in the shared AECCS PET snapshot rather than live PET simulation.</div>`;
+      html += `<div class="insight-card-copy">Recommendations stay passive: they are tied to the issues found on this page, then grounded in the shared AECCS combined-study snapshot rather than live PET simulation.</div>`;
       html += `<div class="insight-list">`;
       for (const pet of data.petRecommendations) {
         const rationale = pet.whyRecommended || pet.studyLabel || "Study-backed recommendation";
@@ -479,13 +482,13 @@
       }
       html += `</div>`;
     } else {
-      html += `<div class="insight-card-copy">No PET recommendation was needed for this page, but the extension still uses the same shared PET study snapshot for context.</div>`;
+      html += `<div class="insight-card-copy">No PET recommendation was needed for this page, but the extension still uses the same shared AECCS combined-study snapshot for context.</div>`;
     }
     html += `</div>`;
 
     html += `<div class="insight-card">`;
     html += `<div class="insight-card-title">Six PETs, One Study Snapshot</div>`;
-    html += `<div class="insight-card-copy">AECCS keeps Brave Shields, Firefox ETP Standard, Firefox ETP Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic in one comparable surface.</div>`;
+    html += `<div class="insight-card-copy">AECCS keeps Brave Shields, Firefox ETP Standard, Firefox ETP Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic in one comparable combined-study surface.</div>`;
     html += `<div class="insight-list">`;
     for (const pet of petStudy) {
       html += `<div class="insight-list-item"><strong>${esc(pet.name)}</strong> — ${esc(pet.studyLabel)}. ${esc(pet.highlight)}</div>`;
@@ -501,9 +504,9 @@
       html += `<div class="insight-card-copy">When a known CMP is detected, AECCS adds shared CMP study context instead of sending data to an external service.</div>`;
     }
     html += `<div class="insight-divider"></div>`;
-    html += `<div class="insight-kv"><span>Best CMP in snapshot</span><strong>${esc((cmpStudy[0] && cmpStudy[0].name) || "OneTrust")}</strong></div>`;
+    html += `<div class="insight-kv"><span>Best CMP in study</span><strong>${esc((cmpStudy[0] && cmpStudy[0].name) || "Didomi")}</strong></div>`;
     html += `<div class="insight-kv"><span>Current page is public sector</span><strong>${data.isGovDomain ? "Yes" : "No"}</strong></div>`;
-    html += `<div class="insight-card-copy">The AECCS corpus includes government/public-sector domains because those sites face stronger consent obligations, not weaker ones.</div>`;
+    html += `<div class="insight-card-copy">The combined corpus included ${study.publicSector?.successfulSites || 77} successful government/public-sector sites. That subset averaged ${study.publicSector?.avgCompliance || 30.9}/100 compliance, and ${formatPercent(study.publicSector?.preConsentTrackerRate ?? 0.753)} showed pre-consent trackers.</div>`;
     html += `</div>`;
 
     html += `<div class="insight-card">`;
@@ -556,9 +559,9 @@
     if (typeof value !== "number" || Number.isNaN(value)) {
       return "study";
     }
-    const rounded = Math.round(value);
+    const rounded = Math.round(value * 10) / 10;
     const sign = rounded > 0 ? "+" : "";
-    return `${sign}${rounded}%`;
+    return `${sign}${rounded.toFixed(1)}%`;
   }
 
   function formatPercent(value) {

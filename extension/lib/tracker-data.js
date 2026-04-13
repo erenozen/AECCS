@@ -208,84 +208,166 @@ const AECCS = (() => {
     "div[data-testid*='consent']",
   ];
 
-  // ── Frozen extension study snapshot (1000 sites, March 2026) ────────────
-  // These values are a lightweight, static summary used only for popup copy
-  // and CMP/PET provenance inside the extension.
+  // ── Frozen extension study snapshot (1000-site combined run) ────────────
+  // The extension reads this lightweight generated layer first so popup copy,
+  // PET context, and CMP stats stay aligned with data/real_combined.
 
-  const STUDY_METADATA = {
-    label: "AECCS 1000-site study snapshot",
-    snapshotDate: "2026-03-06",
-    snapshotDateLabel: "March 2026",
-    sampleSize: 1000,
-    successfulCrawls: 861,
-    bannerSites: 861,
-    avgCompliance: 27.4,
-    missingRejectRate: 0.814,
-    multiLayerRate: 0.042,
-    rejectReducesTrackersRate: 0.094,
-    rejectEliminatesTrackersRate: 0.021,
+  const SNAPSHOT = globalThis.AECCSStudySnapshot || {
+    metadata: {
+      label: "AECCS 1000-site combined study snapshot",
+      sourceMode: "real_combined",
+      runId: "combined-1000",
+      snapshotDate: "2026-03-06",
+      snapshotDateLabel: "March 6, 2026",
+      generatedAt: "2026-03-06T19:06:23.797825+00:00",
+      sampleSize: 1000,
+      successfulCrawls: 861,
+      failedCrawls: 139,
+      bannerSites: 595,
+      sitesWithoutBanners: 266,
+      avgCompliance: 27.4,
+      missingRejectRate: 0.84,
+      multiLayerRate: 0.105,
+      rejectReducesTrackersRate: 0.076,
+      rejectEliminatesTrackersRate: 0.122,
+      publicSector: {
+        successfulSites: 77,
+        avgCompliance: 30.9,
+        preConsentTrackerRate: 0.753,
+      },
+    },
+    petStudyResults: [
+      {
+        name: "Brave Shields",
+        type: "browser",
+        studyRank: 1,
+        sitesTested: 878,
+        trackerReductionPct: 22.8,
+        requestReductionPct: 10.9,
+        studyLabel: "+22.8% avg tracker reduction in study",
+        highlight: "Strongest browser-level tracker reduction in the combined 1000-site study.",
+      },
+      {
+        name: "Privacy Badger",
+        type: "extension",
+        studyRank: 2,
+        sitesTested: 881,
+        trackerReductionPct: 21.0,
+        requestReductionPct: 8.4,
+        studyLabel: "+21.0% avg tracker reduction in study",
+        highlight: "Strong heuristic blocking across the combined study without requiring manual rules.",
+      },
+      {
+        name: "uBlock Origin",
+        type: "extension",
+        studyRank: 3,
+        sitesTested: 878,
+        trackerReductionPct: 22.4,
+        requestReductionPct: 5.2,
+        studyLabel: "+22.4% avg tracker reduction in study",
+        highlight: "Consistently reduced tracker exposure across the combined study snapshot.",
+      },
+      {
+        name: "Firefox ETP Strict",
+        type: "browser",
+        studyRank: 4,
+        sitesTested: 890,
+        trackerReductionPct: -0.5,
+        requestReductionPct: -7.2,
+        studyLabel: "-0.5% avg tracker reduction in study",
+        highlight: "Widely deployed browser protection, but near-flat tracker reduction in this measurement setup.",
+      },
+      {
+        name: "Consent-O-Matic",
+        type: "extension",
+        studyRank: 5,
+        sitesTested: 896,
+        trackerReductionPct: -11.2,
+        requestReductionPct: -11.9,
+        studyLabel: "-11.2% avg tracker reduction in study",
+        highlight: "Relevant for reject-flow automation rather than network blocking.",
+      },
+      {
+        name: "Firefox ETP Standard",
+        type: "browser",
+        studyRank: 6,
+        sitesTested: 890,
+        trackerReductionPct: -2.2,
+        requestReductionPct: -16.4,
+        studyLabel: "-2.2% avg tracker reduction in study",
+        highlight: "Default Firefox protection with modest results in the combined study.",
+      },
+    ],
+    cmpStudyResults: [
+      {
+        name: "Didomi",
+        sampleSize: 49,
+        avgScore: 36.2,
+        rejectRate: 0.388,
+        petScore: 24.9,
+        studyRank: 1,
+        highlight: "Best CMP in the combined study by composite PET score.",
+      },
+      {
+        name: "OneTrust",
+        sampleSize: 138,
+        avgScore: 35.5,
+        rejectRate: 0.406,
+        petScore: 24.1,
+        studyRank: 2,
+        highlight: "Most common detected CMP in the combined study with comparatively frequent reject availability.",
+      },
+      {
+        name: "TrustArc",
+        sampleSize: 121,
+        avgScore: 28.8,
+        rejectRate: 0.24,
+        petScore: 16.3,
+        studyRank: 3,
+        highlight: "Meaningful presence in the corpus, but lower reject availability than the top two CMPs.",
+      },
+      {
+        name: "Cookiebot",
+        sampleSize: 91,
+        avgScore: 22.7,
+        rejectRate: 0.132,
+        petScore: 12.1,
+        studyRank: 4,
+        highlight: "Frequently detected, but reject remained uncommon across the combined sample.",
+      },
+      {
+        name: "Quantcast",
+        sampleSize: 28,
+        avgScore: 18.5,
+        rejectRate: 0.143,
+        petScore: 10.6,
+        studyRank: 5,
+        highlight: "Low scores and limited reject availability in the combined study.",
+      },
+      {
+        name: "Usercentrics",
+        sampleSize: 18,
+        avgScore: 20.6,
+        rejectRate: 0.056,
+        petScore: 9.1,
+        studyRank: 6,
+        highlight: "Lowest-scoring named CMP in the combined study snapshot.",
+      },
+    ],
   };
 
-  const PET_STUDY_RESULTS = [
-    {
-      name: "Brave Shields",
-      type: "browser",
-      studyRank: 1,
-      trackerReductionPct: 22.8,
-      studyLabel: "+22.8% avg tracker reduction in study",
-      highlight: "Best average tracker reduction in the AECCS 1000-site snapshot.",
-    },
-    {
-      name: "Privacy Badger",
-      type: "extension",
-      studyRank: 2,
-      trackerReductionPct: 21.0,
-      studyLabel: "+21.0% avg tracker reduction in study",
-      highlight: "Strong heuristic-based tracker blocking across 881 tested sites.",
-    },
-    {
-      name: "uBlock Origin",
-      type: "extension",
-      studyRank: 3,
-      trackerReductionPct: 22.4,
-      studyLabel: "+22.4% avg tracker reduction in study",
-      highlight: "Open-source blocker with consistently strong tracker reduction.",
-    },
-    {
-      name: "Firefox ETP Strict",
-      type: "browser",
-      studyRank: 4,
-      trackerReductionPct: -0.5,
-      studyLabel: "-0.5% avg tracker reduction in study",
-      highlight: "Firefox's strict mode — minimal net reduction in the 1000-site snapshot.",
-    },
-    {
-      name: "Consent-O-Matic",
-      type: "extension",
-      studyRank: 5,
-      trackerReductionPct: -11.2,
-      studyLabel: "-11.2% avg tracker reduction in study",
-      highlight: "Consent-flow tool rather than a network blocker; mixed reduction results.",
-    },
-    {
-      name: "Firefox ETP Standard",
-      type: "browser",
-      studyRank: 6,
-      trackerReductionPct: -2.2,
-      studyLabel: "-2.2% avg tracker reduction in study",
-      highlight: "Default Firefox experience with modest tracker reduction.",
-    },
-  ];
+  const STUDY_METADATA = SNAPSHOT.metadata;
+  const PET_STUDY_RESULTS = SNAPSHOT.petStudyResults;
 
-  // ── PET Recommendations (frozen to the March 1, 2026 study snapshot) ────
-  // The extension keeps a lightweight ranking model for relevance, while the
-  // study-backed fields shown to users come from the final 1000-site run.
+  // ── PET Recommendations (grounded in the combined 1000-site snapshot) ───
+  // Relevance is still page-specific, but the static study copy must stay
+  // aligned with the completed real_combined dataset.
 
   const PET_PROFILES = [
     {
       name: "Brave Shields",
       type: "browser",
-      description: "Built-in browser protection with the best average tracker reduction in the study.",
+      description: "Built-in browser protection with the strongest average tracker reduction in the combined study.",
       helpsWith: ["pre_consent_trackers", "advertising", "fingerprinting", "analytics"],
       studyTrackerReductionPct: 22.8,
       studyRank: 1,
@@ -294,31 +376,31 @@ const AECCS = (() => {
       url: "https://brave.com",
     },
     {
-      name: "uBlock Origin",
-      type: "extension",
-      description: "Open-source content blocker with consistently strong tracker reduction.",
-      helpsWith: ["pre_consent_trackers", "advertising", "analytics"],
-      studyTrackerReductionPct: 22.4,
-      studyRank: 3,
-      studyLabel: "+22.4% avg tracker reduction across 878 sites",
-      recommendationWeight: 90,
-      url: "https://ublockorigin.com",
-    },
-    {
       name: "Privacy Badger",
       type: "extension",
-      description: "EFF's heuristic tracker blocker with strong results in the 1000-site study.",
+      description: "EFF's heuristic tracker blocker with strong results in the combined study.",
       helpsWith: ["pre_consent_trackers", "fingerprinting"],
       studyTrackerReductionPct: 21.0,
       studyRank: 2,
       studyLabel: "+21.0% avg tracker reduction across 881 sites",
-      recommendationWeight: 80,
+      recommendationWeight: 90,
       url: "https://privacybadger.org",
+    },
+    {
+      name: "uBlock Origin",
+      type: "extension",
+      description: "Open-source content blocker with consistently strong tracker reduction in the combined study.",
+      helpsWith: ["pre_consent_trackers", "advertising", "analytics"],
+      studyTrackerReductionPct: 22.4,
+      studyRank: 3,
+      studyLabel: "+22.4% avg tracker reduction across 878 sites",
+      recommendationWeight: 80,
+      url: "https://ublockorigin.com",
     },
     {
       name: "Firefox ETP Strict",
       type: "browser",
-      description: "Firefox's stricter built-in protection with minimal net reduction in the study.",
+      description: "Firefox's stricter built-in protection with near-flat average tracker reduction in the combined study.",
       helpsWith: ["pre_consent_trackers", "fingerprinting", "social"],
       studyTrackerReductionPct: -0.5,
       studyRank: 4,
@@ -329,7 +411,7 @@ const AECCS = (() => {
     {
       name: "Firefox ETP Standard",
       type: "browser",
-      description: "Firefox's default tracker protection with modest results in the study.",
+      description: "Firefox's default tracker protection with modest results in the combined study.",
       helpsWith: ["pre_consent_trackers", "social"],
       studyTrackerReductionPct: -2.2,
       studyRank: 6,
@@ -340,7 +422,7 @@ const AECCS = (() => {
     {
       name: "Consent-O-Matic",
       type: "extension",
-      description: "Auto-rejects banners when a site exposes a usable reject path.",
+      description: "Automates reject flows when a site exposes a usable path, rather than blocking requests directly.",
       helpsWith: ["dark_patterns", "reject_effort"],
       studyTrackerReductionPct: -11.2,
       studyRank: 5,
@@ -350,56 +432,7 @@ const AECCS = (() => {
     },
   ];
 
-  const CMP_STUDY_RESULTS = [
-    {
-      name: "Didomi",
-      sampleSize: 49,
-      avgScore: 36.2,
-      rejectRate: 0.388,
-      petScore: 24.9,
-      highlight: "Best-performing CMP in the AECCS 1000-site snapshot.",
-    },
-    {
-      name: "OneTrust",
-      sampleSize: 138,
-      avgScore: 35.5,
-      rejectRate: 0.406,
-      petScore: 24.1,
-      highlight: "Most widely deployed CMP with reject available on 40.6% of sites.",
-    },
-    {
-      name: "TrustArc",
-      sampleSize: 121,
-      avgScore: 28.8,
-      rejectRate: 0.240,
-      petScore: 16.3,
-      highlight: "Third-ranked CMP with reject available on 24% of sampled sites.",
-    },
-    {
-      name: "Cookiebot",
-      sampleSize: 91,
-      avgScore: 22.7,
-      rejectRate: 0.132,
-      petScore: 12.1,
-      highlight: "Low reject rate (13.2%) despite being deployed on 91 sites.",
-    },
-    {
-      name: "Quantcast",
-      sampleSize: 28,
-      avgScore: 18.5,
-      rejectRate: 0.143,
-      petScore: 10.6,
-      highlight: "Low compliance scores with 100% pre-consent tracker rate.",
-    },
-    {
-      name: "Usercentrics",
-      sampleSize: 18,
-      avgScore: 20.6,
-      rejectRate: 0.056,
-      petScore: 9.1,
-      highlight: "Lowest reject availability (5.6%) among all CMPs in the snapshot.",
-    },
-  ];
+  const CMP_STUDY_RESULTS = SNAPSHOT.cmpStudyResults;
 
   // ── Government domain suffixes ───────────────────────────────────────────
   // Government / public-sector sites have stricter GDPR obligations.
@@ -413,14 +446,14 @@ const AECCS = (() => {
     ".gov.mt", ".gov.cy",
   ];
 
-  // ── CMP compliance statistics (1000-site final study snapshot) ──────────
+  // ── CMP compliance statistics (1000-site combined study snapshot) ───────
 
   const CMP_STATS = {
+    "Didomi":       { avgScore: 36.2, sampleSize: 49,  rejectRate: 0.388, petScore: 24.9 },
     "OneTrust":     { avgScore: 35.5, sampleSize: 138, rejectRate: 0.406, petScore: 24.1 },
+    "TrustArc":     { avgScore: 28.8, sampleSize: 121, rejectRate: 0.240, petScore: 16.3 },
     "Cookiebot":    { avgScore: 22.7, sampleSize: 91,  rejectRate: 0.132, petScore: 12.1 },
     "Quantcast":    { avgScore: 18.5, sampleSize: 28,  rejectRate: 0.143, petScore: 10.6 },
-    "TrustArc":     { avgScore: 28.8, sampleSize: 121, rejectRate: 0.240, petScore: 16.3 },
-    "Didomi":       { avgScore: 36.2, sampleSize: 49,  rejectRate: 0.388, petScore: 24.9 },
     "Usercentrics": { avgScore: 20.6, sampleSize: 18,  rejectRate: 0.056, petScore: 9.1 },
   };
 
@@ -468,15 +501,19 @@ const AECCS = (() => {
   const RESEARCH_HIGHLIGHTS = [
     {
       title: "PETs × Dark Patterns",
-      summary: "AECCS combines live consent-banner findings with study-backed PET guidance instead of treating them as separate problems.",
+      summary: "AECCS combines live consent-banner findings with study-backed PET guidance instead of treating consent dark patterns and PET effectiveness as separate problems.",
     },
     {
-      title: "Six PETs, One Snapshot",
-      summary: "The extension references one shared 1000-site snapshot spanning Brave Shields, Firefox ETP Standard/Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic.",
+      title: "Six PETs, One Combined Snapshot",
+      summary: "The extension references one shared 1000-site combined study spanning Brave Shields, Firefox ETP Standard/Strict, uBlock Origin, Privacy Badger, and Consent-O-Matic.",
     },
     {
       title: "Government/Public-Sector Coverage",
-      summary: "The underlying AECCS corpus includes public-sector domains, which matters because those sites face stronger consent obligations.",
+      summary: "The underlying AECCS corpus includes government and public-sector domains, so the extension can ground alerts in a broader compliance context.",
+    },
+    {
+      title: "Best CMP In Study: Didomi",
+      summary: "Didomi ranked highest among named CMPs in the combined study by composite PET score, ahead of OneTrust and TrustArc.",
     },
     {
       title: "Reproducible Pipeline",
@@ -486,11 +523,11 @@ const AECCS = (() => {
 
   const CLAIM_GUARDRAILS = {
     positioning:
-      "AECCS is a passive, research-grounded cookie-consent auditor for the current page.",
+      "AECCS is a passive, research-grounded cookie-consent auditor for the current page, grounded in the completed 1000-site combined study.",
     supportedClaims: [
       "Combines dark-pattern findings with study-backed PET guidance",
-      "Surfaces six end-user PETs in one shared study snapshot",
-      "Includes government/public-sector context and a March 2026 post-DMA snapshot",
+      "Surfaces six end-user PETs in one shared combined-study snapshot",
+      "Includes government/public-sector context and a March 6, 2026 post-DMA combined snapshot",
       "Built on a reproducible open-source measurement pipeline",
     ],
     unsupportedClaims: [
