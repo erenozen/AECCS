@@ -91,6 +91,7 @@ const AECCS = (() => {
     "TrustArc":     ["trustarc", "truste", "consent-manager"],
     "Didomi":       ["didomi"],
     "Usercentrics": ["usercentrics"],
+    "Sourcepoint":  ["sourcepoint", "privacy-mgmt", "sp_message", "sp_choice_type"],
   };
 
   // ── Consent Button Keywords (multilingual, 7 languages) ──────────────────
@@ -115,6 +116,9 @@ const AECCS = (() => {
     reject: [
       // English
       "Reject", "Reject All", "Decline", "Deny", "Refuse All",
+      "Essential cookies only", "Necessary cookies only",
+      "Only necessary cookies", "Only essential cookies",
+      "Use necessary cookies only",
       // German
       "Ablehnen", "Alle ablehnen",
       // French

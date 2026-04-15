@@ -21,11 +21,15 @@ README = ROOT / "README.md"
 STORE_LISTING = ROOT / "docs" / "extension_store_listing.md"
 
 
+def _install_scanner(target) -> None:
+    target.add_script_tag(path=str(STUDY_SNAPSHOT))
+    target.add_script_tag(path=str(TRACKER_DATA))
+    target.add_script_tag(path=str(SCANNER))
+
+
 def _scan_fixture(page, fixture_name: str) -> dict:
     page.goto((FIXTURES / fixture_name).as_uri())
-    page.add_script_tag(path=str(STUDY_SNAPSHOT))
-    page.add_script_tag(path=str(TRACKER_DATA))
-    page.add_script_tag(path=str(SCANNER))
+    _install_scanner(page)
     return page.evaluate(
         """async () => {
             return await AECCSConsentScanner.scanPageWithRetries({
@@ -36,6 +40,69 @@ def _scan_fixture(page, fixture_name: str) -> dict:
     )
 
 
+def _scan_fixture_all_frames(page, fixture_name: str) -> dict:
+    page.goto((FIXTURES / fixture_name).as_uri())
+
+    frame_results = []
+    best = None
+
+    for index, frame in enumerate(page.frames):
+        _install_scanner(frame)
+        payload = frame.evaluate(
+            """async () => {
+                const scanResult = await AECCSConsentScanner.scanPageWithRetries({
+                    attempts: 5,
+                    delayMs: 120
+                });
+                return {
+                    scanResult,
+                    scanScore: AECCSConsentScanner.scoreResult(scanResult),
+                };
+            }"""
+        )
+        entry = {
+            "frameIndex": index,
+            "frameName": frame.name,
+            "frameUrl": frame.url,
+            **payload,
+        }
+        frame_results.append(entry)
+
+        if best is None or _is_better_frame_scan(entry, best):
+            best = entry
+
+    return {
+        "best": best["scanResult"] if best else None,
+        "frames": frame_results,
+    }
+
+
+def _is_better_frame_scan(candidate: dict, current: dict | None) -> bool:
+    if current is None:
+        return True
+
+    candidate_score = candidate.get("scanScore", -1)
+    current_score = current.get("scanScore", -1)
+    if candidate_score != current_score:
+        return candidate_score > current_score
+
+    candidate_direct_reject = bool(candidate["scanResult"].get("hasRejectButton"))
+    current_direct_reject = bool(current["scanResult"].get("hasRejectButton"))
+    if candidate_direct_reject != current_direct_reject:
+        return candidate_direct_reject
+
+    candidate_actionable = any(
+        candidate["scanResult"].get(key) for key in ("hasAcceptButton", "hasRejectButton", "hasSettingsButton")
+    )
+    current_actionable = any(
+        current["scanResult"].get(key) for key in ("hasAcceptButton", "hasRejectButton", "hasSettingsButton")
+    )
+    if candidate_actionable != current_actionable:
+        return candidate_actionable
+
+    return candidate["frameIndex"] < current["frameIndex"]
+
+
 def _render_popup(page, result: dict) -> None:
     page.set_content(
         """
@@ -44,6 +111,10 @@ def _render_popup(page, result: dict) -> None:
         <body>
           <div id="loading"></div>
           <div id="errorState" class="hidden"><span id="errorMsg"></span></div>
+          <div id="disabledState" class="hidden">
+            <span id="disabledTitle"></span>
+            <span id="disabledMsg"></span>
+          </div>
           <div id="results" class="hidden">
             <div id="siteDomain"></div>
             <div id="govAlert" class="hidden"><div id="govNote"></div></div>
@@ -138,6 +209,56 @@ def test_consent_scanner_detects_settings_path_without_direct_reject() -> None:
     assert result["buttonComparison"]["available"] is True
     assert result["buttonComparison"]["rejectSource"] == "settings"
     assert result["buttonComparison"]["reject"]["text"] == "Manage Preferences"
+
+
+def test_consent_scanner_detects_sourcepoint_like_buttons() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        result = _scan_fixture(page, "sourcepoint_like.html")
+        browser.close()
+
+    assert result["cmpDetected"] == "Sourcepoint"
+    assert result["bannerFound"] is True
+    assert result["hasAcceptButton"] is True
+    assert result["hasRejectButton"] is True
+    assert result["hasSettingsButton"] is True
+    assert result["acceptButtonText"] == "Accept all"
+    assert result["rejectButtonText"] == "Essential cookies only"
+    assert result["settingsButtonText"] == "View options"
+    assert result["acceptClicksRequired"] == 1
+    assert result["rejectClicksRequired"] == 1
+
+
+def test_consent_scanner_prefers_iframe_hosted_banner_via_frame_aggregation() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        top_frame_result = _scan_fixture(page, "sourcepoint_iframe_host.html")
+        merged = _scan_fixture_all_frames(page, "sourcepoint_iframe_host.html")
+        browser.close()
+
+    assert top_frame_result["bannerFound"] is False
+
+    best = merged["best"]
+    assert best is not None
+    assert best["cmpDetected"] == "Sourcepoint"
+    assert best["bannerFound"] is True
+    assert best["hasAcceptButton"] is True
+    assert best["hasRejectButton"] is True
+    assert best["hasSettingsButton"] is True
+    assert best["acceptButtonText"] == "Accept all"
+    assert best["rejectButtonText"] == "Essential cookies only"
+    assert best["settingsButtonText"] == "View options"
+    assert best["acceptClicksRequired"] == 1
+    assert best["rejectClicksRequired"] == 1
+
+    iframe_scans = [
+        entry for entry in merged["frames"]
+        if entry["frameUrl"].endswith("sourcepoint_iframe_inner.html")
+    ]
+    assert len(iframe_scans) == 1
+    assert iframe_scans[0]["scanResult"]["bannerFound"] is True
 
 
 def test_consent_scanner_tracks_passive_parity_dark_patterns_for_direct_banner() -> None:
@@ -428,6 +549,70 @@ def test_popup_prefers_non_transparent_bg_color_over_background_shorthand() -> N
     assert styles[1]["backgroundColor"] == "rgb(37, 99, 235)"
     assert styles[0]["color"] == "rgb(255, 255, 255)"
     assert styles[1]["color"] == "rgb(255, 255, 255)"
+
+
+def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
+    popup_result = {
+        "isGovDomain": False,
+        "studyMetadata": {
+            "label": "AECCS 1000-site combined study snapshot",
+            "runId": "combined-1000",
+            "sampleSize": 1000,
+            "successfulCrawls": 861,
+            "snapshotDateLabel": "March 6, 2026",
+        },
+        "evaluationDisabled": {
+            "active": True,
+            "reason": "no_active_cookie_banner",
+            "title": "Evaluation unavailable on this page",
+            "message": "AECCS works with active visible cookie banners. No cookie banner was detected, so this website was not evaluated.",
+        },
+        "score": None,
+        "categoryCounts": {},
+        "totalCookies": None,
+        "thirdPartyCount": None,
+        "trackerCount": None,
+        "trackersByVendor": {},
+        "cmpStats": None,
+        "petRecommendations": [],
+        "consentScan": {
+            "cmpDetected": None,
+            "bannerFound": False,
+            "hasAcceptButton": False,
+            "hasRejectButton": False,
+            "hasSettingsButton": False,
+            "acceptButtonText": None,
+            "rejectButtonText": None,
+            "settingsButtonText": None,
+            "acceptClicksRequired": 999,
+            "rejectClicksRequired": 999,
+            "transparency": {},
+            "darkPatterns": {"count": 0, "detected": []},
+            "buttonComparison": None,
+        },
+    }
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _render_popup(page, popup_result)
+        state = page.evaluate(
+            """() => ({
+                disabledHidden: document.getElementById("disabledState").classList.contains("hidden"),
+                resultsHidden: document.getElementById("results").classList.contains("hidden"),
+                errorHidden: document.getElementById("errorState").classList.contains("hidden"),
+                title: document.getElementById("disabledTitle").textContent,
+                message: document.getElementById("disabledMsg").textContent,
+            })"""
+        )
+        browser.close()
+
+    assert state["disabledHidden"] is False
+    assert state["resultsHidden"] is True
+    assert state["errorHidden"] is True
+    assert state["title"] == "Evaluation unavailable on this page"
+    assert "active visible cookie banners" in state["message"]
+    assert "not evaluated" in state["message"]
 
 
 def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:

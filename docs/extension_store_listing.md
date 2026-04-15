@@ -8,6 +8,8 @@ Passive, research-grounded GDPR cookie-consent auditor for Chrome and Firefox. A
 
 AECCS is a lightweight browser extension for people who want evidence-based cookie-consent auditing without auto-clicking banners or blocking site functionality.
 
+It works on pages where an active visible cookie banner is present. If no cookie banner is currently detected, AECCS explains that the page was not evaluated instead of showing a misleading compliance result.
+
 It audits the page you are currently visiting and highlights:
 
 - live cookies, third-party cookies, and tracker-heavy pages

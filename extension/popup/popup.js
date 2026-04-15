@@ -46,6 +46,9 @@
     loading:           $("loading"),
     errorState:        $("errorState"),
     errorMsg:          $("errorMsg"),
+    disabledState:     $("disabledState"),
+    disabledTitle:     $("disabledTitle"),
+    disabledMsg:       $("disabledMsg"),
     results:           $("results"),
     siteDomain:        $("siteDomain"),
     govAlert:          $("govAlert"),
@@ -97,8 +100,21 @@
 
   function showError(msg) {
     els.loading.classList.add("hidden");
+    els.disabledState.classList.add("hidden");
+    els.results.classList.add("hidden");
     els.errorState.classList.remove("hidden");
     els.errorMsg.textContent = msg;
+  }
+
+  function showDisabledState(disabled) {
+    els.loading.classList.add("hidden");
+    els.errorState.classList.add("hidden");
+    els.results.classList.add("hidden");
+    els.disabledState.classList.remove("hidden");
+    els.disabledTitle.textContent = disabled?.title || "Evaluation unavailable on this page";
+    els.disabledMsg.textContent =
+      disabled?.message ||
+      "AECCS works with active visible cookie banners. No cookie banner was detected, so this website was not evaluated.";
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -107,14 +123,26 @@
     currentAnalysis = data;
     renderedInsightsKey = null;
     els.loading.classList.add("hidden");
+    els.errorState.classList.add("hidden");
+    els.disabledState.classList.add("hidden");
+    els.results.classList.add("hidden");
+
+    renderStudyCopy(data.studyMetadata);
+
+    if (data.evaluationDisabled?.active) {
+      showDisabledState(data.evaluationDisabled);
+      return;
+    }
+
     els.results.classList.remove("hidden");
 
     // Government domain alert
     if (data.isGovDomain) {
       els.govAlert.classList.remove("hidden");
+    } else {
+      els.govAlert.classList.add("hidden");
     }
 
-    renderStudyCopy(data.studyMetadata);
     renderScore(data.score);
     renderCookies(data);
     renderTrackers(data.trackersByVendor);

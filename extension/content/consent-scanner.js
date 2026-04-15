@@ -66,6 +66,9 @@
     "manage",
     "customize",
     "customise",
+    "view options",
+    "view cookie options",
+    "view preferences",
     "more options",
     "cookie settings",
     "cookie preferences",
@@ -1335,6 +1338,7 @@
     globalThis.AECCSConsentScanner = {
       scanPage: scanPageOnce,
       scanPageWithRetries,
+      scoreResult: scanResultQuality,
     };
   }
 

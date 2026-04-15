@@ -51,6 +51,7 @@ The `extension/` folder contains a lightweight Chrome/Firefox browser extension 
 
 - **Passive local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling
 - **No blocking and no auto-clicking** — the extension does not try to change consent state or fix a site for the user
+- **Works with active visible cookie banners** — if no cookie banner is currently detected on the page, the extension explains that the page was not evaluated instead of showing a misleading score
 - **Live cookie/tracker evidence** — reads current cookies, classifies trackers, and highlights third-party and tracker-heavy pages
 - **Consent dark-pattern analysis** — detects CMPs, missing reject paths, multi-layer rejection, asymmetric buttons, hidden reject, preselected checkboxes, confusing language, forced action, and transparency signals
 - **Accept vs Reject UX comparison** — renders the visible accept/reject path so users can see unequal effort directly

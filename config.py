@@ -285,6 +285,9 @@ CONSENT_BUTTON_KEYWORDS: dict[str, list[str]] = {
     "reject": [
         # English
         "Reject", "Reject All", "Decline", "Deny", "Refuse All",
+        "Essential cookies only", "Necessary cookies only",
+        "Only necessary cookies", "Only essential cookies",
+        "Use necessary cookies only",
         # German
         "Ablehnen", "Alle ablehnen",
         # French
@@ -309,6 +312,7 @@ CMP_SIGNATURES: dict[str, list[str]] = {
     "TrustArc": ["trustarc", "truste", "consent-manager"],
     "Didomi": ["didomi"],
     "Usercentrics": ["usercentrics"],
+    "Sourcepoint": ["sourcepoint", "privacy-mgmt", "sp_message", "sp_choice_type"],
 }
 
 # ── GDPR Compliance Scoring Weights ───────────────────────────────────────────

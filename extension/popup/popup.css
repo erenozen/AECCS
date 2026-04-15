@@ -114,6 +114,47 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Disabled / Not Applicable ──────────────────────────────────────────── */
+
+.disabled-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px 16px;
+  color: var(--text);
+}
+
+.disabled-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.disabled-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.disabled-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.disabled-msg {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
 /* ── Government Alert ────────────────────────────────────────────────────── */
 
 .gov-alert {
