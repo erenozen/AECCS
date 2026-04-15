@@ -92,8 +92,18 @@
     "secenekler",
   ];
 
-  const CONSENT_TEXT_RE = /cookie|cookies|consent|gdpr|privacy|data protection|datenschutz|cerez|gizlilik/i;
-  const ATTR_HINT_RE = /cookie|consent|gdpr|privacy|cmp|tcf|onetrust|didomi|trustarc|cookiebot/i;
+  const BANNER_TEXT_RE = /cookie|cookies|consent|gdpr|data protection|datenschutz|cerez|gizlilik/i;
+  const BANNER_TEXT_PHRASES = [
+    "privacy choices",
+    "your privacy choices",
+    "privacy preferences",
+    "manage privacy preferences",
+    "manage privacy choices",
+    "we value your privacy",
+    "cerez tercihleri",
+    "gizlilik tercihleri",
+  ];
+  const BANNER_ATTR_HINT_RE = /cookie|consent|gdpr|cmp|tcf|onetrust|didomi|trustarc|cookiebot|sourcepoint|privacy-mgmt|sp_message|sp_choice_type/i;
   const ACTIONABLE_SELECTOR = [
     "button",
     "a",
@@ -248,12 +258,6 @@
   const SETTINGS_BUTTON_KEYWORDS = SETTINGS_KEYWORDS
     .map(normalizeForMatch)
     .filter(Boolean);
-  const ALL_CONSENT_ACTION_KEYWORDS = Array.from(new Set([
-    ...ACCEPT_BUTTON_KEYWORDS,
-    ...REJECT_BUTTON_KEYWORDS,
-    ...SETTINGS_BUTTON_KEYWORDS,
-  ]));
-
   function hasKeywordMatch(text, keywords, { exactOnly = false } = {}) {
     if (!text) return false;
     if (keywords.includes(text)) return true;
@@ -299,11 +303,80 @@
     ].join(" "));
   }
 
-  function hasConsentLikeText(text) {
+  function hasBannerLikeText(text) {
     const normalized = normalizeForMatch(text);
     if (!normalized) return false;
-    if (CONSENT_TEXT_RE.test(normalized)) return true;
-    return hasKeywordMatch(normalized, ALL_CONSENT_ACTION_KEYWORDS);
+    if (BANNER_TEXT_RE.test(normalized)) return true;
+    if (BANNER_TEXT_PHRASES.some(phrase => normalized.includes(phrase))) return true;
+    return false;
+  }
+
+  function hasBannerLikeAttributes(attrs) {
+    const normalized = normalizeForMatch(attrs);
+    if (!normalized) return false;
+    return BANNER_ATTR_HINT_RE.test(normalized);
+  }
+
+  function findDismissButton(root, { visibleOnly = false } = {}) {
+    if (!root) return null;
+
+    for (const el of collectActionableElements(root, { includeHidden: !visibleOnly })) {
+      const text = normalizeForMatch(getElementLabel(el));
+      if (!text || !AMBIGUOUS_BUTTON_TEXTS.has(text)) continue;
+      if (visibleOnly && !isElementVisible(el)) continue;
+      return {
+        element: el,
+        text: getElementLabel(el),
+      };
+    }
+
+    return null;
+  }
+
+  function isStrongBannerSurface(el) {
+    if (!el || !isElementVisible(el)) return false;
+
+    const rect = el.getBoundingClientRect();
+    const area = getRectArea(rect);
+    if (area <= 0) return false;
+
+    const style = getComputedStyle(el);
+    const attrs = elementAttributeHaystack(el);
+    const flags = getVisualStyleFlags(style);
+    const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
+    const areaRatio = area / viewportArea;
+
+    const fixedLike = style.position === "fixed" || style.position === "sticky";
+    const dialogLike = attrs.includes("dialog") || el.getAttribute("aria-modal") === "true";
+    const edgeAnchored = rect.top < 160 || rect.bottom > (window.innerHeight - 160);
+    const largeEnough = areaRatio >= 0.015 ||
+      rect.height >= 90 ||
+      (rect.width >= window.innerWidth * 0.4 && rect.height >= 56);
+
+    return hasMeaningfulPaint(flags) && largeEnough && (fixedLike || dialogLike || edgeAnchored);
+  }
+
+  function isActiveBanner(bannerEl, buttonData) {
+    if (!bannerEl || !isStrongBannerSurface(bannerEl)) return false;
+
+    const hasVisibleConsentAction = Boolean(
+      buttonData && (buttonData.hasAcceptButton || buttonData.hasRejectButton || buttonData.hasSettingsButton)
+    );
+    const visibleConsentActionCount = [
+      Boolean(buttonData && buttonData.hasAcceptButton),
+      Boolean(buttonData && buttonData.hasRejectButton),
+      Boolean(buttonData && buttonData.hasSettingsButton),
+    ].filter(Boolean).length;
+    const dismissButton = findDismissButton(bannerEl, { visibleOnly: true });
+    const hasBannerEvidence = hasBannerLikeText(getElementText(bannerEl)) ||
+      hasBannerLikeAttributes(elementAttributeHaystack(bannerEl)) ||
+      Boolean(dismissButton) ||
+      visibleConsentActionCount >= 2;
+    if (!hasBannerEvidence) return false;
+
+    if (hasVisibleConsentAction) return true;
+
+    return Boolean(dismissButton);
   }
 
   function collectActionableElements(root, { includeHidden = false } = {}) {
@@ -699,7 +772,7 @@
         for (const el of elements) {
           const text = getElementText(el);
           const attrs = elementAttributeHaystack(el);
-          if (hasConsentLikeText(text) || ATTR_HINT_RE.test(attrs)) {
+          if (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs)) {
             maybeAdd(el);
           }
         }
@@ -722,7 +795,7 @@
       const edgeAnchored = rect.top < 160 || rect.bottom > (window.innerHeight - 160);
       const actionable = summary.acceptCount > 0 || summary.rejectCount > 0 || summary.settingsCount > 0;
 
-      if ((fixedLike || dialogLike || edgeAnchored) && (hasConsentLikeText(text) || ATTR_HINT_RE.test(attrs) || actionable)) {
+      if ((fixedLike || dialogLike || edgeAnchored) && (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs) || actionable)) {
         maybeAdd(el);
       }
     }
@@ -756,9 +829,9 @@
 
     let score = 0;
 
-    if (hasConsentLikeText(text)) score += 5;
-    if (CONSENT_TEXT_RE.test(matchText)) score += 3;
-    if (ATTR_HINT_RE.test(attrs)) score += 3;
+    if (hasBannerLikeText(text)) score += 5;
+    if (BANNER_TEXT_RE.test(matchText)) score += 3;
+    if (hasBannerLikeAttributes(attrs)) score += 3;
 
     if (summary.acceptCount > 0) score += 7;
     if (summary.rejectCount > 0) score += 7;
@@ -1212,10 +1285,13 @@
 
   function scanPageOnce() {
     const cmpDetected = detectCMP();
-    const bannerMatch = findBanner();
-    const bannerEl = bannerMatch ? bannerMatch.element : null;
-    const bannerFound = bannerEl !== null;
-    const buttonData = findButtons(bannerEl);
+    const candidateBannerMatch = findBanner();
+    const candidateBannerEl = candidateBannerMatch ? candidateBannerMatch.element : null;
+    const candidateButtonData = findButtons(candidateBannerEl);
+    const bannerFound = isActiveBanner(candidateBannerEl, candidateButtonData);
+    const bannerMatch = bannerFound ? candidateBannerMatch : null;
+    const bannerEl = bannerFound ? candidateBannerEl : null;
+    const buttonData = bannerFound ? candidateButtonData : findButtons(null);
     const {
       acceptButton,
       rejectButton,

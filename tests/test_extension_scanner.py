@@ -170,7 +170,16 @@ def _render_popup(page, result: dict) -> None:
             <section id="buttonCompSection" class="hidden"><div id="buttonComparison"></div></section>
             <section id="darkPatternSection"><div id="darkPatternDetails"></div></section>
             <table><tbody id="criteriaBody"></tbody></table>
-            <section id="petSection" class="hidden"><div id="petSubtitle"></div><div id="petList"></div></section>
+            <details id="petSection" class="study-insights pet-recommendations hidden">
+              <summary class="study-insights-toggle">
+                <span>Recommended Privacy Tools</span>
+                <span class="study-insights-meta">Study-backed guidance</span>
+              </summary>
+              <div id="petContent" class="study-insights-content">
+                <div id="petSubtitle" class="pet-subtitle"></div>
+                <div id="petList"></div>
+              </div>
+            </details>
             <details id="studyInsightsSection" class="hidden">
               <summary>AECCS Study Insights</summary>
               <div id="studyInsightsContent"></div>
@@ -216,6 +225,49 @@ def test_consent_scanner_detects_nested_reddit_like_buttons() -> None:
     assert result["rejectButtonText"] == "Reject Optional Cookies"
     assert result["acceptClicksRequired"] == 1
     assert result["rejectClicksRequired"] == 1
+
+
+def test_consent_scanner_treats_dismissed_banner_as_no_active_banner() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "dismissible_reddit_like.html").as_uri())
+        _install_scanner(page)
+
+        before = page.evaluate(
+            """async () => {
+                return await AECCSConsentScanner.scanPageWithRetries({
+                    attempts: 2,
+                    delayMs: 20
+                });
+            }"""
+        )
+
+        page.click(".close-btn")
+        page.wait_for_function(
+            """() => getComputedStyle(document.querySelector(".site-footer")).display === "block" """
+        )
+
+        after = page.evaluate(
+            """async () => {
+                return await AECCSConsentScanner.scanPageWithRetries({
+                    attempts: 2,
+                    delayMs: 20
+                });
+            }"""
+        )
+        browser.close()
+
+    assert before["bannerFound"] is True
+    assert before["hasAcceptButton"] is True
+    assert before["hasRejectButton"] is True
+
+    assert after["bannerFound"] is False
+    assert after["hasAcceptButton"] is False
+    assert after["hasRejectButton"] is False
+    assert after["hasSettingsButton"] is False
+    assert after["darkPatterns"]["count"] == 0
+    assert after["darkPatterns"]["detected"] == []
 
 
 def test_consent_scanner_detects_direct_accept_and_reject_buttons() -> None:
@@ -393,6 +445,21 @@ def test_consent_scanner_keeps_no_banner_pages_at_zero_dark_patterns() -> None:
     assert result["darkPatterns"]["detected"] == []
     assert result["darkPatterns"]["missingReject"]["detected"] is False
     assert result["darkPatterns"]["multiLayerRejection"]["detected"] is False
+
+
+def test_consent_scanner_does_not_treat_privacy_footer_as_banner() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        result = _scan_fixture(page, "privacy_footer_only.html")
+        browser.close()
+
+    assert result["bannerFound"] is False
+    assert result["hasAcceptButton"] is False
+    assert result["hasRejectButton"] is False
+    assert result["hasSettingsButton"] is False
+    assert result["darkPatterns"]["count"] == 0
+    assert result["darkPatterns"]["detected"] == []
 
 
 def test_consent_scanner_uses_painted_nested_button_styles() -> None:
@@ -580,6 +647,7 @@ def test_popup_prefers_non_transparent_bg_color_over_background_shorthand() -> N
                     return {
                         backgroundColor: style.backgroundColor,
                         color: style.color,
+                        petSectionHidden: document.getElementById("petSection").classList.contains("hidden"),
                     };
                 });
             }"""
@@ -590,6 +658,7 @@ def test_popup_prefers_non_transparent_bg_color_over_background_shorthand() -> N
     assert styles[1]["backgroundColor"] == "rgb(37, 99, 235)"
     assert styles[0]["color"] == "rgb(255, 255, 255)"
     assert styles[1]["color"] == "rgb(255, 255, 255)"
+    assert styles[0]["petSectionHidden"] is True
 
 
 def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
@@ -734,12 +803,32 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1280, "height": 900})
         _render_popup(page, popup_result)
-        page.wait_for_selector("#petList .pet-effectiveness")
+        page.wait_for_function(
+            """() => !document.getElementById("petSection").classList.contains("hidden")"""
+        )
+        before = page.evaluate(
+            """() => ({
+                petOpen: document.getElementById("petSection").open,
+                petSubtitle: document.getElementById("petSubtitle").textContent,
+                petList: document.getElementById("petList").textContent,
+                petCardCount: document.querySelectorAll("#petList .pet-card").length,
+                studyInsightsOpen: document.getElementById("studyInsightsSection").open,
+                studyInsightsContent: document.getElementById("studyInsightsContent").textContent,
+            })"""
+        )
+
+        page.click("#petSection summary")
+        page.wait_for_function(
+            """() => document.getElementById("petSection").open &&
+                document.querySelectorAll("#petList .pet-card").length > 0"""
+        )
+
         content = page.evaluate(
             """() => ({
                 govNote: document.getElementById("govNote").textContent,
                 govAlertBackground: getComputedStyle(document.getElementById("govAlert")).backgroundColor,
                 govNoteColor: getComputedStyle(document.getElementById("govNote")).color,
+                petOpen: document.getElementById("petSection").open,
                 petSubtitle: document.getElementById("petSubtitle").textContent,
                 footer: document.getElementById("footerNote").textContent,
                 cmpInfo: document.getElementById("cmpInfo").textContent,
@@ -751,12 +840,34 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
                 petInfoLabel: document.querySelector(".pet-study-info")?.getAttribute("aria-label") || "",
                 petTooltipText: document.querySelector(".pet-study-tooltip")?.textContent || "",
                 petTooltipHidden: document.querySelector(".pet-study-tooltip")?.hidden ?? true,
-                studyInsightsOpen: document.getElementById("studyInsightsSection").open,
-                studyInsightsContent: document.getElementById("studyInsightsContent").textContent,
+            })"""
+        )
+
+        page.click("#petSection summary")
+        page.wait_for_function(
+            """() => {
+                const petSection = document.getElementById("petSection");
+                return !petSection.open &&
+                    document.getElementById("petSubtitle").textContent === "" &&
+                    document.getElementById("petList").textContent === "";
+            }"""
+        )
+        after_close = page.evaluate(
+            """() => ({
+                petOpen: document.getElementById("petSection").open,
+                petSubtitle: document.getElementById("petSubtitle").textContent,
+                petList: document.getElementById("petList").textContent
             })"""
         )
         browser.close()
 
+    assert before["petOpen"] is False
+    assert before["petSubtitle"] == ""
+    assert before["petList"] == ""
+    assert before["petCardCount"] == 0
+    assert before["studyInsightsOpen"] is False
+    assert before["studyInsightsContent"] == ""
+    assert content["petOpen"] is True
     assert "77 sites" in content["govNote"]
     assert "30.9/100" in content["govNote"]
     assert "75.3%" in content["govNote"]
@@ -779,8 +890,9 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
     assert "878 tested sites" in content["petTooltipText"]
     assert "not a live measurement for the current page" in content["petTooltipText"]
     assert content["petTooltipHidden"] is True
-    assert content["studyInsightsOpen"] is False
-    assert content["studyInsightsContent"] == ""
+    assert after_close["petOpen"] is False
+    assert after_close["petSubtitle"] == ""
+    assert after_close["petList"] == ""
     assert content["govAlertBackground"] == "rgb(239, 246, 255)"
     assert content["govNoteColor"] == "rgb(95, 112, 136)"
     assert content["cmpPanelBackground"] == "rgb(238, 244, 251)"
@@ -850,6 +962,11 @@ def test_popup_pet_tooltip_supports_hover_focus_click_and_escape() -> None:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1280, "height": 900})
         _render_popup(page, popup_result)
+        page.click("#petSection summary")
+        page.wait_for_function(
+            """() => document.getElementById("petSection").open &&
+                document.querySelectorAll("#petList .pet-study-info").length === 2"""
+        )
         page.wait_for_selector("#petList .pet-study-info")
 
         initial = page.evaluate(

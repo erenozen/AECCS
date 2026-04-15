@@ -112,11 +112,16 @@
       </section>
 
       <!-- PET Recommendations (unique to AECCS) -->
-      <section class="section" id="petSection">
-        <h2 class="section-title">Recommended Privacy Tools</h2>
-        <div class="pet-subtitle" id="petSubtitle">Guidance combines this page's live findings with the AECCS 1000-site combined study (861 successful crawls, March 6, 2026)</div>
-        <div id="petList"></div>
-      </section>
+      <details class="section study-insights pet-recommendations hidden" id="petSection">
+        <summary class="study-insights-toggle">
+          <span>Recommended Privacy Tools</span>
+          <span class="study-insights-meta">Study-backed guidance</span>
+        </summary>
+        <div id="petContent" class="study-insights-content">
+          <div class="pet-subtitle" id="petSubtitle"></div>
+          <div id="petList"></div>
+        </div>
+      </details>
 
       <details class="section study-insights hidden" id="studyInsightsSection">
         <summary class="study-insights-toggle">

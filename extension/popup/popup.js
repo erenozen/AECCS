@@ -81,6 +81,7 @@
   async function init() {
     try {
       bindStudyInsights();
+      bindPetSection();
       bindPetTooltips();
 
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -150,7 +151,7 @@
     renderButtonComparison(data.consentScan?.buttonComparison);
     renderDarkPatterns(data.consentScan?.darkPatterns);
     renderCriteria(data.score.criteria);
-    renderPetRecommendations(data.petRecommendations);
+    syncPetRecommendations(data.petRecommendations, data.studyMetadata);
 
     if (els.studyInsightsSection) {
       els.studyInsightsSection.classList.remove("hidden");
@@ -167,6 +168,20 @@
     els.studyInsightsSection.addEventListener("toggle", () => {
       if (els.studyInsightsSection.open && currentAnalysis) {
         renderStudyInsights(currentAnalysis);
+      } else if (els.studyInsightsContent) {
+        clearNode(els.studyInsightsContent);
+        renderedInsightsKey = null;
+      }
+    });
+  }
+
+  function bindPetSection() {
+    if (!els.petSection) return;
+    els.petSection.addEventListener("toggle", () => {
+      if (els.petSection.open && currentAnalysis) {
+        renderPetRecommendations(currentAnalysis.petRecommendations, currentAnalysis.studyMetadata);
+      } else {
+        clearPetRecommendations();
       }
     });
   }
@@ -285,11 +300,6 @@
     if (els.govNote) {
       els.govNote.textContent =
         `Public-sector sites were included in the combined corpus. In the successful government/public-sector category (${publicSector.successfulSites || 77} sites), average compliance was ${publicSector.avgCompliance || 30.9}/100 and ${formatPercent(publicSector.preConsentTrackerRate ?? 0.753)} showed pre-consent trackers.`;
-    }
-
-    if (els.petSubtitle) {
-      els.petSubtitle.textContent =
-        `Guidance combines this page's live findings with the AECCS ${sampleSize}-site combined study (${successfulCrawls} successful crawls, ${snapshotDateLabel})`;
     }
 
     if (els.footerNote) {
@@ -547,16 +557,28 @@
 
   // ── PET Recommendations ───────────────────────────────────────────────────
 
-  function renderPetRecommendations(pets) {
+  function syncPetRecommendations(pets, studyMetadata) {
     closeActivePetTooltip();
 
     if (!pets || pets.length === 0) {
       els.petSection.classList.add("hidden");
-      clearNode(els.petList);
+      els.petSection.open = false;
+      clearPetRecommendations();
       return;
     }
 
     els.petSection.classList.remove("hidden");
+    if (els.petSection.open) {
+      renderPetRecommendations(pets, studyMetadata);
+    } else {
+      clearPetRecommendations();
+    }
+  }
+
+  function renderPetRecommendations(pets, studyMetadata) {
+    if (!els.petList || !els.petSubtitle) return;
+
+    els.petSubtitle.textContent = buildPetSubtitleText(studyMetadata);
     clearNode(els.petList);
 
     for (const [index, pet] of pets.entries()) {
@@ -611,6 +633,16 @@
       }
 
       els.petList.appendChild(card);
+    }
+  }
+
+  function clearPetRecommendations() {
+    closeActivePetTooltip();
+    if (els.petSubtitle) {
+      els.petSubtitle.textContent = "";
+    }
+    if (els.petList) {
+      clearNode(els.petList);
     }
   }
 
@@ -817,6 +849,13 @@
       return `${studyLabel}: ${pet.studyLabel}. This is not a live measurement for the current page.`;
     }
     return `${studyLabel}: study-backed context only. This is not a live measurement for the current page.`;
+  }
+
+  function buildPetSubtitleText(studyMetadata) {
+    const sampleSize = studyMetadata?.sampleSize || 1000;
+    const successfulCrawls = studyMetadata?.successfulCrawls || 861;
+    const snapshotDateLabel = studyMetadata?.snapshotDateLabel || "March 6, 2026";
+    return `Guidance combines this page's live findings with the AECCS ${sampleSize}-site combined study (${successfulCrawls} successful crawls, ${snapshotDateLabel})`;
   }
 
   function formatPercent(value) {
