@@ -1,216 +1,43 @@
 /*
- * AECCS Tracker Data — ported from the Python pipeline.
+ * AECCS Tracker Data — extension assembly layer.
  *
- * Sources:
- *   analysis/classifier.py  → FALLBACK_TRACKERS, COOKIE_HEURISTICS
- *   config.py               → CMP_SIGNATURES, CONSENT_BUTTON_KEYWORDS, COMPLIANCE_WEIGHTS
- *   analysis/scoring.py     → PRIVACY_LINK_KEYWORDS, PURPOSE_KEYWORDS, GRADES
- *   scraper/crawler.py      → BANNER_SELECTORS
+ * Python-owned shared constants are generated into lib/shared-config.js and
+ * loaded first. This file keeps the extension runtime API stable while
+ * combining those generated values with extension-only study metadata.
  */
 
 const AECCS = (() => {
   "use strict";
 
-  // ── Fallback tracker map (39 domains) ─────────────────────────────────────
-  // From analysis/classifier.py lines 39-88
-  const FALLBACK_TRACKERS = {
-    // Advertising
-    "doubleclick.net":          { vendor: "Google",          category: "Advertising" },
-    "googlesyndication.com":    { vendor: "Google",          category: "Advertising" },
-    "googleadservices.com":     { vendor: "Google",          category: "Advertising" },
-    "googleads.g.doubleclick.net": { vendor: "Google",       category: "Advertising" },
-    "adnxs.com":                { vendor: "Xandr/Microsoft", category: "Advertising" },
-    "criteo.com":               { vendor: "Criteo",          category: "Advertising" },
-    "criteo.net":               { vendor: "Criteo",          category: "Advertising" },
-    "amazon-adsystem.com":      { vendor: "Amazon",          category: "Advertising" },
-    "adsrvr.org":               { vendor: "The Trade Desk",  category: "Advertising" },
-    "rubiconproject.com":       { vendor: "Rubicon Project", category: "Advertising" },
-    "pubmatic.com":             { vendor: "PubMatic",        category: "Advertising" },
-    "casalemedia.com":          { vendor: "Casale Media",    category: "Advertising" },
-    "openx.net":                { vendor: "OpenX",           category: "Advertising" },
-    "taboola.com":              { vendor: "Taboola",         category: "Advertising" },
-    "outbrain.com":             { vendor: "Outbrain",        category: "Advertising" },
-    // Analytics
-    "google-analytics.com":     { vendor: "Google",          category: "Analytics" },
-    "googletagmanager.com":     { vendor: "Google",          category: "Analytics" },
-    "hotjar.com":               { vendor: "Hotjar",          category: "Analytics" },
-    "hotjar.io":                { vendor: "Hotjar",          category: "Analytics" },
-    "mouseflow.com":            { vendor: "Mouseflow",       category: "Analytics" },
-    "newrelic.com":             { vendor: "New Relic",       category: "Analytics" },
-    "segment.io":               { vendor: "Segment",         category: "Analytics" },
-    "segment.com":              { vendor: "Segment",         category: "Analytics" },
-    "amplitude.com":            { vendor: "Amplitude",       category: "Analytics" },
-    "mixpanel.com":             { vendor: "Mixpanel",        category: "Analytics" },
-    "clarity.ms":               { vendor: "Microsoft",       category: "Analytics" },
-    "scorecardresearch.com":    { vendor: "comScore",        category: "Analytics" },
-    "chartbeat.com":            { vendor: "Chartbeat",       category: "Analytics" },
-    "chartbeat.net":            { vendor: "Chartbeat",       category: "Analytics" },
-    // Social
-    "facebook.net":             { vendor: "Meta",            category: "Social" },
-    "facebook.com":             { vendor: "Meta",            category: "Social" },
-    "fbcdn.net":                { vendor: "Meta",            category: "Social" },
-    "connect.facebook.net":     { vendor: "Meta",            category: "Social" },
-    "twitter.com":              { vendor: "X/Twitter",       category: "Social" },
-    "platform.twitter.com":     { vendor: "X/Twitter",       category: "Social" },
-    "linkedin.com":             { vendor: "LinkedIn",        category: "Social" },
-    "snap.licdn.com":           { vendor: "LinkedIn",        category: "Social" },
-    "tiktok.com":               { vendor: "TikTok",          category: "Social" },
-    // Fingerprinting
-    "demdex.net":               { vendor: "Adobe",           category: "Fingerprinting" },
-    "omtrdc.net":               { vendor: "Adobe",           category: "Fingerprinting" },
-    "krxd.net":                 { vendor: "Salesforce/Krux", category: "Fingerprinting" },
-    "bluekai.com":              { vendor: "Oracle",          category: "Fingerprinting" },
-    "exelator.com":             { vendor: "Nielsen",         category: "Fingerprinting" },
-    "quantserve.com":           { vendor: "Quantcast",       category: "Fingerprinting" },
-  };
+  const SHARED = globalThis.AECCSSharedConfig;
+  if (!SHARED) {
+    throw new Error("AECCSSharedConfig missing. Load lib/shared-config.js before lib/tracker-data.js.");
+  }
 
-  // ── Heuristic cookie-name patterns (13 regexes) ──────────────────────────
-  // From analysis/classifier.py lines 91-105
-  const COOKIE_HEURISTICS = [
-    { pattern: /^_ga$|^_ga_/i,                                        vendor: "Google",    category: "Analytics" },
-    { pattern: /^_gid$/i,                                              vendor: "Google",    category: "Analytics" },
-    { pattern: /^_gat/i,                                               vendor: "Google",    category: "Analytics" },
-    { pattern: /^__utm/i,                                              vendor: "Google",    category: "Analytics" },
-    { pattern: /_fbp|_fbc|fbp/i,                                       vendor: "Meta",      category: "Social" },
-    { pattern: /^_hjid|^_hj/i,                                         vendor: "Hotjar",    category: "Analytics" },
-    { pattern: /^_tt_/i,                                                vendor: "TikTok",    category: "Social" },
-    { pattern: /^li_|^bcookie|^lidc/i,                                  vendor: "LinkedIn",  category: "Social" },
-    { pattern: /^IDE$|^test_cookie$|^DSID$/i,                           vendor: "Google",    category: "Advertising" },
-    { pattern: /^NID$|^APISID$|^SAPISID$|^SID$|^SSID$|^HSID$/i,       vendor: "Google",    category: "Functional" },
-    { pattern: /^_pin_|^_pinterest_/i,                                  vendor: "Pinterest", category: "Social" },
-    { pattern: /^amp_/i,                                                vendor: "Amplitude", category: "Analytics" },
-    { pattern: /^mp_/i,                                                 vendor: "Mixpanel",  category: "Analytics" },
-  ];
-
-  // ── CMP Detection Signatures ─────────────────────────────────────────────
-  // From config.py lines 305-312
-  const CMP_SIGNATURES = {
-    "OneTrust":     ["onetrust", "optanon", "cookie-consent-banner"],
-    "Cookiebot":    ["cookiebot", "CookieConsent", "Cybot"],
-    "Quantcast":    ["quantcast", "__cmpLocator", "cmp2.js"],
-    "TrustArc":     ["trustarc", "truste", "consent-manager"],
-    "Didomi":       ["didomi"],
-    "Usercentrics": ["usercentrics"],
-    "Sourcepoint":  ["sourcepoint", "privacy-mgmt", "sp_message", "sp_choice_type"],
-  };
-
-  // ── Consent Button Keywords (multilingual, 7 languages) ──────────────────
-  // From config.py lines 268-301
-  const CONSENT_BUTTON_KEYWORDS = {
-    accept: [
-      // English
-      "Accept", "Accept All", "Accept Cookies", "I Agree", "Allow All",
-      // German
-      "Akzeptieren", "Alle akzeptieren", "Zustimmen", "Alle Cookies akzeptieren",
-      // French
-      "Accepter", "Tout accepter", "J'accepte", "Accepter tout",
-      // Dutch
-      "Accepteren", "Alle accepteren", "Alle cookies accepteren",
-      // Spanish
-      "Aceptar", "Aceptar todo", "Aceptar todas",
-      // Italian
-      "Accetta", "Accetta tutto", "Accetta tutti",
-      // Turkish
-      "Kabul Et", "Tümünü Kabul Et", "İzin Ver",
-    ],
-    reject: [
-      // English
-      "Reject", "Reject All", "Decline", "Deny", "Refuse All",
-      "Essential cookies only", "Necessary cookies only",
-      "Only necessary cookies", "Only essential cookies",
-      "Use necessary cookies only",
-      // German
-      "Ablehnen", "Alle ablehnen",
-      // French
-      "Refuser", "Tout refuser",
-      // Dutch
-      "Weigeren", "Alle weigeren",
-      // Spanish
-      "Rechazar", "Rechazar todo", "Rechazar todas",
-      // Italian
-      "Rifiuta", "Rifiuta tutto", "Rifiuta tutti",
-      // Turkish
-      "Reddet", "Tümünü Reddet",
-    ],
-  };
-
-  // ── GDPR Compliance Scoring Weights ──────────────────────────────────────
-  // From config.py lines 316-323
-  const COMPLIANCE_WEIGHTS = {
-    no_pre_consent_trackers:   0.25,
-    reject_option_available:   0.20,
-    equal_accept_reject_effort: 0.15,
-    no_dark_patterns:          0.15,
-    post_reject_compliance:    0.15,
-    transparent_information:   0.10,
-  };
-
-  // ── Grade thresholds ─────────────────────────────────────────────────────
-  // From analysis/scoring.py lines 35-41
-  const GRADES = [
-    { threshold: 90, grade: "A" },
-    { threshold: 75, grade: "B" },
-    { threshold: 60, grade: "C" },
-    { threshold: 40, grade: "D" },
-    { threshold: 0,  grade: "F" },
-  ];
-
-  // ── Privacy-policy link keywords (multilingual) ──────────────────────────
-  // From analysis/scoring.py lines 44-52
-  const PRIVACY_LINK_KEYWORDS = [
-    "privacy policy", "privacy notice", "data protection",
-    "datenschutz", "datenschutzerklaerung", "datenschutzerklärung",
-    "politique de confidentialité", "politique de confidentialite",
-    "privacybeleid", "privacyverklaring",
-    "politica de privacidad", "política de privacidad",
-    "informativa sulla privacy",
-    "gizlilik politikası", "gizlilik politikasi",
-  ];
-
-  // ── Purpose keywords for transparency check ─────────────────────────────
-  // From analysis/scoring.py lines 55-60
-  const PURPOSE_KEYWORDS = [
-    "analytics", "advertising", "personalization", "marketing",
-    "functional", "preferences", "statistics", "targeting",
-    "analyse", "werbung", "personalisierung",
-    "analytique", "publicité", "personnalisation",
-  ];
-
-  // ── Vendor keywords for transparency check ──────────────────────────────
-  // From analysis/scoring.py line 221
-  const VENDOR_KEYWORDS = [
-    "google", "facebook", "meta", "analytics", "advertisement",
-  ];
-
-  // ── Consent banner CSS selectors ─────────────────────────────────────────
-  // From scraper/crawler.py lines 56-81
-  const BANNER_SELECTORS = [
-    "#cookie-banner",
-    "#cookie-consent",
-    "#consent-banner",
-    "#cookieConsent",
-    "#onetrust-banner-sdk",
-    "#CybotCookiebotDialog",
-    "#qc-cmp2-container",
-    ".cookie-banner",
-    ".cookie-consent",
-    ".consent-banner",
-    ".cookie-notice",
-    "[class*='cookie-banner']",
-    "[class*='cookie-consent']",
-    "[class*='consent-banner']",
-    "[id*='cookie']",
-    "[id*='consent']",
-    "[id*='gdpr']",
-    "[id*='privacy']",
-    "[class*='cookie']",
-    "[class*='consent']",
-    "[class*='gdpr']",
-    "[role='dialog'][aria-label*='cookie' i]",
-    "[role='dialog'][aria-label*='consent' i]",
-    "div[data-testid*='cookie']",
-    "div[data-testid*='consent']",
-  ];
+  const FALLBACK_TRACKERS = SHARED.fallbackTrackers || {};
+  const COOKIE_HEURISTICS = (SHARED.cookieHeuristics || []).map(spec => ({
+    ...spec,
+    pattern: new RegExp(spec.pattern, spec.flags || ""),
+  }));
+  const CMP_SIGNATURES = SHARED.cmpSignatures || {};
+  const CONSENT_VOCABULARY = SHARED.consentVocabulary || {};
+  const CONSENT_BUTTON_KEYWORDS = SHARED.consentButtonKeywords || { accept: [], reject: [] };
+  const SETTINGS_KEYWORDS = SHARED.settingsKeywords || [];
+  const DISMISS_BUTTON_KEYWORDS = SHARED.dismissButtonKeywords || [];
+  const NECESSARY_KEYWORDS = SHARED.necessaryKeywords || [];
+  const BANNER_SELECTORS = SHARED.bannerSelectors || [];
+  const BANNER_TEXT_KEYWORDS = SHARED.bannerTextKeywords || [];
+  const BANNER_TEXT_PHRASES = SHARED.bannerTextPhrases || [];
+  const BANNER_ATTR_HINTS = SHARED.bannerAttrHints || [];
+  const COMPLIANCE_WEIGHTS = SHARED.complianceWeights || {};
+  const GRADES = SHARED.grades || [];
+  const PRIVACY_LINK_KEYWORDS = SHARED.privacyLinkKeywords || [];
+  const PURPOSE_KEYWORDS = SHARED.purposeKeywords || [];
+  const VENDOR_KEYWORDS = SHARED.vendorKeywords || [];
+  const GUILT_TRIP_PHRASES = SHARED.guiltTripPhrases || [];
+  const DOUBLE_NEGATIVE_PATTERNS = (SHARED.doubleNegativePatterns || []).map(
+    spec => new RegExp(spec.pattern, spec.flags || "")
+  );
 
   // ── Frozen extension study snapshot (1000-site combined run) ────────────
   // The extension reads this lightweight generated layer first so popup copy,
@@ -590,13 +417,22 @@ const AECCS = (() => {
     FALLBACK_TRACKERS,
     COOKIE_HEURISTICS,
     CMP_SIGNATURES,
+    CONSENT_VOCABULARY,
     CONSENT_BUTTON_KEYWORDS,
+    SETTINGS_KEYWORDS,
+    DISMISS_BUTTON_KEYWORDS,
+    NECESSARY_KEYWORDS,
+    BANNER_TEXT_KEYWORDS,
+    BANNER_TEXT_PHRASES,
+    BANNER_ATTR_HINTS,
     COMPLIANCE_WEIGHTS,
     GRADES,
     PRIVACY_LINK_KEYWORDS,
     PURPOSE_KEYWORDS,
     VENDOR_KEYWORDS,
     BANNER_SELECTORS,
+    GUILT_TRIP_PHRASES,
+    DOUBLE_NEGATIVE_PATTERNS,
     STUDY_METADATA,
     PET_STUDY_RESULTS,
     PET_PROFILES,

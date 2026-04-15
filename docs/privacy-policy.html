@@ -290,7 +290,7 @@
       </tr>
       <tr>
         <td>Bundled study snapshot</td>
-        <td>Static AECCS reference data bundled in the extension package (<code>study-snapshot.js</code>, <code>tracker-index.js</code>) to provide frozen study context without making network requests.</td>
+        <td>Static AECCS reference data bundled in the extension package (<code>shared-config.js</code>, <code>study-snapshot.js</code>, <code>tracker-index.js</code>) to provide frozen study context without making network requests.</td>
         <td class="status-no">No</td>
         <td class="status-no">No</td>
       </tr>
@@ -326,7 +326,8 @@
     AECCS does not download executable code, load remote scripts, or depend on
     remote configuration at runtime. The large study-reference assets bundled
     with the extension are generated locally from the repository using
-    <code>scripts/build_extension_study_snapshot.py</code> and
+    <code>scripts/build_extension_shared_config.py</code>,
+    <code>scripts/build_extension_study_snapshot.py</code>, and
     <code>scripts/build_extension_tracker_index.py</code>, then shipped as
     static files inside the extension package.
   </p>

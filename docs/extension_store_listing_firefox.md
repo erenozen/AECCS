@@ -26,7 +26,7 @@ AECCS is grounded in the completed 1000-site combined study snapshot (`combined-
 ## AMO Reviewer-Friendly Notes
 
 - The add-on is passive and on-demand: it runs only when the user opens the popup.
-- The generated static assets `extension/lib/study-snapshot.js` and `extension/lib/tracker-index.js` are local artifacts built from repository data and filter lists, not remote code.
+- The generated static assets `extension/lib/shared-config.js`, `extension/lib/study-snapshot.js`, and `extension/lib/tracker-index.js` are local artifacts built from repository data and filter lists, not remote code.
 - Runtime behavior is local-only: no analytics, telemetry, remote requests, or external service integrations.
 
 ## Public URLs

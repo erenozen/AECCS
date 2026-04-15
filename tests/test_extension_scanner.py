@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+from html import escape
 from pathlib import Path
 
+import pytest
 from playwright.sync_api import sync_playwright
 
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "extension_scanner"
 STUDY_SNAPSHOT = ROOT / "extension" / "lib" / "study-snapshot.js"
+SHARED_CONFIG = ROOT / "extension" / "lib" / "shared-config.js"
 TRACKER_DATA = ROOT / "extension" / "lib" / "tracker-data.js"
 TRACKER_INDEX = ROOT / "extension" / "lib" / "tracker-index.js"
 DOMAIN_UTILS = ROOT / "extension" / "lib" / "domain-utils.js"
@@ -24,6 +27,7 @@ STORE_LISTING = ROOT / "docs" / "extension_store_listing.md"
 
 def _install_scanner(target) -> None:
     target.add_script_tag(path=str(STUDY_SNAPSHOT))
+    target.add_script_tag(path=str(SHARED_CONFIG))
     target.add_script_tag(path=str(TRACKER_DATA))
     target.add_script_tag(path=str(SCANNER))
 
@@ -76,6 +80,41 @@ def _scan_fixture_all_frames(page, fixture_name: str) -> dict:
         "best": best["scanResult"] if best else None,
         "frames": frame_results,
     }
+
+
+def _scan_inline_banner(page, *, accept: str = "Accept All", reject: str | None = None, settings: str | None = None) -> dict:
+    buttons: list[str] = [f'<button type="button">{escape(accept)}</button>']
+    if reject:
+        buttons.append(f'<button type="button">{escape(reject)}</button>')
+    if settings:
+        buttons.append(f'<button type="button">{escape(settings)}</button>')
+
+    page.set_content(
+        f"""
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <main style="min-height: 120vh;">Fixture page</main>
+          <div id="inline-banner" role="dialog" aria-modal="true"
+               style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999;
+                      padding: 18px; background: rgb(255, 255, 255); border-top: 1px solid #cbd5e1;
+                      box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.12);">
+            <p>We use cookies to improve the site and remember your preferences.</p>
+            <div style="display: flex; gap: 12px;">{''.join(buttons)}</div>
+          </div>
+        </body>
+        </html>
+        """
+    )
+    _install_scanner(page)
+    return page.evaluate(
+        """async () => {
+            return await AECCSConsentScanner.scanPageWithRetries({
+                attempts: 2,
+                delayMs: 20
+            });
+        }"""
+    )
 
 
 def _is_better_frame_scan(candidate: dict, current: dict | None) -> bool:
@@ -206,6 +245,7 @@ def _render_popup(page, result: dict) -> None:
         result,
     )
     page.add_script_tag(path=str(STUDY_SNAPSHOT))
+    page.add_script_tag(path=str(SHARED_CONFIG))
     page.add_script_tag(path=str(TRACKER_DATA))
     page.add_script_tag(path=str(POPUP))
 
@@ -323,6 +363,44 @@ def test_consent_scanner_detects_sourcepoint_like_buttons() -> None:
     assert result["rejectClicksRequired"] == 1
 
 
+@pytest.mark.parametrize(
+    ("label", "expected_field"),
+    [
+        ("Necessary cookies only", "reject"),
+        ("Continue without accepting", "reject"),
+        ("View Options", "settings"),
+        ("Manage Preferences", "settings"),
+        ("Gerir preferências", "settings"),
+        ("Tylko niezbędne pliki cookie", "reject"),
+        ("Προβολή επιλογών", "settings"),
+        ("Endast nödvändiga cookies", "reject"),
+    ],
+)
+def test_consent_scanner_matches_multilingual_action_labels(label: str, expected_field: str) -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        result = _scan_inline_banner(
+            page,
+            reject=label if expected_field == "reject" else None,
+            settings=label if expected_field == "settings" else None,
+        )
+        browser.close()
+
+    assert result["bannerFound"] is True
+    assert result["hasAcceptButton"] is True
+    assert result["acceptButtonText"] == "Accept All"
+
+    if expected_field == "reject":
+        assert result["hasRejectButton"] is True
+        assert result["rejectButtonText"] == label
+        assert result["rejectClicksRequired"] == 1
+    else:
+        assert result["hasSettingsButton"] is True
+        assert result["settingsButtonText"] == label
+        assert result["rejectClicksRequired"] == 2
+
+
 def test_consent_scanner_prefers_iframe_hosted_banner_via_frame_aggregation() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -428,6 +506,7 @@ def test_consent_scanner_keeps_no_banner_pages_at_zero_dark_patterns() -> None:
         page = browser.new_page(viewport={"width": 1280, "height": 900})
         page.set_content("<!DOCTYPE html><html><body><main>No consent banner here.</main></body></html>")
         page.add_script_tag(path=str(STUDY_SNAPSHOT))
+        page.add_script_tag(path=str(SHARED_CONFIG))
         page.add_script_tag(path=str(TRACKER_DATA))
         page.add_script_tag(path=str(SCANNER))
         result = page.evaluate(
@@ -541,6 +620,7 @@ def test_classifier_uses_precompiled_tracker_index_for_non_fallback_domains() ->
         page = browser.new_page()
         page.goto("data:text/html,<html><body></body></html>")
         page.add_script_tag(path=str(STUDY_SNAPSHOT))
+        page.add_script_tag(path=str(SHARED_CONFIG))
         page.add_script_tag(path=str(TRACKER_DATA))
         page.add_script_tag(path=str(TRACKER_INDEX))
         page.add_script_tag(path=str(DOMAIN_UTILS))
@@ -1149,6 +1229,7 @@ def test_extension_combined_study_snapshot_matches_authoritative_values() -> Non
         page = browser.new_page()
         page.goto("data:text/html,<html><body></body></html>")
         page.add_script_tag(path=str(STUDY_SNAPSHOT))
+        page.add_script_tag(path=str(SHARED_CONFIG))
         page.add_script_tag(path=str(TRACKER_DATA))
         result = page.evaluate(
             """() => ({
@@ -1210,6 +1291,7 @@ def test_scorer_distinguishes_direct_and_settings_reject_paths() -> None:
         page = browser.new_page()
         page.goto("data:text/html,<html><body></body></html>")
         page.add_script_tag(path=str(STUDY_SNAPSHOT))
+        page.add_script_tag(path=str(SHARED_CONFIG))
         page.add_script_tag(path=str(TRACKER_DATA))
         page.add_script_tag(path=str(SCORER))
 

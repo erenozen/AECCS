@@ -59,6 +59,7 @@ The `extension/` folder contains a lightweight Chrome/Firefox browser extension 
 
 The extension’s static study context is generated from `data/real_combined/processed/` and frozen into small runtime assets:
 
+- `extension/lib/shared-config.js` — generated shared scanner/classifier config sourced from Python truth
 - `extension/lib/study-snapshot.js` — combined-study metadata, PET study results, and CMP study results
 - `extension/lib/tracker-index.js` — compact precompiled tracker index for lightweight cookie classification
 
@@ -106,7 +107,8 @@ AECCS/
 │   ├── content/
 │   │   └── consent-scanner.js         # Live DOM consent and dark-pattern scan
 │   ├── lib/
-│   │   ├── tracker-data.js            # Ported constants and study metadata
+│   │   ├── shared-config.js           # Generated Python-owned shared constants
+│   │   ├── tracker-data.js            # Extension assembly layer + study metadata
 │   │   ├── study-snapshot.js          # Generated 1000-site combined-study snapshot
 │   │   ├── tracker-index.js           # Precompiled tracker Bloom filters
 │   │   ├── classifier.js              # Cookie classification logic
@@ -127,6 +129,7 @@ AECCS/
 │
 ├── scripts/
 │   ├── __init__.py
+│   ├── build_extension_shared_config.py  # Generate shared extension config
 │   ├── build_extension_study_snapshot.py  # Generate extension study snapshot
 │   ├── build_extension_tracker_index.py   # Generate compact tracker index
 │   ├── package_extension_release.py       # Build Chrome/Firefox/reviewer release archives

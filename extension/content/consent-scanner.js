@@ -21,89 +21,6 @@
   if (globalThis._AECCSConsentScannerLoaded) return;
   globalThis._AECCSConsentScannerLoaded = true;
 
-  // ── Dark-pattern keyword lists (from detector.py lines 38-80) ────────────
-
-  const GUILT_TRIP_PHRASES = [
-    "keep the site free", "support our journalist", "help us improve",
-    "you'll miss out", "you will miss out", "miss personalized",
-    "enjoy a better experience", "support free journalism",
-    "we need your support", "without your support",
-    "fund our work", "keep this site running",
-    "best experience", "optimal experience",
-    "unterstützen sie uns", "helfen sie uns", "kostenlos halten",
-    "bessere erfahrung", "optimale erfahrung",
-  ];
-
-  const DOUBLE_NEGATIVE_PATTERNS = [
-    /don'?t\s+(not|reject|refuse|decline)/i,
-    /nicht\s+(ablehnen|verweigern)/i,
-    /ne\s+pas\s+(refuser|rejeter)/i,
-    /I\s+do\s+not\s+want\s+to\s+not/i,
-  ];
-
-  const AMBIGUOUS_BUTTON_TEXTS = new Set([
-    "ok", "okay", "continue", "got it", "i understand", "understood",
-    "close", "dismiss", "later", "not now", "remind me later",
-    "weiter", "verstanden", "schliessen", "schließen",
-    "continuer", "compris", "j'ai compris", "fermer",
-    "doorgaan", "begrepen", "sluiten",
-  ]);
-
-  const NECESSARY_KEYWORDS = [
-    "necessary", "essential", "required", "strictly necessary",
-    "erforderlich", "notwendig", "unbedingt erforderlich",
-    "nécessaire", "strictement nécessaire",
-    "noodzakelijk", "strikt noodzakelijk",
-    "necesario", "estrictamente necesario",
-    "necessario", "strettamente necessario",
-    "gerekli", "zorunlu",
-  ];
-
-  // Port of scraper/crawler.py _SETTINGS_KEYWORDS
-  const SETTINGS_KEYWORDS = [
-    "settings",
-    "preferences",
-    "manage",
-    "customize",
-    "customise",
-    "view options",
-    "view cookie options",
-    "view preferences",
-    "more options",
-    "cookie settings",
-    "cookie preferences",
-    "einstellungen",
-    "paramètres",
-    "parametres",
-    "gérer",
-    "gerer",
-    "instellingen",
-    "opciones",
-    "configurar",
-    "impostazioni",
-    "ayarlar",
-    "secenekleri yonetin",
-    "secenekleri yonet",
-    "tercihleri yonetin",
-    "tercihleri yonet",
-    "cerez tercihleri",
-    "gizlilik tercihleri",
-    "izin secenekleri",
-    "secenekler",
-  ];
-
-  const BANNER_TEXT_RE = /cookie|cookies|consent|gdpr|data protection|datenschutz|cerez|gizlilik/i;
-  const BANNER_TEXT_PHRASES = [
-    "privacy choices",
-    "your privacy choices",
-    "privacy preferences",
-    "manage privacy preferences",
-    "manage privacy choices",
-    "we value your privacy",
-    "cerez tercihleri",
-    "gizlilik tercihleri",
-  ];
-  const BANNER_ATTR_HINT_RE = /cookie|consent|gdpr|cmp|tcf|onetrust|didomi|trustarc|cookiebot|sourcepoint|privacy-mgmt|sp_message|sp_choice_type/i;
   const ACTIONABLE_SELECTOR = [
     "button",
     "a",
@@ -136,6 +53,38 @@
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
   }
+
+  function buildNormalizedMatcher(entries) {
+    const exact = new Set((entries?.exact || []).map(normalizeForMatch).filter(Boolean));
+    const contains = (entries?.contains || []).map(normalizeForMatch).filter(Boolean);
+    return { exact, contains };
+  }
+
+  function matchesAction(text, matcher, { exactOnly = false, allowPrefixFromExact = false } = {}) {
+    if (!text || !matcher) return false;
+    if (matcher.exact.has(text)) return true;
+    if (allowPrefixFromExact) {
+      for (const term of matcher.exact) {
+        if (term.includes(" ")) continue;
+        if (text.startsWith(`${term} `)) return true;
+      }
+    }
+    if (exactOnly) return false;
+    return matcher.contains.some(term => text.includes(term));
+  }
+
+  const ACCEPT_BUTTON_MATCHER = buildNormalizedMatcher(AECCS.CONSENT_VOCABULARY?.accept);
+  const REJECT_BUTTON_MATCHER = buildNormalizedMatcher(AECCS.CONSENT_VOCABULARY?.reject);
+  const SETTINGS_BUTTON_MATCHER = buildNormalizedMatcher(AECCS.CONSENT_VOCABULARY?.settings);
+  const DISMISS_BUTTON_TEXTS = new Set(
+    (AECCS.DISMISS_BUTTON_KEYWORDS || []).map(normalizeForMatch).filter(Boolean)
+  );
+  const NECESSARY_LABEL_KEYWORDS = (AECCS.NECESSARY_KEYWORDS || []).map(normalizeForMatch).filter(Boolean);
+  const BANNER_TEXT_KEYWORDS = (AECCS.BANNER_TEXT_KEYWORDS || []).map(normalizeForMatch).filter(Boolean);
+  const BANNER_TEXT_PHRASES = (AECCS.BANNER_TEXT_PHRASES || []).map(normalizeForMatch).filter(Boolean);
+  const BANNER_ATTR_HINTS = (AECCS.BANNER_ATTR_HINTS || []).map(normalizeForMatch).filter(Boolean);
+  const GUILT_TRIP_PHRASES = (AECCS.GUILT_TRIP_PHRASES || []).map(normalizeForMatch).filter(Boolean);
+  const DOUBLE_NEGATIVE_PATTERNS = AECCS.DOUBLE_NEGATIVE_PATTERNS || [];
 
   function parsePx(value) {
     if (!value) return 0;
@@ -249,31 +198,16 @@
     return options[0];
   }
 
-  const ACCEPT_BUTTON_KEYWORDS = AECCS.CONSENT_BUTTON_KEYWORDS.accept
-    .map(normalizeForMatch)
-    .filter(Boolean);
-  const REJECT_BUTTON_KEYWORDS = AECCS.CONSENT_BUTTON_KEYWORDS.reject
-    .map(normalizeForMatch)
-    .filter(Boolean);
-  const SETTINGS_BUTTON_KEYWORDS = SETTINGS_KEYWORDS
-    .map(normalizeForMatch)
-    .filter(Boolean);
-  function hasKeywordMatch(text, keywords, { exactOnly = false } = {}) {
-    if (!text) return false;
-    if (keywords.includes(text)) return true;
-    if (exactOnly) return false;
-    return keywords.some(kw => text.includes(kw));
-  }
-
   function classifyButtonText(text) {
     const normalized = normalizeForMatch(text);
     if (!normalized) return "unknown";
 
-    if (hasKeywordMatch(normalized, REJECT_BUTTON_KEYWORDS, { exactOnly: true })) return "reject";
-    if (hasKeywordMatch(normalized, ACCEPT_BUTTON_KEYWORDS, { exactOnly: true })) return "accept";
-    if (hasKeywordMatch(normalized, REJECT_BUTTON_KEYWORDS)) return "reject";
-    if (hasKeywordMatch(normalized, ACCEPT_BUTTON_KEYWORDS)) return "accept";
-    if (hasKeywordMatch(normalized, SETTINGS_BUTTON_KEYWORDS)) return "settings";
+    if (matchesAction(normalized, REJECT_BUTTON_MATCHER, { exactOnly: true })) return "reject";
+    if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER, { exactOnly: true })) return "accept";
+    if (matchesAction(normalized, SETTINGS_BUTTON_MATCHER, { exactOnly: true })) return "settings";
+    if (matchesAction(normalized, REJECT_BUTTON_MATCHER, { allowPrefixFromExact: true })) return "reject";
+    if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER, { allowPrefixFromExact: true })) return "accept";
+    if (matchesAction(normalized, SETTINGS_BUTTON_MATCHER)) return "settings";
     return "unknown";
   }
 
@@ -306,7 +240,7 @@
   function hasBannerLikeText(text) {
     const normalized = normalizeForMatch(text);
     if (!normalized) return false;
-    if (BANNER_TEXT_RE.test(normalized)) return true;
+    if (BANNER_TEXT_KEYWORDS.some(term => normalized.includes(term))) return true;
     if (BANNER_TEXT_PHRASES.some(phrase => normalized.includes(phrase))) return true;
     return false;
   }
@@ -314,7 +248,7 @@
   function hasBannerLikeAttributes(attrs) {
     const normalized = normalizeForMatch(attrs);
     if (!normalized) return false;
-    return BANNER_ATTR_HINT_RE.test(normalized);
+    return BANNER_ATTR_HINTS.some(hint => normalized.includes(hint));
   }
 
   function findDismissButton(root, { visibleOnly = false } = {}) {
@@ -322,7 +256,7 @@
 
     for (const el of collectActionableElements(root, { includeHidden: !visibleOnly })) {
       const text = normalizeForMatch(getElementLabel(el));
-      if (!text || !AMBIGUOUS_BUTTON_TEXTS.has(text)) continue;
+      if (!text || !DISMISS_BUTTON_TEXTS.has(text)) continue;
       if (visibleOnly && !isElementVisible(el)) continue;
       return {
         element: el,
@@ -830,7 +764,7 @@
     let score = 0;
 
     if (hasBannerLikeText(text)) score += 5;
-    if (BANNER_TEXT_RE.test(matchText)) score += 3;
+    if (BANNER_TEXT_KEYWORDS.some(term => matchText.includes(term))) score += 3;
     if (hasBannerLikeAttributes(attrs)) score += 3;
 
     if (summary.acceptCount > 0) score += 7;
@@ -974,7 +908,8 @@
         labelText = cb.parentElement.textContent.trim().toLowerCase();
       }
 
-      const isNecessary = NECESSARY_KEYWORDS.some(kw => labelText.includes(kw));
+      const normalizedLabel = normalizeForMatch(labelText);
+      const isNecessary = NECESSARY_LABEL_KEYWORDS.some(kw => normalizedLabel.includes(kw));
       if (!isNecessary) preselected++;
     }
 
@@ -1126,11 +1061,11 @@
     const result = { detected: false, suspiciousPhrases: [] };
     if (!bannerEl) return result;
 
-    const text = (bannerEl.innerText || bannerEl.textContent || "").toLowerCase();
+    const text = normalizeForMatch(bannerEl.innerText || bannerEl.textContent || "");
     const phrases = [];
 
     for (const phrase of GUILT_TRIP_PHRASES) {
-      if (text.includes(phrase.toLowerCase())) {
+      if (text.includes(phrase)) {
         phrases.push(`guilt-trip: '${phrase}'`);
       }
     }
@@ -1142,8 +1077,8 @@
 
     const buttons = bannerEl.querySelectorAll("button, a, input");
     for (const btn of buttons) {
-      const btnText = getElementLabel(btn).toLowerCase();
-      if (AMBIGUOUS_BUTTON_TEXTS.has(btnText)) {
+      const btnText = getElementLabel(btn);
+      if (DISMISS_BUTTON_TEXTS.has(normalizeForMatch(btnText))) {
         phrases.push(`ambiguous-button: '${btnText}'`);
       }
     }

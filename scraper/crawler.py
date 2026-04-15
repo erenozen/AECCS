@@ -50,64 +50,11 @@ from config import (
     generate_run_id,
     get_dataset_layout,
 )
+from shared_constants import BANNER_SELECTORS, SETTINGS_KEYWORDS, classify_consent_action
 
 # ── CSS selectors tried in order when looking for consent banners ─────────────
 
-_BANNER_SELECTORS = [
-    "#cookie-banner",
-    "#cookie-consent",
-    "#consent-banner",
-    "#cookieConsent",
-    "#onetrust-banner-sdk",
-    "#CybotCookiebotDialog",
-    "#qc-cmp2-container",
-    ".cookie-banner",
-    ".cookie-consent",
-    ".consent-banner",
-    ".cookie-notice",
-    "[class*='cookie-banner']",
-    "[class*='cookie-consent']",
-    "[class*='consent-banner']",
-    "[id*='cookie']",
-    "[id*='consent']",
-    "[id*='gdpr']",
-    "[id*='privacy']",
-    "[class*='cookie']",
-    "[class*='consent']",
-    "[class*='gdpr']",
-    "[role='dialog'][aria-label*='cookie' i]",
-    "[role='dialog'][aria-label*='consent' i]",
-    "div[data-testid*='cookie']",
-    "div[data-testid*='consent']",
-]
-
-# Keywords that indicate a "settings / manage preferences" button
-_SETTINGS_KEYWORDS = [
-    "settings",
-    "preferences",
-    "manage",
-    "customize",
-    "customise",
-    "more options",
-    "cookie settings",
-    "cookie preferences",
-    # German
-    "einstellungen",
-    # French
-    "paramètres",
-    "parametres",
-    "gérer",
-    "gerer",
-    # Dutch
-    "instellingen",
-    # Spanish
-    "opciones",
-    "configurar",
-    # Italian
-    "impostazioni",
-    # Turkish
-    "ayarlar",
-]
+_BANNER_SELECTORS = BANNER_SELECTORS
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -120,30 +67,12 @@ def _extract_registered_domain(url: str) -> str:
 
 
 def _classify_button_text(text: str) -> str:
-    """Classify button text as 'accept', 'reject', 'settings', or 'unknown'.
+    """Classify button text as a shared consent action or ``unknown``.
 
     Uses substring matching so that variations like "Accepter et continuer"
     or "Reject and close" are still recognised.
     """
-    normalised = text.strip().lower()
-    # Try exact match first (higher confidence)
-    for kw in CONSENT_BUTTON_KEYWORDS["accept"]:
-        if kw.lower() == normalised:
-            return "accept"
-    for kw in CONSENT_BUTTON_KEYWORDS["reject"]:
-        if kw.lower() == normalised:
-            return "reject"
-    # Then substring containment
-    for kw in CONSENT_BUTTON_KEYWORDS["reject"]:
-        if kw.lower() in normalised:
-            return "reject"
-    for kw in CONSENT_BUTTON_KEYWORDS["accept"]:
-        if kw.lower() in normalised:
-            return "accept"
-    for kw in _SETTINGS_KEYWORDS:
-        if kw in normalised:
-            return "settings"
-    return "unknown"
+    return classify_consent_action(text)
 
 
 def _safe_json(obj: object) -> object:
@@ -290,6 +219,7 @@ async def detect_consent_banner(page) -> dict | None:
                 all_keywords = (
                     CONSENT_BUTTON_KEYWORDS["accept"]
                     + CONSENT_BUTTON_KEYWORDS["reject"]
+                    + SETTINGS_KEYWORDS
                 )
                 if not any(kw.lower() in text_lower for kw in all_keywords):
                     continue
@@ -337,8 +267,15 @@ async def detect_consent_banner(page) -> dict | None:
 
     # Strategy 3: fixed/sticky overlays with consent keywords
     try:
-        accept_keywords_js = json.dumps(
-            [kw.lower() for kw in CONSENT_BUTTON_KEYWORDS["accept"]]
+        action_keywords_js = json.dumps(
+            [
+                kw.lower()
+                for kw in (
+                    CONSENT_BUTTON_KEYWORDS["accept"]
+                    + CONSENT_BUTTON_KEYWORDS["reject"]
+                    + SETTINGS_KEYWORDS
+                )
+            ]
         )
         result = await page.evaluate(
             """(keywords) => {
@@ -364,7 +301,7 @@ async def detect_consent_banner(page) -> dict | None:
                 }
                 return null;
             }""",
-            accept_keywords_js,
+            action_keywords_js,
         )
         if result:
             # Build a selector from id or class

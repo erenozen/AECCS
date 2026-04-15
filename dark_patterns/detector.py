@@ -32,52 +32,19 @@ from config import (
     build_provenance,
     get_dataset_layout,
 )
+from shared_constants import (
+    DISMISS_BUTTON_KEYWORDS,
+    GUILT_TRIP_PHRASES,
+    NECESSARY_KEYWORDS,
+    compile_double_negative_patterns,
+)
 
 # ── Suspicious language patterns ──────────────────────────────────────────────
 
-_GUILT_TRIP_PHRASES = [
-    # English
-    "keep the site free", "support our journalist", "help us improve",
-    "you'll miss out", "you will miss out", "miss personalized",
-    "enjoy a better experience", "support free journalism",
-    "we need your support", "without your support",
-    "fund our work", "keep this site running",
-    "best experience", "optimal experience",
-    # German
-    "unterstützen sie uns", "helfen sie uns", "kostenlos halten",
-    "bessere erfahrung", "optimale erfahrung",
-    # French
-    "soutenez-nous", "aidez-nous", "meilleure expérience",
-    "garder le site gratuit", "expérience optimale",
-    # Dutch
-    "steun ons", "help ons", "beste ervaring",
-]
-
-_DOUBLE_NEGATIVE_PATTERNS = [
-    re.compile(r"don'?t\s+(not|reject|refuse|decline)", re.I),
-    re.compile(r"nicht\s+(ablehnen|verweigern)", re.I),
-    re.compile(r"ne\s+pas\s+(refuser|rejeter)", re.I),
-    re.compile(r"I\s+do\s+not\s+want\s+to\s+not", re.I),
-]
-
-_AMBIGUOUS_BUTTON_TEXTS = [
-    "ok", "okay", "continue", "got it", "i understand", "understood",
-    "close", "dismiss", "later", "not now", "remind me later",
-    "weiter", "verstanden", "schliessen", "schließen",
-    "continuer", "compris", "j'ai compris", "fermer",
-    "doorgaan", "begrepen", "sluiten",
-]
-
-# Necessary-cookie checkbox label keywords (these are legitimately pre-checked)
-_NECESSARY_KEYWORDS = [
-    "necessary", "essential", "required", "strictly necessary",
-    "erforderlich", "notwendig", "unbedingt erforderlich",
-    "nécessaire", "strictement nécessaire",
-    "noodzakelijk", "strikt noodzakelijk",
-    "necesario", "estrictamente necesario",
-    "necessario", "strettamente necessario",
-    "gerekli", "zorunlu",
-]
+_GUILT_TRIP_PHRASES = [phrase.lower() for phrase in GUILT_TRIP_PHRASES]
+_DOUBLE_NEGATIVE_PATTERNS = compile_double_negative_patterns()
+_AMBIGUOUS_BUTTON_TEXTS = [label.lower() for label in DISMISS_BUTTON_KEYWORDS]
+_NECESSARY_KEYWORDS = [keyword.lower() for keyword in NECESSARY_KEYWORDS]
 
 
 # ── CSS Parsing Helpers ──────────────────────────────────────────────────────

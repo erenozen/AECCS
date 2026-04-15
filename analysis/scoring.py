@@ -30,38 +30,10 @@ from config import (
     get_dataset_layout,
     unwrap_payload,
 )
-
-# Grade thresholds
-_GRADES = [
-    (90, "A"),
-    (75, "B"),
-    (60, "C"),
-    (40, "D"),
-    (0, "F"),
-]
-
-# Privacy-policy link keywords (multilingual)
-_PRIVACY_LINK_KEYWORDS = [
-    "privacy policy", "privacy notice", "data protection",
-    "datenschutz", "datenschutzerklaerung", "datenschutzerklärung",
-    "politique de confidentialité", "politique de confidentialite",
-    "privacybeleid", "privacyverklaring",
-    "politica de privacidad", "política de privacidad",
-    "informativa sulla privacy",
-    "gizlilik politikası", "gizlilik politikasi",
-]
-
-# Purpose keywords for transparency check
-_PURPOSE_KEYWORDS = [
-    "analytics", "advertising", "personalization", "marketing",
-    "functional", "preferences", "statistics", "targeting",
-    "analyse", "werbung", "personalisierung",
-    "analytique", "publicité", "personnalisation",
-]
-
+from shared_constants import GRADE_THRESHOLDS, PRIVACY_LINK_KEYWORDS, PURPOSE_KEYWORDS, VENDOR_KEYWORDS
 
 def _score_grade(score: float) -> str:
-    for threshold, grade in _GRADES:
+    for threshold, grade in GRADE_THRESHOLDS:
         if score >= threshold:
             return grade
     return "F"
@@ -212,14 +184,13 @@ def _score_transparent_information(site_data: dict) -> tuple[int, str]:
     details = []
 
     # Mentions specific purposes?
-    purpose_found = any(kw in text for kw in _PURPOSE_KEYWORDS)
+    purpose_found = any(kw in text for kw in PURPOSE_KEYWORDS)
     if purpose_found:
         score += 30
         details.append("mentions purposes")
 
     # Mentions vendor names?
-    vendor_keywords = ["google", "facebook", "meta", "analytics", "advertisement"]
-    vendor_found = any(kw in text for kw in vendor_keywords)
+    vendor_found = any(kw in text for kw in VENDOR_KEYWORDS)
     if vendor_found:
         score += 30
         details.append("mentions vendors")
@@ -227,7 +198,7 @@ def _score_transparent_information(site_data: dict) -> tuple[int, str]:
     # Privacy policy link?
     has_pp_link = False
     if html:
-        for kw in _PRIVACY_LINK_KEYWORDS:
+        for kw in PRIVACY_LINK_KEYWORDS:
             if kw in html:
                 has_pp_link = True
                 break

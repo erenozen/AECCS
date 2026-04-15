@@ -73,7 +73,7 @@
 7. Do not mark the add-on experimental unless reduced visibility is intentional.
 8. Be ready for reviewer questions about:
    - why `cookies`, `activeTab`, `scripting`, and `<all_urls>` are needed
-   - generated static assets `study-snapshot.js` and `tracker-index.js`
+   - generated static assets `shared-config.js`, `study-snapshot.js`, and `tracker-index.js`
    - local-only privacy posture with no data transmission
 
 ## Submit Chrome Immediately After

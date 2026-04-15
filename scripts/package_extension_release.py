@@ -22,6 +22,7 @@ PRIVACY_POLICY_URL = "https://erenozen.github.io/AECCS/privacy-policy.html"
 FIREFOX_BACKGROUND_SCRIPTS = [
     "lib/browser-polyfill.js",
     "lib/study-snapshot.js",
+    "lib/shared-config.js",
     "lib/tracker-data.js",
     "lib/tracker-index.js",
     "lib/domain-utils.js",
@@ -38,6 +39,7 @@ REVIEWER_SOURCE_FILES = [
     "docs/extension_store_listing_firefox.md",
     "docs/extension_reviewer_notes.md",
     "docs/extension_release_checklist.md",
+    "scripts/build_extension_shared_config.py",
     "scripts/build_extension_study_snapshot.py",
     "scripts/build_extension_tracker_index.py",
     "scripts/package_extension_release.py",
@@ -131,12 +133,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--version", help="Optional version to write into extension/manifest.json before packaging.")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help="Directory to place release archives.")
-    parser.add_argument("--skip-generate", action="store_true", help="Skip regenerating study-snapshot.js and tracker-index.js.")
+    parser.add_argument(
+        "--skip-generate",
+        action="store_true",
+        help="Skip regenerating shared-config.js, study-snapshot.js, and tracker-index.js.",
+    )
     args = parser.parse_args()
 
     version = bump_version(args.version)
 
     if not args.skip_generate:
+        run_generator("build_extension_shared_config.py")
         run_generator("build_extension_study_snapshot.py")
         run_generator("build_extension_tracker_index.py")
 

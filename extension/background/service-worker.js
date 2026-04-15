@@ -15,6 +15,7 @@ if (typeof importScripts === "function") {
   importScripts(
     "../lib/browser-polyfill.js",
     "../lib/study-snapshot.js",
+    "../lib/shared-config.js",
     "../lib/tracker-data.js",
     "../lib/tracker-index.js",
     "../lib/domain-utils.js",
@@ -165,6 +166,7 @@ async function scanConsentAcrossFrames(tabId) {
       files: [
         "lib/browser-polyfill.js",
         "lib/study-snapshot.js",
+        "lib/shared-config.js",
         "lib/tracker-data.js",
         "content/consent-scanner.js",
       ],
