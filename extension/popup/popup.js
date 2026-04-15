@@ -19,7 +19,7 @@
   const CATEGORY_COLORS = {
     Analytics:      "#3b82f6",
     Advertising:    "#ef4444",
-    Social:         "#a855f7",
+    Social:         "#06b6d4",
     Functional:     "#6b7280",
     Fingerprinting: "#f97316",
     Unknown:        "#374151",

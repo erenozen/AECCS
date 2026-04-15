@@ -15,6 +15,7 @@ CLASSIFIER = ROOT / "extension" / "lib" / "classifier.js"
 SCANNER = ROOT / "extension" / "content" / "consent-scanner.js"
 SCORER = ROOT / "extension" / "lib" / "scorer.js"
 POPUP = ROOT / "extension" / "popup" / "popup.js"
+POPUP_CSS = ROOT / "extension" / "popup" / "popup.css"
 POPUP_HTML = ROOT / "extension" / "popup" / "popup.html"
 MANIFEST = ROOT / "extension" / "manifest.json"
 README = ROOT / "README.md"
@@ -109,18 +110,56 @@ def _render_popup(page, result: dict) -> None:
         <!DOCTYPE html>
         <html>
         <body>
-          <div id="loading"></div>
-          <div id="errorState" class="hidden"><span id="errorMsg"></span></div>
-          <div id="disabledState" class="hidden">
-            <span id="disabledTitle"></span>
-            <span id="disabledMsg"></span>
-          </div>
-          <div id="results" class="hidden">
-            <div id="siteDomain"></div>
-            <div id="govAlert" class="hidden"><div id="govNote"></div></div>
-            <div id="gradeBadge"></div>
-            <div id="gradeLetter"></div>
-            <div id="scoreValue"></div>
+          <div id="app">
+            <header class="header">
+              <div class="header-title">
+                <svg class="logo" width="20" height="20" viewBox="0 1 24 24.5" fill="none">
+                  <path d="M12 2L3 7v6c0 5.25 3.83 10.15 9 11.25C17.17 23.15 21 18.25 21 13V7l-9-5z"
+                        class="logo-fill"></path>
+                  <path d="M12 2L3 7v6c0 5.25 3.83 10.15 9 11.25C17.17 23.15 21 18.25 21 13V7l-9-5z"
+                        class="logo-stroke" stroke-width="2" fill="none"></path>
+                  <path d="M9 12l2 2 4-4" class="logo-stroke" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span>AECCS Compliance Checker</span>
+              </div>
+              <div id="siteDomain" class="site-domain">—</div>
+            </header>
+
+            <div id="loading" class="loading">
+              <div class="spinner"></div>
+              <span>Analyzing compliance...</span>
+            </div>
+
+            <div id="errorState" class="error-state hidden">
+              <span class="error-icon">!</span>
+              <span id="errorMsg"></span>
+            </div>
+
+            <div id="disabledState" class="disabled-state hidden">
+              <span class="disabled-icon">i</span>
+              <div class="disabled-copy">
+                <div id="disabledTitle" class="disabled-title"></div>
+                <div id="disabledMsg" class="disabled-msg"></div>
+              </div>
+            </div>
+
+            <div id="results" class="hidden">
+              <div id="govAlert" class="gov-alert hidden">
+                <div>
+                  <strong>Government / Public Sector Site</strong>
+                  <div id="govNote" class="gov-note"></div>
+                </div>
+              </div>
+              <section class="score-card">
+                <div id="gradeBadge" class="grade-badge">
+                  <span id="gradeLetter" class="grade-letter"></span>
+                </div>
+                <div class="score-info">
+                  <div class="score-value"><span id="scoreValue"></span><span class="score-max">/100</span></div>
+                  <div class="score-label">GDPR Compliance Score</div>
+                </div>
+              </section>
             <div id="cookieBar"></div>
             <div id="cookieCounts"></div>
             <div id="cookieMeta"></div>
@@ -136,12 +175,14 @@ def _render_popup(page, result: dict) -> None:
               <summary>AECCS Study Insights</summary>
               <div id="studyInsightsContent"></div>
             </details>
+            </div>
+            <footer id="footerNote" class="footer"></footer>
           </div>
-          <footer id="footerNote"></footer>
         </body>
         </html>
         """
     )
+    page.add_style_tag(path=str(POPUP_CSS))
     page.evaluate(
         """data => {
             window.browser = {
@@ -603,6 +644,11 @@ def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
                 errorHidden: document.getElementById("errorState").classList.contains("hidden"),
                 title: document.getElementById("disabledTitle").textContent,
                 message: document.getElementById("disabledMsg").textContent,
+                bodyBackground: getComputedStyle(document.body).backgroundColor,
+                disabledBackground: getComputedStyle(document.getElementById("disabledState")).backgroundColor,
+                disabledBorderColor: getComputedStyle(document.getElementById("disabledState")).borderBottomColor,
+                disabledMessageColor: getComputedStyle(document.getElementById("disabledMsg")).color,
+                disabledIconBackground: getComputedStyle(document.querySelector(".disabled-icon")).backgroundColor,
             })"""
         )
         browser.close()
@@ -613,6 +659,11 @@ def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
     assert state["title"] == "Evaluation unavailable on this page"
     assert "active visible cookie banners" in state["message"]
     assert "not evaluated" in state["message"]
+    assert state["bodyBackground"] == "rgb(244, 248, 252)"
+    assert state["disabledBackground"] == "rgb(239, 246, 255)"
+    assert state["disabledBorderColor"] == "rgb(191, 219, 254)"
+    assert state["disabledMessageColor"] == "rgb(95, 112, 136)"
+    assert state["disabledIconBackground"] == "rgb(37, 99, 235)"
 
 
 def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
@@ -687,9 +738,13 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
         content = page.evaluate(
             """() => ({
                 govNote: document.getElementById("govNote").textContent,
+                govAlertBackground: getComputedStyle(document.getElementById("govAlert")).backgroundColor,
+                govNoteColor: getComputedStyle(document.getElementById("govNote")).color,
                 petSubtitle: document.getElementById("petSubtitle").textContent,
                 footer: document.getElementById("footerNote").textContent,
                 cmpInfo: document.getElementById("cmpInfo").textContent,
+                cmpPanelBackground: getComputedStyle(document.querySelector(".cmp-stats")).backgroundColor,
+                cmpTitleColor: getComputedStyle(document.querySelector(".cmp-stats-title")).color,
                 petList: document.getElementById("petList").textContent,
                 petBadge: document.querySelector(".pet-effectiveness")?.textContent || "",
                 petBadges: Array.from(document.querySelectorAll(".pet-effectiveness")).map(el => el.textContent),
@@ -726,6 +781,10 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
     assert content["petTooltipHidden"] is True
     assert content["studyInsightsOpen"] is False
     assert content["studyInsightsContent"] == ""
+    assert content["govAlertBackground"] == "rgb(239, 246, 255)"
+    assert content["govNoteColor"] == "rgb(95, 112, 136)"
+    assert content["cmpPanelBackground"] == "rgb(238, 244, 251)"
+    assert content["cmpTitleColor"] == "rgb(37, 99, 235)"
 
 
 def test_popup_pet_tooltip_supports_hover_focus_click_and_escape() -> None:
