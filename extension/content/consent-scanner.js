@@ -101,6 +101,11 @@
     const DEFAULT_SCAN_ATTEMPTS = 4;
     const DEFAULT_SCAN_DELAY_MS = 160;
     const MAX_PRESENTATION_DESCENDANTS = 32;
+    const INTERACTION_SESSION_TIMEOUT_MS = 120000;
+
+    let interactionSession = null;
+    let interactionWatcherCleanup = null;
+    let interactionTimeoutId = null;
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -265,6 +270,21 @@
     if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER)) return "accept";
     if (matchesAction(normalized, SETTINGS_BUTTON_MATCHER)) return "settings";
     return "unknown";
+  }
+
+  function classifyInteractionAction(text) {
+    const normalized = normalizeForMatch(text);
+    if (!normalized) return "unknown";
+    if (DISMISS_BUTTON_TEXTS.has(normalized)) return "dismiss";
+
+    const type = classifyButtonText(text);
+    if (type === "reject") {
+      if (NECESSARY_LABEL_KEYWORDS.some(term => normalized.includes(term))) {
+        return "essential";
+      }
+      return "reject";
+    }
+    return type;
   }
 
   function describeElement(el) {
@@ -941,6 +961,272 @@
     return result;
   }
 
+  function cloneForTransport(value) {
+    if (value == null) return value;
+    if (typeof structuredClone === "function") {
+      try {
+        return structuredClone(value);
+      } catch (_) {
+        // Fall through to JSON clone.
+      }
+    }
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function clearInteractionTimeout() {
+    if (interactionTimeoutId) {
+      clearTimeout(interactionTimeoutId);
+      interactionTimeoutId = null;
+    }
+  }
+
+  function stopInteractionWatcher(reason = null) {
+    clearInteractionTimeout();
+    if (interactionWatcherCleanup) {
+      interactionWatcherCleanup();
+      interactionWatcherCleanup = null;
+    }
+    if (interactionSession) {
+      interactionSession.watching = false;
+      interactionSession.stopReason = reason || interactionSession.stopReason || null;
+      interactionSession.updatedAt = new Date().toISOString();
+      interactionSession.rootElement = null;
+    }
+  }
+
+  function clearInteractionAuditSession() {
+    stopInteractionWatcher("cleared");
+    interactionSession = null;
+    return null;
+  }
+
+  function getInteractionAuditSession() {
+    if (!interactionSession) return null;
+
+    return cloneForTransport({
+      status: interactionSession.status,
+      watching: Boolean(interactionSession.watching),
+      action: interactionSession.action || null,
+      baseline: interactionSession.baseline || null,
+      current: interactionSession.current || null,
+      delta: interactionSession.delta || null,
+      honesty: interactionSession.honesty || { verdict: "unknown", findings: [] },
+      frameId: interactionSession.frameId ?? null,
+      armedAt: interactionSession.armedAt || null,
+      observedAt: interactionSession.observedAt || null,
+      updatedAt: interactionSession.updatedAt || null,
+      stopReason: interactionSession.stopReason || null,
+    });
+  }
+
+  function scheduleInteractionTimeout() {
+    clearInteractionTimeout();
+    if (!interactionSession || !interactionSession.watching) return;
+
+    interactionTimeoutId = setTimeout(() => {
+      if (!interactionSession) return;
+      if (!interactionSession.action) {
+        clearInteractionAuditSession();
+        return;
+      }
+      stopInteractionWatcher("timeout");
+    }, interactionSession.timeoutMs || INTERACTION_SESSION_TIMEOUT_MS);
+  }
+
+  function refreshTrackedBannerRoot() {
+    if (!interactionSession) return null;
+
+    const bannerMatch = findBanner();
+    if (bannerMatch?.element) {
+      interactionSession.rootElement = bannerMatch.element;
+      interactionSession.bannerSelector = bannerMatch.selector;
+      return bannerMatch.element;
+    }
+
+    return interactionSession.rootElement || null;
+  }
+
+  function isWithinTrackedConsentFlow(actionable) {
+    if (!interactionSession || !actionable) return false;
+
+    const rootElement = interactionSession.rootElement;
+    if (rootElement && rootElement.contains(actionable)) {
+      return true;
+    }
+
+    const refreshedRoot = refreshTrackedBannerRoot();
+    if (refreshedRoot && refreshedRoot.contains(actionable)) {
+      return true;
+    }
+
+    let current = actionable.parentElement;
+    let depth = 0;
+    while (current && depth < MAX_ANCESTOR_DEPTH) {
+      if (
+        isStrongBannerSurface(current) &&
+        (hasBannerLikeText(getElementText(current)) || hasBannerLikeAttributes(elementAttributeHaystack(current)))
+      ) {
+        interactionSession.rootElement = current;
+        interactionSession.bannerSelector = describeElement(current);
+        return true;
+      }
+      current = current.parentElement;
+      depth += 1;
+    }
+
+    return false;
+  }
+
+  async function notifyBackgroundOfObservedInteraction() {
+    if (
+      !interactionSession ||
+      interactionSession.notified ||
+      typeof browser === "undefined" ||
+      !browser.runtime ||
+      typeof browser.runtime.sendMessage !== "function"
+    ) {
+      return;
+    }
+
+    interactionSession.notified = true;
+
+    try {
+      await browser.runtime.sendMessage({
+        action: "consentInteractionObserved",
+        session: getInteractionAuditSession(),
+      });
+    } catch (_) {
+      interactionSession.notified = false;
+    }
+  }
+
+  function observeFinalInteractionAction(actionEl, type) {
+    if (!interactionSession || !actionEl || !type || type === "unknown" || type === "settings") {
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    interactionSession.status = "observed";
+    interactionSession.action = {
+      type,
+      text: getElementLabel(actionEl) || null,
+      observed: true,
+      observedAt: timestamp,
+    };
+    interactionSession.observedAt = timestamp;
+    interactionSession.updatedAt = timestamp;
+    interactionSession.honesty = { verdict: "unknown", findings: [] };
+    stopInteractionWatcher("final_action_observed");
+    void notifyBackgroundOfObservedInteraction();
+  }
+
+  function armInteractionAuditSession(options = {}) {
+    if (interactionSession && interactionSession.watching && !interactionSession.action) {
+      return getInteractionAuditSession();
+    }
+
+    const bannerMatch = findBanner();
+    const bannerEl = bannerMatch ? bannerMatch.element : null;
+    const buttonData = findButtons(bannerEl);
+    if (!isActiveBanner(bannerEl, buttonData)) {
+      return getInteractionAuditSession();
+    }
+
+    clearInteractionAuditSession();
+
+    interactionSession = {
+      status: "armed",
+      watching: true,
+      action: null,
+      baseline: cloneForTransport(options.baseline || null),
+      current: null,
+      delta: null,
+      honesty: { verdict: "unknown", findings: [] },
+      frameId: options.frameId ?? null,
+      armedAt: new Date().toISOString(),
+      observedAt: null,
+      updatedAt: new Date().toISOString(),
+      timeoutMs: Number(options.inactivityMs) > 0 ? Number(options.inactivityMs) : INTERACTION_SESSION_TIMEOUT_MS,
+      rootElement: bannerEl,
+      bannerSelector: bannerMatch?.selector || null,
+      stopReason: null,
+      notified: false,
+    };
+
+    const onClick = event => {
+      if (!interactionSession || interactionSession.status === "completed") return;
+
+      const actionable = event.target && event.target.closest ? event.target.closest(ACTIONABLE_SELECTOR) : null;
+      if (!actionable || !isWithinTrackedConsentFlow(actionable)) return;
+
+      const actionType = classifyInteractionAction(getElementLabel(actionable));
+      if (actionType === "unknown") return;
+
+      interactionSession.updatedAt = new Date().toISOString();
+      scheduleInteractionTimeout();
+
+      if (actionType === "settings") {
+        refreshTrackedBannerRoot();
+        return;
+      }
+
+      observeFinalInteractionAction(actionable, actionType);
+    };
+
+    const onPageHide = () => {
+      clearInteractionAuditSession();
+    };
+
+    document.addEventListener("click", onClick, true);
+    window.addEventListener("pagehide", onPageHide, true);
+
+    interactionWatcherCleanup = () => {
+      document.removeEventListener("click", onClick, true);
+      window.removeEventListener("pagehide", onPageHide, true);
+    };
+
+    scheduleInteractionTimeout();
+    return getInteractionAuditSession();
+  }
+
+  function storeInteractionOutcome(outcome) {
+    const now = new Date().toISOString();
+    if (!interactionSession) {
+      interactionSession = {
+        status: "completed",
+        watching: false,
+        action: cloneForTransport(outcome?.action || null),
+        baseline: cloneForTransport(outcome?.baseline || null),
+        current: cloneForTransport(outcome?.current || null),
+        delta: cloneForTransport(outcome?.delta || null),
+        honesty: cloneForTransport(outcome?.honesty || { verdict: "unknown", findings: [] }),
+        frameId: outcome?.frameId ?? null,
+        armedAt: null,
+        observedAt: outcome?.action?.observedAt || null,
+        updatedAt: now,
+        timeoutMs: INTERACTION_SESSION_TIMEOUT_MS,
+        rootElement: null,
+        bannerSelector: null,
+        stopReason: "stored_outcome",
+        notified: true,
+      };
+      return getInteractionAuditSession();
+    }
+
+    interactionSession.status = outcome?.status || "completed";
+    interactionSession.watching = false;
+    interactionSession.action = cloneForTransport(outcome?.action || interactionSession.action || null);
+    interactionSession.baseline = cloneForTransport(outcome?.baseline || interactionSession.baseline || null);
+    interactionSession.current = cloneForTransport(outcome?.current || null);
+    interactionSession.delta = cloneForTransport(outcome?.delta || null);
+    interactionSession.honesty = cloneForTransport(outcome?.honesty || { verdict: "unknown", findings: [] });
+    interactionSession.updatedAt = now;
+    interactionSession.stopReason = "stored_outcome";
+    interactionSession.notified = true;
+    stopInteractionWatcher("stored_outcome");
+    return getInteractionAuditSession();
+  }
+
   // ── Dark Pattern: Pre-selected Checkboxes ────────────────────────────────
   // Port of detector.py detect_preselected_checkboxes (lines 333-368)
 
@@ -1406,6 +1692,10 @@
       scanPage: scanPageOnce,
       scanPageWithRetries,
       scoreResult: scanResultQuality,
+      armInteractionAuditSession,
+      getInteractionAuditSession,
+      storeInteractionOutcome,
+      clearInteractionAuditSession,
     };
 
     ROOT._AECCSConsentScannerLoaded = true;

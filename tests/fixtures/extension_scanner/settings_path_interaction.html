@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings Path Interaction Banner</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: sans-serif;
+      background: #f8fafc;
+    }
+
+    .consent-banner {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 520px;
+      padding: 22px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 18px;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.28);
+    }
+
+    .consent-actions,
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .settings-panel[hidden] {
+      display: none;
+    }
+
+    button {
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <section class="consent-banner" role="dialog" aria-modal="true">
+    <h2>Privacy choices</h2>
+    <p>We use cookies for analytics and advertising. You can manage or reject non-essential cookies in your settings.</p>
+    <div class="consent-actions">
+      <button type="button" class="secondary" id="manage-preferences">Manage Preferences</button>
+      <button type="button" class="primary">Accept All</button>
+    </div>
+
+    <div class="settings-panel" id="settings-panel" hidden>
+      <p>Choose how we use optional cookies.</p>
+      <div class="settings-actions">
+        <button type="button" class="secondary">Reject All</button>
+        <button type="button" class="primary">Accept All</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.getElementById("manage-preferences").addEventListener("click", () => {
+      document.getElementById("settings-panel").hidden = false;
+    });
+  </script>
+</body>
+</html>

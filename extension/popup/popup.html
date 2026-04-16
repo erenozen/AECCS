@@ -40,7 +40,7 @@
       <span class="disabled-icon">i</span>
       <div class="disabled-copy">
         <div id="disabledTitle" class="disabled-title">Evaluation unavailable on this page</div>
-        <div id="disabledMsg" class="disabled-msg">AECCS works with active visible cookie banners. No cookie banner was detected, so this website was not evaluated.</div>
+        <div id="disabledMsg" class="disabled-msg">AECCS did not detect an active cookie banner or a meaningful post-interaction consent state, so this website was not evaluated.</div>
       </div>
     </div>
 
@@ -63,7 +63,20 @@
         </div>
         <div class="score-info">
           <div class="score-value"><span id="scoreValue">-</span><span class="score-max">/100</span></div>
-          <div class="score-label">GDPR Compliance Score</div>
+          <div class="score-label" id="scoreLabel">GDPR Compliance Score</div>
+        </div>
+      </section>
+
+      <section class="section secondary-score hidden" id="baselineScoreSection">
+        <h2 class="section-title">Baseline Banner Score</h2>
+        <div class="secondary-score-card">
+          <div class="secondary-grade-badge" id="baselineGradeBadge">
+            <span class="secondary-grade-letter" id="baselineGradeLetter">-</span>
+          </div>
+          <div class="secondary-score-info">
+            <div class="secondary-score-value"><span id="baselineScoreValue">-</span><span class="score-max">/100</span></div>
+            <div class="score-label" id="baselineScoreLabel">GDPR Compliance Score</div>
+          </div>
         </div>
       </section>
 
@@ -86,6 +99,11 @@
         <h2 class="section-title">Consent Banner Analysis</h2>
         <div id="consentInfo"></div>
         <div id="cmpInfo" class="hidden"></div>
+      </section>
+
+      <section class="section hidden" id="interactionSection">
+        <h2 class="section-title">Interaction Outcome</h2>
+        <div id="interactionInfo"></div>
       </section>
 
       <!-- Accept vs Reject UX Comparison (unique to AECCS) -->
@@ -135,7 +153,7 @@
 
     <!-- Footer -->
     <footer class="footer" id="footerNote">
-      AECCS &mdash; Passive local audit &middot; 1000-site combined study snapshot &middot; March 6, 2026
+      AECCS &mdash; Session-limited local consent audit &middot; 1000-site combined study snapshot &middot; March 6, 2026
     </footer>
   </div>
 

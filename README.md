@@ -47,14 +47,15 @@ The pipeline now separates demonstration data, earlier real-study artifacts, and
 
 ## Browser Extension
 
-The `extension/` folder contains a lightweight Chrome/Firefox browser extension that turns AECCS into a passive, local cookie-consent auditor for the currently loaded page.
+The `extension/` folder contains a lightweight Chrome/Firefox browser extension that turns AECCS into a local, user-initiated cookie-consent auditor for the currently loaded page.
 
-- **Passive local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling
+- **Session-limited local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling, and no persistent storage
 - **No blocking and no auto-clicking** — the extension does not try to change consent state or fix a site for the user
-- **Works with active visible cookie banners** — if no cookie banner is currently detected on the page, the extension explains that the page was not evaluated instead of showing a misleading score
+- **Current-state and post-click analysis** — if a banner is visible, AECCS captures a baseline GDPR audit and can keep watching that consent flow locally for the current tab session; if the banner is already gone, it can still audit the currently loaded consent state when there is meaningful cookie/CMP evidence
 - **Live cookie/tracker evidence** — reads current cookies, classifies trackers, and highlights third-party and tracker-heavy pages
 - **Consent dark-pattern analysis** — detects CMPs, missing reject paths, multi-layer rejection, asymmetric buttons, hidden reject, preselected checkboxes, confusing language, forced action, and transparency signals
 - **Accept vs Reject UX comparison** — renders the visible accept/reject path so users can see unequal effort directly
+- **Post-interaction honesty checks** — compares before/after cookie state for observed Reject All, Essential Only, and Accept All flows without auto-clicking or sending data off-device
 - **Study-backed PET guidance** — recommends relevant privacy tools based on live findings, then grounds those suggestions in the completed 1000-site combined AECCS study
 
 The extension’s static study context is generated from `data/real_combined/processed/` and frozen into small runtime assets:

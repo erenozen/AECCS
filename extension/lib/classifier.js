@@ -97,6 +97,7 @@ const Classifier = (() => {
     const result = {
       name: cookie.name,
       domain: domain,
+      path: cookie.path || "/",
       registered_domain: registeredDomain,
       is_third_party: thirdParty,
       expiration_days: expirationDays,

@@ -49,6 +49,7 @@
     const BANNER_TEXT_PHRASES = SHARED.bannerTextPhrases || [];
     const BANNER_ATTR_HINTS = SHARED.bannerAttrHints || [];
     const COMPLIANCE_WEIGHTS = SHARED.complianceWeights || {};
+    const STATE_OUTCOME_WEIGHTS = SHARED.stateOutcomeWeights || {};
     const GRADES = SHARED.grades || [];
     const PRIVACY_LINK_KEYWORDS = SHARED.privacyLinkKeywords || [];
     const PURPOSE_KEYWORDS = SHARED.purposeKeywords || [];
@@ -412,7 +413,7 @@
 
   const CLAIM_GUARDRAILS = {
     positioning:
-      "AECCS is a passive, research-grounded cookie-consent auditor for the current page, grounded in the completed 1000-site combined study.",
+      "AECCS is a local, user-initiated, session-limited cookie-consent auditor for the current page, grounded in the completed 1000-site combined study.",
     supportedClaims: [
       "Combines dark-pattern findings with study-backed PET guidance",
       "Surfaces six end-user PETs in one shared combined-study snapshot",
@@ -443,9 +444,10 @@
       NECESSARY_KEYWORDS,
       BANNER_TEXT_KEYWORDS,
       BANNER_TEXT_PHRASES,
-      BANNER_ATTR_HINTS,
-      COMPLIANCE_WEIGHTS,
-      GRADES,
+    BANNER_ATTR_HINTS,
+    COMPLIANCE_WEIGHTS,
+    STATE_OUTCOME_WEIGHTS,
+    GRADES,
       PRIVACY_LINK_KEYWORDS,
       PURPOSE_KEYWORDS,
       VENDOR_KEYWORDS,

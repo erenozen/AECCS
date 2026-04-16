@@ -32,6 +32,10 @@
     no_dark_patterns:           "No Dark Patterns",
     post_reject_compliance:     "Post-Reject Compliance",
     transparent_information:    "Transparent Information",
+    low_tracker_load:           "Low Tracker Load",
+    low_third_party_load:       "Low Third-Party Load",
+    low_total_cookie_load:      "Low Total Cookie Load",
+    claimed_action_honesty:     "Claimed Action Honesty",
   };
 
   let currentAnalysis = null;
@@ -56,6 +60,12 @@
     gradeBadge:        $("gradeBadge"),
     gradeLetter:       $("gradeLetter"),
     scoreValue:        $("scoreValue"),
+    scoreLabel:        $("scoreLabel"),
+    baselineScoreSection: $("baselineScoreSection"),
+    baselineGradeBadge: $("baselineGradeBadge"),
+    baselineGradeLetter: $("baselineGradeLetter"),
+    baselineScoreValue: $("baselineScoreValue"),
+    baselineScoreLabel: $("baselineScoreLabel"),
     cookieBar:         $("cookieBar"),
     cookieCounts:      $("cookieCounts"),
     cookieMeta:        $("cookieMeta"),
@@ -63,6 +73,8 @@
     trackerList:       $("trackerList"),
     consentInfo:       $("consentInfo"),
     cmpInfo:           $("cmpInfo"),
+    interactionSection: $("interactionSection"),
+    interactionInfo:   $("interactionInfo"),
     buttonCompSection: $("buttonCompSection"),
     buttonComparison:  $("buttonComparison"),
     darkPatternSection: $("darkPatternSection"),
@@ -115,7 +127,7 @@
     els.disabledTitle.textContent = disabled?.title || "Evaluation unavailable on this page";
     els.disabledMsg.textContent =
       disabled?.message ||
-      "AECCS works with active visible cookie banners. No cookie banner was detected, so this website was not evaluated.";
+      "AECCS did not detect an active cookie banner or a meaningful post-interaction consent state, so this website was not evaluated.";
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -130,7 +142,7 @@
 
     renderStudyCopy(data.studyMetadata);
 
-    if (data.evaluationDisabled?.active) {
+    if (data.analysisMode === "unavailable" || data.evaluationDisabled?.active) {
       showDisabledState(data.evaluationDisabled);
       return;
     }
@@ -144,10 +156,12 @@
       els.govAlert.classList.add("hidden");
     }
 
-    renderScore(data.score);
+    renderScoreCard(els.gradeBadge, els.gradeLetter, els.scoreValue, els.scoreLabel, data.score);
+    renderBaselineScore(data.baselineScore);
     renderCookies(data);
     renderTrackers(data.trackersByVendor);
     renderConsent(data.consentScan, data.cmpStats, data.studyMetadata);
+    renderInteractionAudit(data.interactionAudit, data.analysisMode);
     renderButtonComparison(data.consentScan?.buttonComparison);
     renderDarkPatterns(data.consentScan?.darkPatterns);
     renderCriteria(data.score.criteria);
@@ -304,18 +318,38 @@
 
     if (els.footerNote) {
       els.footerNote.textContent =
-        `AECCS · Passive local audit · ${sampleSize}-site combined study snapshot · ${snapshotDateLabel}`;
+        `AECCS · Session-limited local consent audit · ${sampleSize}-site combined study snapshot · ${snapshotDateLabel}`;
     }
   }
 
   // ── Score Badge ───────────────────────────────────────────────────────────
 
-  function renderScore(score) {
+  function renderScoreCard(gradeBadgeEl, gradeLetterEl, scoreValueEl, scoreLabelEl, score) {
+    if (!score) return;
     const color = GRADE_COLORS[score.grade] || GRADE_COLORS.F;
-    els.gradeBadge.style.color = color;
-    els.gradeBadge.style.borderColor = color;
-    els.gradeLetter.textContent = score.grade;
-    els.scoreValue.textContent = score.overall_score;
+    gradeBadgeEl.style.color = color;
+    gradeBadgeEl.style.borderColor = color;
+    gradeLetterEl.textContent = score.grade;
+    scoreValueEl.textContent = score.overall_score;
+    if (scoreLabelEl) {
+      scoreLabelEl.textContent = score.label || "GDPR Compliance Score";
+    }
+  }
+
+  function renderBaselineScore(score) {
+    if (!score) {
+      els.baselineScoreSection?.classList.add("hidden");
+      return;
+    }
+
+    els.baselineScoreSection?.classList.remove("hidden");
+    renderScoreCard(
+      els.baselineGradeBadge,
+      els.baselineGradeLetter,
+      els.baselineScoreValue,
+      els.baselineScoreLabel,
+      score
+    );
   }
 
   // ── Cookie Breakdown ──────────────────────────────────────────────────────
@@ -446,6 +480,87 @@
     }
   }
 
+  function renderInteractionAudit(interactionAudit, analysisMode) {
+    clearNode(els.interactionInfo);
+
+    if (!interactionAudit) {
+      els.interactionSection.classList.add("hidden");
+      return;
+    }
+
+    els.interactionSection.classList.remove("hidden");
+
+    const statusMap = {
+      armed: "Watching consent interaction",
+      observed: "Observed consent action",
+      completed: "Completed post-interaction audit",
+      unknown_current_state: "Unknown post-click state",
+    };
+
+    const verdictMap = {
+      honest: "Honest",
+      mixed: "Mixed",
+      dishonest: "Dishonest",
+      not_applicable: "Not applicable",
+      unknown: "Unknown",
+    };
+
+    const statusText = statusMap[interactionAudit.status] || "Interaction state";
+    const action = interactionAudit.action;
+    const actionText = action?.text
+      ? `${action.text}${action?.observed ? " (observed)" : " (inferred/unknown)"}`
+      : "No observed consent action";
+    const honestyText = verdictMap[interactionAudit.honesty?.verdict] || "Unknown";
+
+    const summary = createElement("div", { className: "interaction-summary" });
+    summary.append(
+      buildLabeledValueRow("interaction-kv", "Session status", statusText),
+      buildLabeledValueRow("interaction-kv", "Action", actionText),
+      buildLabeledValueRow("interaction-kv", "Honesty verdict", honestyText),
+      buildLabeledValueRow("interaction-kv", "Analysis mode", analysisMode || "baseline_banner")
+    );
+    els.interactionInfo.appendChild(summary);
+
+    if (interactionAudit.delta) {
+      const delta = interactionAudit.delta;
+      const deltaCard = createElement("div", { className: "interaction-card" });
+      deltaCard.append(
+        createElement("div", { className: "interaction-card-title", text: "Before vs After" }),
+        buildLabeledValueRow("interaction-kv", "Total cookies", signedMetric(delta.totalCookies)),
+        buildLabeledValueRow("interaction-kv", "Third-party cookies", signedMetric(delta.thirdPartyCount)),
+        buildLabeledValueRow("interaction-kv", "Trackers", signedMetric(delta.trackerCount))
+      );
+
+      if (delta.newCookies?.length) {
+        deltaCard.appendChild(
+          createElement("div", {
+            className: "interaction-list",
+            text: `New cookies: ${delta.newCookies.map(item => `${item.name} (${item.category})`).join(", ")}`,
+          })
+        );
+      }
+      if (delta.newTrackers?.length) {
+        deltaCard.appendChild(
+          createElement("div", {
+            className: "interaction-list interaction-list-bad",
+            text: `New trackers: ${delta.newTrackers.map(item => `${item.name} (${item.vendor})`).join(", ")}`,
+          })
+        );
+      }
+
+      els.interactionInfo.appendChild(deltaCard);
+    }
+
+    if (interactionAudit.honesty?.findings?.length) {
+      const honestyCard = createElement("div", { className: "interaction-card" });
+      honestyCard.appendChild(createElement("div", { className: "interaction-card-title", text: "Honesty Findings" }));
+      for (const finding of interactionAudit.honesty.findings) {
+        honestyCard.appendChild(createElement("div", { className: "interaction-list", text: finding }));
+      }
+      els.interactionInfo.appendChild(honestyCard);
+    }
+  }
+
   function buildConsentRow(type, content) {
     const icons = { ok: "\u2713", warn: "\u25cf", bad: "\u2717" };
     const row = createElement("div", { className: "consent-row" });
@@ -530,7 +645,8 @@
     clearNode(els.criteriaBody);
     for (const [key, { score, details }] of Object.entries(criteria)) {
       const label = CRITERIA_LABELS[key] || key;
-      const color = scoreColor(score);
+      const hasNumericScore = typeof score === "number";
+      const color = hasNumericScore ? scoreColor(score) : "var(--text-dim)";
       const tr = createElement("tr");
 
       const detailsCell = createElement("td");
@@ -539,13 +655,13 @@
         createElement("div", { className: "criteria-details", text: details })
       );
 
-      const scoreCell = createElement("td", { text: score });
+      const scoreCell = createElement("td", { text: hasNumericScore ? score : "n/a" });
       scoreCell.style.color = color;
 
       const progressCell = createElement("td");
       const progressBar = createElement("div", { className: "progress-bar" });
       const progressFill = createElement("div", { className: "progress-fill" });
-      progressFill.style.width = `${score}%`;
+      progressFill.style.width = `${hasNumericScore ? score : 0}%`;
       progressFill.style.background = color;
       progressBar.appendChild(progressFill);
       progressCell.appendChild(progressBar);
@@ -668,7 +784,7 @@
       }),
       createElement("div", {
         className: "insight-intro",
-        text: "This popup audits the current page locally. The cards below add frozen AECCS study context without introducing extra scans, clicks, or network requests.",
+        text: "This popup audits the current page locally and may continue a session-limited consent watch after you open it. The cards below add frozen AECCS study context without introducing clicks or network requests.",
       })
     );
 
@@ -676,7 +792,7 @@
     positioningCard.appendChild(
       createElement("div", {
         className: "insight-card-copy",
-        text: guardrails.positioning || "AECCS is a passive, research-grounded cookie-consent auditor.",
+        text: guardrails.positioning || "AECCS is a local, user-initiated cookie-consent auditor.",
       })
     );
     if (highlights.length > 0) {
@@ -711,7 +827,7 @@
       guidanceCard.appendChild(
         createElement("div", {
           className: "insight-card-copy",
-          text: "Recommendations stay passive: they are tied to the issues found on this page, then grounded in the shared AECCS combined-study snapshot rather than live PET simulation.",
+          text: "Recommendations stay local and session-limited: they are tied to the issues found on this page, then grounded in the shared AECCS combined-study snapshot rather than live PET simulation.",
         })
       );
       const list = createElement("div", { className: "insight-list" });
@@ -861,6 +977,12 @@
   function formatPercent(value) {
     if (typeof value !== "number" || Number.isNaN(value)) return "n/a";
     return `${Math.round(value * 1000) / 10}%`;
+  }
+
+  function signedMetric(value) {
+    if (typeof value !== "number" || Number.isNaN(value)) return "n/a";
+    if (value > 0) return `+${value}`;
+    return `${value}`;
   }
 
   function isTransparentBackgroundValue(value) {

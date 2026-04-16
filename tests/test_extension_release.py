@@ -40,6 +40,9 @@ def test_privacy_policy_matches_release_behavior() -> None:
 
     assert "does not collect, sell, store" in lowered
     assert "transmit personal data" in lowered
+    assert "local, user-initiated" in lowered
+    assert "session-limited" in lowered
+    assert "page-wide click logging" in lowered
     assert "browser.cookies" in text
     assert "<code>activeTab</code>" in text
     assert "<code>scripting</code>" in text
@@ -61,20 +64,24 @@ def test_release_docs_cover_store_and_reviewer_workflows() -> None:
     reviewer_text = REVIEWER_NOTES.read_text(encoding="utf-8")
     checklist_text = RELEASE_CHECKLIST.read_text(encoding="utf-8")
 
-    assert "Passive, research-grounded GDPR cookie-consent auditor" in source_text
+    assert "Local, user-initiated GDPR cookie-consent auditor" in source_text
+    assert "post-interaction consent outcomes" in source_text
 
     assert "Chrome Web Store" in chrome_text
     assert "Single Purpose" in chrome_text
     assert "no remote code" in chrome_text.lower()
+    assert "session-limited" in chrome_text.lower()
     assert PUBLIC_PRIVACY_POLICY_URL in chrome_text
 
     assert "Firefox Add-ons" in firefox_text
+    assert "session-limited" in firefox_text.lower()
     assert PUBLIC_PRIVACY_POLICY_URL in firefox_text
     assert "listed add-on" in checklist_text
     assert "Submit Firefox First" in checklist_text
     assert "Submit Chrome Immediately After" in checklist_text
     assert "440x280" in checklist_text
     assert "generated static assets" in firefox_text.lower()
+    assert "session-limited consent auditor" in checklist_text.lower()
 
     assert "`cookies`" in reviewer_text
     assert "`activeTab`" in reviewer_text

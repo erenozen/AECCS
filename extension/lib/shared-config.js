@@ -2022,6 +2022,12 @@
     "post_reject_compliance": 0.15,
     "transparent_information": 0.1
   },
+  "stateOutcomeWeights": {
+    "low_tracker_load": 0.45,
+    "low_third_party_load": 0.25,
+    "low_total_cookie_load": 0.15,
+    "claimed_action_honesty": 0.15
+  },
   "grades": [
     {
       "threshold": 90,

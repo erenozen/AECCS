@@ -28,6 +28,9 @@ SERVICE_WORKER = ROOT / "extension" / "background" / "service-worker.js"
 MANIFEST = ROOT / "extension" / "manifest.json"
 README = ROOT / "README.md"
 STORE_LISTING = ROOT / "docs" / "extension_store_listing.md"
+STORE_LISTING_CHROME = ROOT / "docs" / "extension_store_listing_chrome.md"
+STORE_LISTING_FIREFOX = ROOT / "docs" / "extension_store_listing_firefox.md"
+PRIVACY_POLICY = ROOT / "docs" / "privacy-policy.html"
 
 
 def _install_runtime(target) -> None:
@@ -220,9 +223,21 @@ def _render_popup(page, result: dict) -> None:
                 </div>
                 <div class="score-info">
                   <div class="score-value"><span id="scoreValue"></span><span class="score-max">/100</span></div>
-                  <div class="score-label">GDPR Compliance Score</div>
+                  <div id="scoreLabel" class="score-label">GDPR Compliance Score</div>
                 </div>
               </section>
+            <section id="baselineScoreSection" class="section secondary-score hidden">
+              <h2 class="section-title">Baseline Banner Score</h2>
+              <div class="secondary-score-card">
+                <div id="baselineGradeBadge" class="secondary-grade-badge">
+                  <span id="baselineGradeLetter" class="secondary-grade-letter"></span>
+                </div>
+                <div class="secondary-score-info">
+                  <div class="secondary-score-value"><span id="baselineScoreValue"></span><span class="score-max">/100</span></div>
+                  <div id="baselineScoreLabel" class="score-label">GDPR Compliance Score</div>
+                </div>
+              </div>
+            </section>
             <div id="cookieBar"></div>
             <div id="cookieCounts"></div>
             <div id="cookieMeta"></div>
@@ -230,6 +245,7 @@ def _render_popup(page, result: dict) -> None:
             <div id="trackerList"></div>
             <div id="consentInfo"></div>
             <div id="cmpInfo" class="hidden"></div>
+            <section id="interactionSection" class="hidden"><div id="interactionInfo"></div></section>
             <section id="buttonCompSection" class="hidden"><div id="buttonComparison"></div></section>
             <section id="darkPatternSection"><div id="darkPatternDetails"></div></section>
             <table><tbody id="criteriaBody"></tbody></table>
@@ -287,6 +303,13 @@ def _install_service_worker_harness(page) -> None:
             };
         }"""
     )
+    page.add_script_tag(path=str(STUDY_SNAPSHOT))
+    page.add_script_tag(path=str(SHARED_CONFIG))
+    page.add_script_tag(path=str(TRACKER_DATA))
+    page.add_script_tag(path=str(TRACKER_INDEX))
+    page.add_script_tag(path=str(DOMAIN_UTILS))
+    page.add_script_tag(path=str(CLASSIFIER))
+    page.add_script_tag(path=str(SCORER))
     page.add_script_tag(path=str(SERVICE_WORKER))
 
 
@@ -659,6 +682,91 @@ def test_consent_scanner_bootstraps_on_sky_news_like_sourcepoint_fixture() -> No
     assert iframe_scans[0]["scanResult"]["acceptButtonText"] == "Accept all"
 
 
+def test_consent_scanner_records_direct_essential_action_in_local_session() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "sourcepoint_like.html").as_uri())
+        _install_scanner(page)
+
+        armed = page.evaluate(
+            """() => AECCSConsentScanner.armInteractionAuditSession({
+                baseline: {
+                    totalCookies: 8,
+                    thirdPartyCount: 2,
+                    trackerCount: 1,
+                    categoryCounts: { Advertising: 1, Functional: 2, Unknown: 5 },
+                    cookieKeys: ["cmp|.example.com|/"],
+                    score: {
+                        kind: "gdpr_compliance",
+                        label: "GDPR Compliance Score",
+                        overall_score: 38,
+                        grade: "F",
+                        criteria: {}
+                    },
+                    consentScan: { bannerFound: true, cmpDetected: "Sourcepoint" }
+                },
+                frameId: 0
+            })"""
+        )
+        page.click("button:has-text('Essential cookies only')")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert armed["status"] == "armed"
+    assert armed["watching"] is True
+    assert session["status"] == "observed"
+    assert session["watching"] is False
+    assert session["action"]["type"] == "essential"
+    assert session["action"]["text"] == "Essential cookies only"
+    assert session["action"]["observed"] is True
+
+
+def test_consent_scanner_keeps_watching_after_settings_click_until_final_action() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "settings_path_interaction.html").as_uri())
+        _install_scanner(page)
+
+        page.evaluate(
+            """() => AECCSConsentScanner.armInteractionAuditSession({
+                baseline: {
+                    totalCookies: 4,
+                    thirdPartyCount: 1,
+                    trackerCount: 0,
+                    categoryCounts: { Functional: 1, Unknown: 3 },
+                    cookieKeys: [],
+                    score: {
+                        kind: "gdpr_compliance",
+                        label: "GDPR Compliance Score",
+                        overall_score: 52,
+                        grade: "D",
+                        criteria: {}
+                    },
+                    consentScan: { bannerFound: true, cmpDetected: null }
+                },
+                frameId: 0
+            })"""
+        )
+
+        page.click("text=Manage Preferences")
+        intermediate = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+
+        page.click("text=Reject All")
+        final_session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert intermediate["status"] == "armed"
+    assert intermediate["watching"] is True
+    assert intermediate["action"] is None
+
+    assert final_session["status"] == "observed"
+    assert final_session["watching"] is False
+    assert final_session["action"]["type"] == "reject"
+    assert final_session["action"]["text"] == "Reject All"
+
+
 def test_service_worker_reports_scanner_init_context_when_all_frames_fail() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -821,6 +929,212 @@ def test_service_worker_reports_shared_config_stage_error_when_unavailable() -> 
     assert "AECCSSharedConfig missing" in result["error"]
 
 
+def test_service_worker_returns_post_interaction_analysis_when_current_state_is_meaningful() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        result = page.evaluate(
+            """async () => {
+                browser.tabs = {
+                    get: async () => ({ id: 5, url: "https://news.sky.com" })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0] });
+                runConsentScanAcrossReadyFrames = async () => ({
+                    error: null,
+                    frameId: 0,
+                    scanResult: {
+                        cmpDetected: "Sourcepoint",
+                        bannerFound: false,
+                        hasAcceptButton: false,
+                        hasRejectButton: false,
+                        hasSettingsButton: false,
+                        acceptButtonText: null,
+                        rejectButtonText: null,
+                        settingsButtonText: null,
+                        acceptClicksRequired: 999,
+                        rejectClicksRequired: 999,
+                        transparency: {},
+                        darkPatterns: { count: 0, detected: [] },
+                        buttonComparison: null
+                    }
+                });
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["cmp|news.sky.com|/", "pref|news.sky.com|/"],
+                    classifiedCookies: [
+                        { name: "cmp", domain: "news.sky.com", path: "/", category: "Functional", is_tracker: false, vendor: "First Party" },
+                        { name: "pref", domain: "news.sky.com", path: "/", category: "Unknown", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 2,
+                    categoryCounts: { Functional: 1, Unknown: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getBestInteractionAuditSession = async () => ({
+                    status: "completed",
+                    action: {
+                        type: "essential",
+                        text: "Essential cookies only",
+                        observed: true,
+                        observedAt: "2026-04-16T10:00:00.000Z"
+                    },
+                    baseline: {
+                        totalCookies: 8,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        categoryCounts: { Advertising: 1, Functional: 2, Unknown: 5 },
+                        cookieKeys: ["cmp|news.sky.com|/", "pref|news.sky.com|/"],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 38,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: {
+                            cmpDetected: "Sourcepoint",
+                            bannerFound: true,
+                            hasAcceptButton: true,
+                            hasRejectButton: true,
+                            hasSettingsButton: true,
+                            acceptButtonText: "Accept all",
+                            rejectButtonText: "Essential cookies only",
+                            settingsButtonText: "View options",
+                            acceptClicksRequired: 1,
+                            rejectClicksRequired: 1,
+                            transparency: {},
+                            darkPatterns: { count: 0, detected: [] },
+                            buttonComparison: null
+                        }
+                    },
+                    current: null,
+                    delta: null,
+                    honesty: { verdict: "unknown", findings: [] },
+                    frameId: 0,
+                    updatedAt: "2026-04-16T10:00:04.000Z"
+                });
+
+                return await handleAnalyze(5);
+            }"""
+        )
+        browser.close()
+
+    assert result["analysisMode"] == "post_interaction"
+    assert result["score"]["kind"] == "state_outcome"
+    assert result["baselineScore"]["kind"] == "gdpr_compliance"
+    assert result["interactionAudit"]["status"] == "completed"
+    assert result["interactionAudit"]["action"]["type"] == "essential"
+    assert result["interactionAudit"]["honesty"]["verdict"] == "mixed"
+    assert result["consentScan"]["bannerFound"] is False
+    assert result["evaluationDisabled"] is None
+
+
+def test_service_worker_returns_unknown_current_state_when_popup_opens_after_click() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        result = page.evaluate(
+            """async () => {
+                browser.tabs = {
+                    get: async () => ({ id: 6, url: "https://example.com" })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0] });
+                runConsentScanAcrossReadyFrames = async () => ({
+                    error: null,
+                    frameId: 0,
+                    scanResult: {
+                        cmpDetected: null,
+                        bannerFound: false,
+                        hasAcceptButton: false,
+                        hasRejectButton: false,
+                        hasSettingsButton: false,
+                        acceptButtonText: null,
+                        rejectButtonText: null,
+                        settingsButtonText: null,
+                        acceptClicksRequired: 999,
+                        rejectClicksRequired: 999,
+                        transparency: {},
+                        darkPatterns: { count: 0, detected: [] },
+                        buttonComparison: null
+                    }
+                });
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["sess|example.com|/"],
+                    classifiedCookies: [
+                        { name: "sess", domain: "example.com", path: "/", category: "Unknown", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 1,
+                    categoryCounts: { Unknown: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getBestInteractionAuditSession = async () => null;
+
+                return await handleAnalyze(6);
+            }"""
+        )
+        browser.close()
+
+    assert result["analysisMode"] == "post_interaction"
+    assert result["baselineScore"] is None
+    assert result["interactionAudit"]["status"] == "unknown_current_state"
+    assert result["interactionAudit"]["action"]["type"] == "unknown"
+    assert result["interactionAudit"]["baseline"] is None
+
+
+def test_service_worker_selects_richest_captured_post_interaction_outcome() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        payload = page.evaluate(
+            """async () => {
+                sleep = async () => {};
+                let index = 0;
+                const captures = [
+                    { status: "completed", current: { totalCookies: 1, thirdPartyCount: 0, trackerCount: 0, capturedAt: "2026-04-16T10:00:00.000Z" } },
+                    { status: "completed", current: { totalCookies: 3, thirdPartyCount: 1, trackerCount: 0, capturedAt: "2026-04-16T10:00:01.000Z" } },
+                    { status: "completed", current: { totalCookies: 4, thirdPartyCount: 2, trackerCount: 1, capturedAt: "2026-04-16T10:00:02.000Z" } }
+                ];
+
+                capturePostInteractionAudit = async () => captures[index++];
+                window.__storedOutcome = null;
+                storeInteractionOutcomeForFrame = async (_tabId, _frameId, interactionAudit) => {
+                    window.__storedOutcome = interactionAudit;
+                    return interactionAudit;
+                };
+
+                const result = await handleConsentInteractionObserved(
+                    {
+                        session: {
+                            status: "observed",
+                            action: { type: "reject", text: "Reject All", observed: true, observedAt: "2026-04-16T10:00:00.000Z" }
+                        }
+                    },
+                    {
+                        tab: { id: 9, url: "https://example.com" },
+                        frameId: 2
+                    }
+                );
+
+                return { result, stored: window.__storedOutcome };
+            }"""
+        )
+        browser.close()
+
+    assert payload["result"]["ok"] is True
+    assert payload["stored"]["current"]["trackerCount"] == 1
+    assert payload["stored"]["current"]["thirdPartyCount"] == 2
+    assert payload["stored"]["current"]["totalCookies"] == 4
+
+
 def test_extension_background_analyze_succeeds_on_sky_news_fixture_when_supported() -> None:
     with sync_playwright() as p:
         with _serve_fixture_dir(FIXTURES) as base_url:
@@ -840,15 +1154,18 @@ def test_extension_background_analyze_succeeds_on_sky_news_fixture_when_supporte
             finally:
                 context.close()
 
+    assert result["analysisMode"] == "baseline_banner"
     assert result["consentScan"]["cmpDetected"] == "Sourcepoint"
     assert result["consentScan"]["bannerFound"] is True
     assert result["consentScan"]["acceptButtonText"] == "Accept all"
     assert result["consentScan"]["rejectButtonText"] == "Essential cookies only"
     assert result["consentScan"]["settingsButtonText"] == "View options"
+    assert result["score"]["kind"] == "gdpr_compliance"
+    assert result["interactionAudit"]["status"] == "armed"
     assert "error" not in result
 
 
-def test_consent_scanner_tracks_passive_parity_dark_patterns_for_direct_banner() -> None:
+def test_consent_scanner_matches_expected_dark_patterns_for_direct_banner() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1280, "height": 900})
@@ -861,7 +1178,7 @@ def test_consent_scanner_tracks_passive_parity_dark_patterns_for_direct_banner()
     assert "Multi-layer rejection" not in result["darkPatterns"]["detected"]
 
 
-def test_consent_scanner_tracks_passive_parity_dark_patterns_for_settings_path() -> None:
+def test_consent_scanner_matches_expected_dark_patterns_for_settings_path() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1280, "height": 900})
@@ -1159,6 +1476,7 @@ def test_popup_prefers_non_transparent_bg_color_over_background_shorthand() -> N
 
 def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
     popup_result = {
+        "analysisMode": "unavailable",
         "isGovDomain": False,
         "studyMetadata": {
             "label": "AECCS 1000-site combined study snapshot",
@@ -1169,9 +1487,9 @@ def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
         },
         "evaluationDisabled": {
             "active": True,
-            "reason": "no_active_cookie_banner",
+            "reason": "no_meaningful_consent_state",
             "title": "Evaluation unavailable on this page",
-            "message": "AECCS works with active visible cookie banners. No cookie banner was detected, so this website was not evaluated.",
+            "message": "AECCS did not detect an active cookie banner or a meaningful post-interaction consent state, so this website was not evaluated.",
         },
         "score": None,
         "categoryCounts": {},
@@ -1222,13 +1540,161 @@ def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
     assert state["resultsHidden"] is True
     assert state["errorHidden"] is True
     assert state["title"] == "Evaluation unavailable on this page"
-    assert "active visible cookie banners" in state["message"]
+    assert "meaningful post-interaction consent state" in state["message"]
     assert "not evaluated" in state["message"]
     assert state["bodyBackground"] == "rgb(244, 248, 252)"
     assert state["disabledBackground"] == "rgb(239, 246, 255)"
     assert state["disabledBorderColor"] == "rgb(191, 219, 254)"
     assert state["disabledMessageColor"] == "rgb(95, 112, 136)"
     assert state["disabledIconBackground"] == "rgb(37, 99, 235)"
+
+
+def test_popup_renders_post_interaction_scores_and_honesty_details() -> None:
+    popup_result = {
+        "analysisMode": "post_interaction",
+        "isGovDomain": False,
+        "studyMetadata": {
+            "label": "AECCS 1000-site combined study snapshot",
+            "runId": "combined-1000",
+            "sampleSize": 1000,
+            "successfulCrawls": 861,
+            "snapshotDateLabel": "March 6, 2026",
+        },
+        "score": {
+            "kind": "state_outcome",
+            "label": "Post-Interaction State Score",
+            "grade": "A",
+            "overall_score": 94.0,
+            "criteria": {
+                "low_tracker_load": {"score": 100, "details": "No trackers detected"},
+                "low_third_party_load": {"score": 100, "details": "No third-party cookies detected"},
+                "low_total_cookie_load": {"score": 100, "details": "2 cookies currently loaded"},
+                "claimed_action_honesty": {
+                    "score": 60,
+                    "details": "Only functional or unknown cookies remained after reject/essential action",
+                },
+            },
+        },
+        "baselineScore": {
+            "kind": "gdpr_compliance",
+            "label": "GDPR Compliance Score",
+            "grade": "F",
+            "overall_score": 38.0,
+            "criteria": {},
+        },
+        "interactionAudit": {
+            "status": "completed",
+            "action": {
+                "type": "essential",
+                "text": "Essential cookies only",
+                "observed": True,
+                "observedAt": "2026-04-16T10:00:00.000Z",
+            },
+            "baseline": {
+                "totalCookies": 8,
+                "thirdPartyCount": 2,
+                "trackerCount": 1,
+                "score": {
+                    "kind": "gdpr_compliance",
+                    "label": "GDPR Compliance Score",
+                    "grade": "F",
+                    "overall_score": 38.0,
+                    "criteria": {},
+                },
+                "consentScan": {
+                    "cmpDetected": "Sourcepoint",
+                    "bannerFound": True,
+                    "hasAcceptButton": True,
+                    "hasRejectButton": True,
+                    "hasSettingsButton": True,
+                    "acceptButtonText": "Accept all",
+                    "rejectButtonText": "Essential cookies only",
+                    "settingsButtonText": "View options",
+                    "acceptClicksRequired": 1,
+                    "rejectClicksRequired": 1,
+                    "transparency": {},
+                    "darkPatterns": {"count": 0, "detected": []},
+                    "buttonComparison": None,
+                },
+            },
+            "current": {
+                "totalCookies": 2,
+                "thirdPartyCount": 0,
+                "trackerCount": 0,
+                "score": {
+                    "kind": "state_outcome",
+                    "label": "Post-Interaction State Score",
+                    "grade": "A",
+                    "overall_score": 94.0,
+                    "criteria": {},
+                },
+            },
+            "delta": {
+                "totalCookies": -6,
+                "thirdPartyCount": -2,
+                "trackerCount": -1,
+                "newCookies": [],
+                "newTrackers": [],
+            },
+            "honesty": {
+                "verdict": "mixed",
+                "findings": [
+                    "Only functional or unknown cookies remained after the claimed reject/essential action."
+                ],
+            },
+        },
+        "categoryCounts": {"Functional": 1, "Unknown": 1},
+        "totalCookies": 2,
+        "thirdPartyCount": 0,
+        "trackerCount": 0,
+        "trackersByVendor": {},
+        "cmpStats": None,
+        "petRecommendations": [],
+        "consentScan": {
+            "cmpDetected": "Sourcepoint",
+            "bannerFound": False,
+            "hasAcceptButton": False,
+            "hasRejectButton": False,
+            "hasSettingsButton": False,
+            "acceptButtonText": None,
+            "rejectButtonText": None,
+            "settingsButtonText": None,
+            "acceptClicksRequired": 999,
+            "rejectClicksRequired": 999,
+            "transparency": {},
+            "darkPatterns": {"count": 0, "detected": []},
+            "buttonComparison": None,
+        },
+    }
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _render_popup(page, popup_result)
+        state = page.evaluate(
+            """() => ({
+                mainLabel: document.getElementById("scoreLabel").textContent,
+                baselineHidden: document.getElementById("baselineScoreSection").classList.contains("hidden"),
+                baselineLabel: document.getElementById("baselineScoreLabel").textContent,
+                interactionHidden: document.getElementById("interactionSection").classList.contains("hidden"),
+                interactionText: document.getElementById("interactionInfo").textContent,
+                consentText: document.getElementById("consentInfo").textContent,
+                footer: document.getElementById("footerNote").textContent
+            })"""
+        )
+        browser.close()
+
+    assert state["mainLabel"] == "Post-Interaction State Score"
+    assert state["baselineHidden"] is False
+    assert state["baselineLabel"] == "GDPR Compliance Score"
+    assert state["interactionHidden"] is False
+    assert "Completed post-interaction audit" in state["interactionText"]
+    assert "Essential cookies only (observed)" in state["interactionText"]
+    assert "Mixed" in state["interactionText"]
+    assert "Total cookies-6" in state["interactionText"]
+    assert "Only functional or unknown cookies remained" in state["interactionText"]
+    assert "No consent banner found" in state["consentText"]
+    assert "Session-limited local consent audit" in state["footer"]
 
 
 def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
@@ -1682,23 +2148,34 @@ def test_extension_combined_study_snapshot_matches_authoritative_values() -> Non
     assert result["cmpStats"]["avgScore"] == 36.2
 
 
-def test_readme_and_store_listing_use_passive_combined_study_framing() -> None:
+def test_extension_copy_uses_session_limited_local_audit_framing() -> None:
     readme_text = README.read_text(encoding="utf-8")
     manifest_text = MANIFEST.read_text(encoding="utf-8")
     listing_text = STORE_LISTING.read_text(encoding="utf-8")
+    chrome_listing_text = STORE_LISTING_CHROME.read_text(encoding="utf-8")
+    firefox_listing_text = STORE_LISTING_FIREFOX.read_text(encoding="utf-8")
+    privacy_policy_text = PRIVACY_POLICY.read_text(encoding="utf-8")
 
-    assert "passive, local cookie-consent auditor" in readme_text.lower()
+    assert "local, user-initiated" in readme_text.lower()
+    assert "session-limited local audit" in readme_text.lower()
     assert "1000-site combined study" in readme_text
     assert "no blocking" in readme_text.lower()
     assert "no auto-clicking" in readme_text.lower()
     assert "study-backed pet guidance" in readme_text.lower()
+    assert "post-interaction" in readme_text.lower()
 
-    assert "Passive, research-grounded GDPR cookie-consent auditor" in manifest_text
+    assert "Local, user-initiated GDPR cookie-consent auditor with session-limited post-interaction analysis" in manifest_text
 
-    assert "Passive, research-grounded GDPR cookie-consent auditor" in listing_text
-    assert "1000-site combined study snapshot" in listing_text
-    assert "Not an auto-consent clicker" in listing_text
+    for text in (listing_text, chrome_listing_text, firefox_listing_text):
+        assert "local, user-initiated gdpr cookie-consent auditor" in text.lower()
+        assert "session-limited" in text.lower()
+        assert "1000-site combined study snapshot" in text
+
+    assert "not an auto-consent clicker" in listing_text.lower()
     assert "First to detect dark patterns" in listing_text
+    assert "research-grounded browser extension" in privacy_policy_text.lower()
+    assert "session-limited" in privacy_policy_text.lower()
+    assert "page-wide click logging" in privacy_policy_text.lower()
 
 
 def test_scorer_distinguishes_direct_and_settings_reject_paths() -> None:
@@ -1777,3 +2254,57 @@ def test_scorer_distinguishes_direct_and_settings_reject_paths() -> None:
     assert scores["noBanner"]["criteria"]["reject_option_available"]["score"] == 0
     assert scores["noBanner"]["criteria"]["post_reject_compliance"]["score"] == 0
     assert scores["noBanner"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
+
+
+def test_scorer_computes_post_interaction_state_score_and_honesty() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto("data:text/html,<html><body></body></html>")
+        page.add_script_tag(path=str(STUDY_SNAPSHOT))
+        page.add_script_tag(path=str(SHARED_CONFIG))
+        page.add_script_tag(path=str(TRACKER_DATA))
+        page.add_script_tag(path=str(SCORER))
+
+        scores = page.evaluate(
+            """() => {
+                const essentialOutcome = Scorer.computeStateOutcomeScore(
+                    {
+                        totalCookies: 2,
+                        thirdPartyCount: 0,
+                        trackerCount: 0,
+                        categoryCounts: { Functional: 1, Unknown: 1 }
+                    },
+                    {
+                        action: { type: "essential", text: "Essential cookies only", observed: true },
+                        baseline: { thirdPartyCount: 2 },
+                        delta: { newTrackers: [] }
+                    }
+                );
+
+                const acceptOutcome = Scorer.computeStateOutcomeScore(
+                    {
+                        totalCookies: 12,
+                        thirdPartyCount: 4,
+                        trackerCount: 3,
+                        categoryCounts: { Advertising: 2, Analytics: 1, Unknown: 9 }
+                    },
+                    {
+                        action: { type: "accept", text: "Accept all", observed: true },
+                        baseline: { thirdPartyCount: 1 },
+                        delta: { newTrackers: [{ name: "ad_id" }] }
+                    }
+                );
+
+                return { essentialOutcome, acceptOutcome };
+            }"""
+        )
+        browser.close()
+
+    assert scores["essentialOutcome"]["kind"] == "state_outcome"
+    assert scores["essentialOutcome"]["label"] == "Post-Interaction State Score"
+    assert scores["essentialOutcome"]["overall_score"] == 94
+    assert scores["essentialOutcome"]["criteria"]["claimed_action_honesty"]["score"] == 60
+    assert "Only functional or unknown cookies remained" in scores["essentialOutcome"]["criteria"]["claimed_action_honesty"]["details"]
+    assert scores["acceptOutcome"]["criteria"]["claimed_action_honesty"]["score"] is None
+    assert scores["acceptOutcome"]["overall_score"] == 28.2

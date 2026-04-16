@@ -1011,6 +1011,13 @@ COMPLIANCE_WEIGHTS: dict[str, float] = {
     "transparent_information": 0.10,
 }
 
+STATE_OUTCOME_WEIGHTS: dict[str, float] = {
+    "low_tracker_load": 0.45,
+    "low_third_party_load": 0.25,
+    "low_total_cookie_load": 0.15,
+    "claimed_action_honesty": 0.15,
+}
+
 GRADE_THRESHOLDS = [
     (90, "A"),
     (75, "B"),
@@ -1247,6 +1254,7 @@ def build_extension_shared_payload() -> dict[str, object]:
         "bannerTextPhrases": BANNER_TEXT_PHRASES,
         "bannerAttrHints": BANNER_ATTR_HINTS,
         "complianceWeights": COMPLIANCE_WEIGHTS,
+        "stateOutcomeWeights": STATE_OUTCOME_WEIGHTS,
         "grades": [{"threshold": threshold, "grade": grade} for threshold, grade in GRADE_THRESHOLDS],
         "privacyLinkKeywords": PRIVACY_LINK_KEYWORDS,
         "purposeKeywords": PURPOSE_KEYWORDS,

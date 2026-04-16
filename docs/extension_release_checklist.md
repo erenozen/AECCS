@@ -6,7 +6,7 @@
 - Publisher identity: personal publisher account, using AECCS as the product brand
 - Release model: listed add-on / public extension on both Firefox AMO and Chrome Web Store
 - Product posture:
-  - passive local auditor
+  - local, user-initiated, session-limited consent auditor
   - no blocking
   - no auto-clicking
   - no remote scan

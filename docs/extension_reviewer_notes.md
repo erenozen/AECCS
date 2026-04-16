@@ -2,7 +2,7 @@
 
 ## Reviewer Summary
 
-AECCS Cookie Compliance Checker is a passive, on-demand browser extension that analyzes the currently active webpage for GDPR cookie-consent compliance. It does not auto-click banners, block requests, crawl in the background, or send browsing data to any remote service.
+AECCS Cookie Compliance Checker is a local, user-initiated browser extension that analyzes the currently active webpage for GDPR cookie-consent compliance. After the user opens the popup on a visible banner, it may continue a session-limited local watch of that tracked consent flow for the current tab so it can compare before/after outcomes. It does not auto-click banners, block requests, crawl in the background, or send browsing data to any remote service.
 
 ## Why These Permissions Are Needed
 
@@ -35,6 +35,7 @@ These files are not downloaded at runtime, do not execute remote code, and do no
 - no cloud sync or server storage
 - no remote configuration or remote code loading
 - all analysis stays local to the user’s browser session
+- no page-wide click logging; only tracked consent controls inside the observed banner flow are watched after the user opens the popup
 
 ## Packaging Notes
 

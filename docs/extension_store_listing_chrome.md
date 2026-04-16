@@ -6,7 +6,7 @@ AECCS Cookie Compliance Checker
 
 ## Short Description
 
-Passive, research-grounded GDPR cookie-consent auditor for the current website.
+Local, user-initiated GDPR cookie-consent auditor with session-limited post-interaction analysis for the current website.
 
 ## Single Purpose
 
@@ -24,8 +24,9 @@ It audits the page you are currently visiting and highlights:
 - asymmetric buttons, hidden reject paths, preselected checkboxes, confusing language, forced action, and transparency signals
 - accept vs reject UX comparison using the controls that are actually visible on the page
 - study-backed privacy-tool guidance tied to the issues found on the current site
+- session-limited before/after consent-state comparisons when the user opens AECCS before interacting with the banner
 
-AECCS is grounded in the completed 1000-site combined study snapshot (`combined-1000`, generated March 6, 2026). The extension uses that completed combined snapshot as frozen local reference data. It does not fetch remote reports, does not simulate PETs live, and does not transmit browsing data off-device.
+AECCS is grounded in the completed 1000-site combined study snapshot (`combined-1000`, generated March 6, 2026). The extension uses that completed combined snapshot as frozen local reference data. It does not fetch remote reports, does not simulate PETs live, does not log page-wide clicks, and does not transmit browsing data off-device.
 
 ## Privacy Practices Summary
 
@@ -33,7 +34,7 @@ AECCS is grounded in the completed 1000-site combined study snapshot (`combined-
 - No data transferred off-device
 - No analytics or telemetry
 - No remote code
-- All analysis is triggered on demand when the user opens the popup
+- Analysis is user-initiated when the user opens the popup, and any consent watch is limited to the tracked banner flow for the current tab session
 
 ## Permission Justification Summary
 
