@@ -722,6 +722,97 @@ def test_consent_scanner_records_direct_essential_action_in_local_session() -> N
     assert session["action"]["observed"] is True
 
 
+def test_consent_scanner_records_direct_accept_action_in_local_session() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "sourcepoint_like.html").as_uri())
+        _install_scanner(page)
+
+        armed = page.evaluate(
+            """() => AECCSConsentScanner.armInteractionAuditSession({
+                baseline: {
+                    totalCookies: 8,
+                    thirdPartyCount: 2,
+                    trackerCount: 1,
+                    categoryCounts: { Advertising: 1, Functional: 2, Unknown: 5 },
+                    cookieKeys: ["cmp|.example.com|/"],
+                    score: {
+                        kind: "gdpr_compliance",
+                        label: "GDPR Compliance Score",
+                        overall_score: 38,
+                        grade: "F",
+                        criteria: {}
+                    },
+                    consentScan: { bannerFound: true, cmpDetected: "Sourcepoint" }
+                },
+                frameId: 0,
+                pageKey: "https://example.com/news"
+            })"""
+        )
+        page.click("button:has-text('Accept all')")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert armed["status"] == "armed"
+    assert armed["watching"] is True
+    assert session["status"] == "observed"
+    assert session["watching"] is False
+    assert session["action"]["type"] == "accept"
+    assert session["action"]["text"] == "Accept all"
+    assert session["action"]["observed"] is True
+    assert session["pageKey"] == "https://example.com/news"
+
+
+def test_consent_scanner_promotes_pending_accept_action_on_fast_teardown() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "sourcepoint_like.html").as_uri())
+        _install_scanner(page)
+
+        page.evaluate(
+            """() => {
+                AECCSConsentScanner.armInteractionAuditSession({
+                    baseline: {
+                        totalCookies: 8,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        categoryCounts: { Advertising: 1, Functional: 2, Unknown: 5 },
+                        cookieKeys: ["cmp|.example.com|/"],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 38,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: { bannerFound: true, cmpDetected: "Sourcepoint" }
+                    },
+                    frameId: 4,
+                    pageKey: "https://news.sky.com/"
+                });
+
+                const accept = document.querySelector("button.primary");
+                accept.addEventListener("pointerdown", () => {
+                    document.getElementById("sp_message_container_1").remove();
+                    window.dispatchEvent(new Event("pagehide"));
+                }, { once: true });
+            }"""
+        )
+
+        page.locator("button:has-text('Accept all')").dispatch_event("pointerdown")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert session["status"] == "observed"
+    assert session["watching"] is False
+    assert session["action"]["type"] == "accept"
+    assert session["action"]["text"] == "Accept all"
+    assert session["action"]["observed"] is False
+    assert session["pageKey"] == "https://news.sky.com/"
+
+
 def test_consent_scanner_keeps_watching_after_settings_click_until_final_action() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -1089,6 +1180,239 @@ def test_service_worker_returns_unknown_current_state_when_popup_opens_after_cli
     assert result["interactionAudit"]["baseline"] is None
 
 
+def test_service_worker_returns_accept_action_from_background_session_store() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        result = page.evaluate(
+            """async () => {
+                const url = "https://news.sky.com/world?edition=uk";
+                const pageKey = buildPageKey(url);
+                const now = new Date();
+                const recent = new Date(now.getTime() - 1000).toISOString();
+                const updatedAt = now.toISOString();
+
+                browser.tabs = {
+                    get: async () => ({ id: 10, url })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0] });
+                runConsentScanAcrossReadyFrames = async () => ({
+                    error: null,
+                    frameId: 0,
+                    scanResult: {
+                        cmpDetected: "Sourcepoint",
+                        bannerFound: false,
+                        hasAcceptButton: false,
+                        hasRejectButton: false,
+                        hasSettingsButton: false,
+                        acceptButtonText: null,
+                        rejectButtonText: null,
+                        settingsButtonText: null,
+                        acceptClicksRequired: 999,
+                        rejectClicksRequired: 999,
+                        transparency: {},
+                        darkPatterns: { count: 0, detected: [] },
+                        buttonComparison: null
+                    }
+                });
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["cmp|news.sky.com|/", "prefs|news.sky.com|/"],
+                    classifiedCookies: [
+                        { name: "cmp", domain: "news.sky.com", path: "/", category: "Functional", is_tracker: false, vendor: "First Party" },
+                        { name: "prefs", domain: "news.sky.com", path: "/", category: "Unknown", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 2,
+                    categoryCounts: { Functional: 1, Unknown: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getInteractionAuditSessionsFromFrames = async () => [];
+                syncInteractionAuditSessionToTopFrame = async () => null;
+
+                    persistInteractionSession(10, pageKey, {
+                        status: "completed",
+                        action: {
+                            type: "accept",
+                            text: "Accept all",
+                            observed: true,
+                            observedAt: recent
+                        },
+                    baseline: {
+                        totalCookies: 8,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        cookieKeys: ["cmp|news.sky.com|/"],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 38,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: {
+                            cmpDetected: "Sourcepoint",
+                            bannerFound: true,
+                            hasAcceptButton: true,
+                            hasRejectButton: true,
+                            hasSettingsButton: true,
+                            acceptButtonText: "Accept all",
+                            rejectButtonText: "Essential cookies only",
+                            settingsButtonText: "View options",
+                            acceptClicksRequired: 1,
+                            rejectClicksRequired: 1,
+                            transparency: {},
+                            darkPatterns: { count: 0, detected: [] },
+                            buttonComparison: null
+                        }
+                    },
+                    current: null,
+                    delta: null,
+                        honesty: {
+                            verdict: "not_applicable",
+                            findings: ["Honesty checks are only applied to reject or essential-only outcomes."]
+                        },
+                        frameId: 2,
+                        updatedAt
+                    }, 2);
+
+                return await handleAnalyze(10);
+            }"""
+        )
+        browser.close()
+
+    assert result["analysisMode"] == "post_interaction"
+    assert result["interactionAudit"]["status"] == "completed"
+    assert result["interactionAudit"]["action"]["type"] == "accept"
+    assert result["interactionAudit"]["action"]["text"] == "Accept all"
+    assert result["interactionAudit"]["action"]["observed"] is True
+    assert result["interactionAudit"]["honesty"]["verdict"] == "not_applicable"
+
+
+def test_service_worker_returns_accept_action_from_top_frame_mirror_when_background_is_empty() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        payload = page.evaluate(
+            """async () => {
+                const url = "https://news.sky.com/world";
+                const pageKey = buildPageKey(url);
+                const now = new Date();
+                const recent = new Date(now.getTime() - 1000).toISOString();
+                const updatedAt = now.toISOString();
+
+                browser.tabs = {
+                    get: async () => ({ id: 11, url })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0, 2] });
+                runConsentScanAcrossReadyFrames = async () => ({
+                    error: null,
+                    frameId: 0,
+                    scanResult: {
+                        cmpDetected: "Sourcepoint",
+                        bannerFound: false,
+                        hasAcceptButton: false,
+                        hasRejectButton: false,
+                        hasSettingsButton: false,
+                        acceptButtonText: null,
+                        rejectButtonText: null,
+                        settingsButtonText: null,
+                        acceptClicksRequired: 999,
+                        rejectClicksRequired: 999,
+                        transparency: {},
+                        darkPatterns: { count: 0, detected: [] },
+                        buttonComparison: null
+                    }
+                });
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["cmp|news.sky.com|/", "prefs|news.sky.com|/"],
+                    classifiedCookies: [
+                        { name: "cmp", domain: "news.sky.com", path: "/", category: "Functional", is_tracker: false, vendor: "First Party" },
+                        { name: "prefs", domain: "news.sky.com", path: "/", category: "Unknown", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 2,
+                    categoryCounts: { Functional: 1, Unknown: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getInteractionAuditSessionsFromFrames = async () => [
+                    {
+                        frameId: 0,
+                        status: "completed",
+                        pageKey,
+                        action: {
+                            type: "accept",
+                            text: "Accept all",
+                            observed: true,
+                            observedAt: recent
+                        },
+                        baseline: {
+                            totalCookies: 8,
+                            thirdPartyCount: 2,
+                            trackerCount: 1,
+                            cookieKeys: ["cmp|news.sky.com|/"],
+                            score: {
+                                kind: "gdpr_compliance",
+                                label: "GDPR Compliance Score",
+                                overall_score: 38,
+                                grade: "F",
+                                criteria: {}
+                            },
+                            consentScan: {
+                                cmpDetected: "Sourcepoint",
+                                bannerFound: true,
+                                hasAcceptButton: true,
+                                hasRejectButton: true,
+                                hasSettingsButton: true,
+                                acceptButtonText: "Accept all",
+                                rejectButtonText: "Essential cookies only",
+                                settingsButtonText: "View options",
+                                acceptClicksRequired: 1,
+                                rejectClicksRequired: 1,
+                                transparency: {},
+                                darkPatterns: { count: 0, detected: [] },
+                                buttonComparison: null
+                            }
+                        },
+                        current: null,
+                        delta: null,
+                        honesty: {
+                            verdict: "not_applicable",
+                            findings: ["Honesty checks are only applied to reject or essential-only outcomes."]
+                        },
+                        updatedAt
+                    }
+                ];
+                syncInteractionAuditSessionToTopFrame = async (_tabId, session) => {
+                    window.__topFrameSync = session;
+                    return session;
+                };
+
+                const result = await handleAnalyze(11);
+                return {
+                    result,
+                    stored: getStoredInteractionSession(11, pageKey),
+                    synced: window.__topFrameSync
+                };
+            }"""
+        )
+        browser.close()
+
+    result = payload["result"]
+    assert result["analysisMode"] == "post_interaction"
+    assert result["interactionAudit"]["action"]["type"] == "accept"
+    assert result["interactionAudit"]["action"]["text"] == "Accept all"
+    assert payload["stored"]["action"]["type"] == "accept"
+    assert payload["synced"]["action"]["type"] == "accept"
+
+
 def test_service_worker_selects_richest_captured_post_interaction_outcome() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -1104,6 +1428,8 @@ def test_service_worker_selects_richest_captured_post_interaction_outcome() -> N
                     { status: "completed", current: { totalCookies: 4, thirdPartyCount: 2, trackerCount: 1, capturedAt: "2026-04-16T10:00:02.000Z" } }
                 ];
 
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0] });
+                syncInteractionAuditSessionToTopFrame = async () => null;
                 capturePostInteractionAudit = async () => captures[index++];
                 window.__storedOutcome = null;
                 storeInteractionOutcomeForFrame = async (_tabId, _frameId, interactionAudit) => {
@@ -1135,6 +1461,133 @@ def test_service_worker_selects_richest_captured_post_interaction_outcome() -> N
     assert payload["stored"]["current"]["totalCookies"] == 4
 
 
+def test_service_worker_persists_accept_session_even_if_original_banner_frame_is_gone() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        payload = page.evaluate(
+            """async () => {
+                sleep = async () => {};
+                const url = "https://news.sky.com/world";
+                const pageKey = buildPageKey(url);
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0, 2] });
+                capturePostInteractionAudit = async () => ({
+                    status: "observed",
+                    action: {
+                        type: "accept",
+                        text: "Accept all",
+                        observed: true,
+                        observedAt: "2026-04-16T13:00:00.000Z"
+                    },
+                    baseline: {
+                        totalCookies: 8,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        cookieKeys: ["cmp|news.sky.com|/"],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 38,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: {
+                            cmpDetected: "Sourcepoint",
+                            bannerFound: true,
+                            hasAcceptButton: true,
+                            hasRejectButton: true,
+                            hasSettingsButton: true,
+                            acceptButtonText: "Accept all",
+                            rejectButtonText: "Essential cookies only",
+                            settingsButtonText: "View options",
+                            acceptClicksRequired: 1,
+                            rejectClicksRequired: 1,
+                            transparency: {},
+                            darkPatterns: { count: 0, detected: [] },
+                            buttonComparison: null
+                        }
+                    },
+                    current: {
+                        totalCookies: 30,
+                        thirdPartyCount: 0,
+                        trackerCount: 0,
+                        capturedAt: "2026-04-16T13:00:03.000Z"
+                    },
+                    delta: {
+                        totalCookies: 22,
+                        thirdPartyCount: -2,
+                        trackerCount: -1,
+                        newCookies: [],
+                        newTrackers: []
+                    },
+                    honesty: {
+                        verdict: "not_applicable",
+                        findings: ["Honesty checks are only applied to reject or essential-only outcomes."]
+                    }
+                });
+                window.__topFrameSync = null;
+                syncInteractionAuditSessionToTopFrame = async (_tabId, session) => {
+                    window.__topFrameSync = session;
+                    return session;
+                };
+                storeInteractionOutcomeForFrame = async () => {
+                    throw new Error("frame gone");
+                };
+
+                const result = await handleConsentInteractionObserved(
+                    {
+                        session: {
+                            status: "observed",
+                            pageKey,
+                            action: {
+                                type: "accept",
+                                text: "Accept all",
+                                observed: true,
+                                observedAt: "2026-04-16T13:00:00.000Z"
+                            },
+                            baseline: {
+                                totalCookies: 8,
+                                thirdPartyCount: 2,
+                                trackerCount: 1,
+                                cookieKeys: ["cmp|news.sky.com|/"],
+                                score: {
+                                    kind: "gdpr_compliance",
+                                    label: "GDPR Compliance Score",
+                                    overall_score: 38,
+                                    grade: "F",
+                                    criteria: {}
+                                },
+                                consentScan: { bannerFound: true, cmpDetected: "Sourcepoint" }
+                            },
+                            updatedAt: "2026-04-16T13:00:00.000Z"
+                        }
+                    },
+                    {
+                        tab: { id: 12, url },
+                        frameId: 2
+                    }
+                );
+
+                return {
+                    result,
+                    stored: getStoredInteractionSession(12, pageKey),
+                    synced: window.__topFrameSync
+                };
+            }"""
+        )
+        browser.close()
+
+    assert payload["result"]["ok"] is True
+    assert payload["stored"]["status"] == "completed"
+    assert payload["stored"]["action"]["type"] == "accept"
+    assert payload["stored"]["action"]["text"] == "Accept all"
+    assert payload["stored"]["current"]["totalCookies"] == 30
+    assert payload["synced"]["status"] == "completed"
+    assert payload["synced"]["action"]["type"] == "accept"
+
+
 def test_extension_background_analyze_succeeds_on_sky_news_fixture_when_supported() -> None:
     with sync_playwright() as p:
         with _serve_fixture_dir(FIXTURES) as base_url:
@@ -1163,6 +1616,49 @@ def test_extension_background_analyze_succeeds_on_sky_news_fixture_when_supporte
     assert result["score"]["kind"] == "gdpr_compliance"
     assert result["interactionAudit"]["status"] == "armed"
     assert "error" not in result
+
+
+def test_extension_background_preserves_accept_action_on_sky_news_fixture_when_supported() -> None:
+    with sync_playwright() as p:
+        with _serve_fixture_dir(FIXTURES) as base_url:
+            context = _launch_extension_context_or_skip(p)
+            try:
+                page = context.new_page()
+                page.goto(f"{base_url}/sky_news_sourcepoint_like.html", wait_until="domcontentloaded")
+                page.bring_to_front()
+                service_worker = _get_extension_service_worker(context)
+
+                baseline = service_worker.evaluate(
+                    """async () => {
+                        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+                        const tabId = tabs[0]?.id;
+                        return await handleAnalyze(tabId);
+                    }"""
+                )
+
+                consent_frame = next(
+                    frame for frame in page.frames
+                    if frame.url.endswith("sourcepoint_iframe_inner.html")
+                )
+                consent_frame.get_by_text("Accept all").click()
+                page.wait_for_timeout(3500)
+
+                after_click = service_worker.evaluate(
+                    """async () => {
+                        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+                        const tabId = tabs[0]?.id;
+                        return await handleAnalyze(tabId);
+                    }"""
+                )
+            finally:
+                context.close()
+
+    assert baseline["analysisMode"] == "baseline_banner"
+    assert baseline["interactionAudit"]["status"] == "armed"
+    assert after_click["analysisMode"] == "post_interaction"
+    assert after_click["interactionAudit"]["action"]["type"] == "accept"
+    assert after_click["interactionAudit"]["action"]["text"] == "Accept all"
+    assert after_click["interactionAudit"]["honesty"]["verdict"] == "not_applicable"
 
 
 def test_consent_scanner_matches_expected_dark_patterns_for_direct_banner() -> None:

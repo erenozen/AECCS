@@ -102,6 +102,7 @@
     const DEFAULT_SCAN_DELAY_MS = 160;
     const MAX_PRESENTATION_DESCENDANTS = 32;
     const INTERACTION_SESSION_TIMEOUT_MS = 120000;
+    const INTERACTION_PENDING_WINDOW_MS = 2500;
 
     let interactionSession = null;
     let interactionWatcherCleanup = null;
@@ -973,6 +974,106 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function buildInteractionAction(type, text, observed, timestamp) {
+    return {
+      type,
+      text: text || null,
+      observed: Boolean(observed),
+      observedAt: timestamp || new Date().toISOString(),
+    };
+  }
+
+  function normalizeInteractionSessionPayload(payload = {}) {
+    const cloned = cloneForTransport(payload) || {};
+    return {
+      status: cloned.status || "armed",
+      watching: Boolean(cloned.watching),
+      action: cloned.action || null,
+      baseline: cloned.baseline || null,
+      current: cloned.current || null,
+      delta: cloned.delta || null,
+      honesty: cloned.honesty || { verdict: "unknown", findings: [] },
+      frameId: cloned.frameId ?? null,
+      pageKey: cloned.pageKey || null,
+      pendingAction: cloned.pendingAction || null,
+      armedAt: cloned.armedAt || null,
+      observedAt: cloned.observedAt || cloned.action?.observedAt || null,
+      updatedAt: cloned.updatedAt || new Date().toISOString(),
+      stopReason: cloned.stopReason || null,
+      timeoutMs: Number(cloned.timeoutMs) > 0 ? Number(cloned.timeoutMs) : INTERACTION_SESSION_TIMEOUT_MS,
+      rootElement: null,
+      bannerSelector: null,
+      notified: Boolean(cloned.notified),
+      notificationInFlight: false,
+    };
+  }
+
+  function hasFreshPendingAction() {
+    if (!interactionSession?.pendingAction?.startedAt) return false;
+    const startedAt = Date.parse(interactionSession.pendingAction.startedAt) || 0;
+    if (!startedAt) return false;
+    return (Date.now() - startedAt) <= INTERACTION_PENDING_WINDOW_MS;
+  }
+
+  function setPendingInteractionAction(actionEl, type) {
+    if (!interactionSession || !actionEl || !type || type === "unknown" || type === "settings") {
+      return false;
+    }
+
+    const timestamp = new Date().toISOString();
+    interactionSession.pendingAction = {
+      type,
+      text: getElementLabel(actionEl) || null,
+      startedAt: timestamp,
+    };
+    interactionSession.updatedAt = timestamp;
+    return true;
+  }
+
+  function finalizeInteractionAction(action, observed, stopReason) {
+    if (!interactionSession || !action || !action.type) return false;
+
+    const timestamp = action.observedAt || new Date().toISOString();
+    interactionSession.status = "observed";
+    interactionSession.action = buildInteractionAction(
+      action.type,
+      action.text,
+      observed,
+      timestamp
+    );
+    interactionSession.observedAt = timestamp;
+    interactionSession.updatedAt = timestamp;
+    interactionSession.pendingAction = null;
+    interactionSession.honesty = { verdict: "unknown", findings: [] };
+    stopInteractionWatcher(stopReason);
+    void notifyBackgroundOfObservedInteraction();
+    return true;
+  }
+
+  function promotePendingInteractionAction(stopReason = "pending_action_promoted") {
+    if (!interactionSession || interactionSession.action || !hasFreshPendingAction()) {
+      return false;
+    }
+
+    const pending = interactionSession.pendingAction;
+    if (!pending?.type) return false;
+
+    return finalizeInteractionAction(
+      {
+        type: pending.type,
+        text: pending.text,
+        observedAt: pending.startedAt,
+      },
+      false,
+      stopReason
+    );
+  }
+
+  function isActivationKey(event) {
+    const key = String(event?.key || "");
+    return key === "Enter" || key === " " || key === "Spacebar";
+  }
+
   function clearInteractionTimeout() {
     if (interactionTimeoutId) {
       clearTimeout(interactionTimeoutId);
@@ -1012,6 +1113,8 @@
       delta: interactionSession.delta || null,
       honesty: interactionSession.honesty || { verdict: "unknown", findings: [] },
       frameId: interactionSession.frameId ?? null,
+      pageKey: interactionSession.pageKey || null,
+      pendingAction: interactionSession.pendingAction || null,
       armedAt: interactionSession.armedAt || null,
       observedAt: interactionSession.observedAt || null,
       updatedAt: interactionSession.updatedAt || null,
@@ -1081,6 +1184,7 @@
     if (
       !interactionSession ||
       interactionSession.notified ||
+      interactionSession.notificationInFlight ||
       typeof browser === "undefined" ||
       !browser.runtime ||
       typeof browser.runtime.sendMessage !== "function"
@@ -1088,15 +1192,18 @@
       return;
     }
 
-    interactionSession.notified = true;
+    interactionSession.notificationInFlight = true;
 
     try {
       await browser.runtime.sendMessage({
         action: "consentInteractionObserved",
         session: getInteractionAuditSession(),
       });
+      interactionSession.notified = true;
     } catch (_) {
       interactionSession.notified = false;
+    } finally {
+      interactionSession.notificationInFlight = false;
     }
   }
 
@@ -1105,19 +1212,15 @@
       return;
     }
 
-    const timestamp = new Date().toISOString();
-    interactionSession.status = "observed";
-    interactionSession.action = {
-      type,
-      text: getElementLabel(actionEl) || null,
-      observed: true,
-      observedAt: timestamp,
-    };
-    interactionSession.observedAt = timestamp;
-    interactionSession.updatedAt = timestamp;
-    interactionSession.honesty = { verdict: "unknown", findings: [] };
-    stopInteractionWatcher("final_action_observed");
-    void notifyBackgroundOfObservedInteraction();
+    finalizeInteractionAction(
+      {
+        type,
+        text: getElementLabel(actionEl) || null,
+        observedAt: new Date().toISOString(),
+      },
+      true,
+      "final_action_observed"
+    );
   }
 
   function armInteractionAuditSession(options = {}) {
@@ -1143,6 +1246,8 @@
       delta: null,
       honesty: { verdict: "unknown", findings: [] },
       frameId: options.frameId ?? null,
+      pageKey: options.pageKey || null,
+      pendingAction: null,
       armedAt: new Date().toISOString(),
       observedAt: null,
       updatedAt: new Date().toISOString(),
@@ -1151,41 +1256,103 @@
       bannerSelector: bannerMatch?.selector || null,
       stopReason: null,
       notified: false,
+      notificationInFlight: false,
     };
 
-    const onClick = event => {
-      if (!interactionSession || interactionSession.status === "completed") return;
+    const trackInteractionEvent = event => {
+      if (!interactionSession || interactionSession.status === "completed") return null;
 
       const actionable = event.target && event.target.closest ? event.target.closest(ACTIONABLE_SELECTOR) : null;
-      if (!actionable || !isWithinTrackedConsentFlow(actionable)) return;
+      if (!actionable || !isWithinTrackedConsentFlow(actionable)) return null;
 
       const actionType = classifyInteractionAction(getElementLabel(actionable));
-      if (actionType === "unknown") return;
+      if (actionType === "unknown") return null;
 
       interactionSession.updatedAt = new Date().toISOString();
       scheduleInteractionTimeout();
 
-      if (actionType === "settings") {
+      return { actionable, actionType };
+    };
+
+    const onPointerDown = event => {
+      const tracked = trackInteractionEvent(event);
+      if (!tracked || tracked.actionType === "settings") return;
+      setPendingInteractionAction(tracked.actionable, tracked.actionType);
+    };
+
+    const onKeyDown = event => {
+      if (!isActivationKey(event)) return;
+      const tracked = trackInteractionEvent(event);
+      if (!tracked || tracked.actionType === "settings") return;
+      setPendingInteractionAction(tracked.actionable, tracked.actionType);
+    };
+
+    const onClick = event => {
+      const tracked = trackInteractionEvent(event);
+      if (!tracked) return;
+
+      if (tracked.actionType === "settings") {
         refreshTrackedBannerRoot();
         return;
       }
 
-      observeFinalInteractionAction(actionable, actionType);
+      setPendingInteractionAction(tracked.actionable, tracked.actionType);
+      observeFinalInteractionAction(tracked.actionable, tracked.actionType);
     };
 
     const onPageHide = () => {
+      if (!interactionSession) return;
+      if (interactionSession.action) {
+        if (!interactionSession.notified) {
+          void notifyBackgroundOfObservedInteraction();
+        }
+        stopInteractionWatcher(interactionSession.action.observed ? "pagehide_after_action" : "pagehide_after_inferred");
+        return;
+      }
+      if (promotePendingInteractionAction("pagehide_inferred")) {
+        return;
+      }
       clearInteractionAuditSession();
     };
 
+    const onBeforeUnload = () => {
+      if (!interactionSession) return;
+      if (!interactionSession.action) {
+        promotePendingInteractionAction("beforeunload_inferred");
+      } else if (!interactionSession.notified) {
+        void notifyBackgroundOfObservedInteraction();
+      }
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown, true);
     document.addEventListener("click", onClick, true);
     window.addEventListener("pagehide", onPageHide, true);
+    window.addEventListener("beforeunload", onBeforeUnload, true);
 
     interactionWatcherCleanup = () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown, true);
       document.removeEventListener("click", onClick, true);
       window.removeEventListener("pagehide", onPageHide, true);
+      window.removeEventListener("beforeunload", onBeforeUnload, true);
     };
 
     scheduleInteractionTimeout();
+    return getInteractionAuditSession();
+  }
+
+  function syncInteractionAuditSession(outcome) {
+    if (!outcome || typeof outcome !== "object") {
+      return getInteractionAuditSession();
+    }
+
+    stopInteractionWatcher("synced_session");
+    interactionSession = normalizeInteractionSessionPayload(outcome);
+    interactionSession.watching = false;
+    interactionSession.stopReason = outcome.stopReason || "synced_session";
+    interactionSession.notified = true;
+    interactionSession.notificationInFlight = false;
     return getInteractionAuditSession();
   }
 
@@ -1201,6 +1368,8 @@
         delta: cloneForTransport(outcome?.delta || null),
         honesty: cloneForTransport(outcome?.honesty || { verdict: "unknown", findings: [] }),
         frameId: outcome?.frameId ?? null,
+        pageKey: outcome?.pageKey || null,
+        pendingAction: null,
         armedAt: null,
         observedAt: outcome?.action?.observedAt || null,
         updatedAt: now,
@@ -1209,6 +1378,7 @@
         bannerSelector: null,
         stopReason: "stored_outcome",
         notified: true,
+        notificationInFlight: false,
       };
       return getInteractionAuditSession();
     }
@@ -1220,9 +1390,12 @@
     interactionSession.current = cloneForTransport(outcome?.current || null);
     interactionSession.delta = cloneForTransport(outcome?.delta || null);
     interactionSession.honesty = cloneForTransport(outcome?.honesty || { verdict: "unknown", findings: [] });
+    interactionSession.pageKey = outcome?.pageKey || interactionSession.pageKey || null;
+    interactionSession.pendingAction = null;
     interactionSession.updatedAt = now;
     interactionSession.stopReason = "stored_outcome";
     interactionSession.notified = true;
+    interactionSession.notificationInFlight = false;
     stopInteractionWatcher("stored_outcome");
     return getInteractionAuditSession();
   }
@@ -1694,6 +1867,7 @@
       scoreResult: scanResultQuality,
       armInteractionAuditSession,
       getInteractionAuditSession,
+      syncInteractionAuditSession,
       storeInteractionOutcome,
       clearInteractionAuditSession,
     };

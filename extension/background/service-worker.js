@@ -43,6 +43,92 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
+const INTERACTION_SESSION_TTL_MS = 10 * 60 * 1000;
+const TAB_INTERACTION_SESSIONS = new Map();
+
+if (browser?.tabs?.onRemoved?.addListener) {
+  browser.tabs.onRemoved.addListener(tabId => {
+    TAB_INTERACTION_SESSIONS.delete(tabId);
+  });
+}
+
+function cloneForTransport(value) {
+  if (value == null) return value;
+  if (typeof structuredClone === "function") {
+    try {
+      return structuredClone(value);
+    } catch (_) {
+      // Fall through to JSON clone.
+    }
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
+function buildPageKey(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    return `${url.origin}${url.pathname}`;
+  } catch (_) {
+    return String(rawUrl || "");
+  }
+}
+
+function normalizeInteractionSessionForStorage(session, pageKey, frameId = null) {
+  if (!session || typeof session !== "object") return null;
+
+  const cloned = cloneForTransport(session) || {};
+  const timestamp = new Date().toISOString();
+  return {
+    status: cloned.status || "armed",
+    action: cloned.action || null,
+    baseline: cloned.baseline || null,
+    current: cloned.current || null,
+    delta: cloned.delta || null,
+    honesty: cloned.honesty || { verdict: "unknown", findings: [] },
+    frameId: frameId != null ? frameId : (cloned.frameId ?? null),
+    pageKey: pageKey || cloned.pageKey || null,
+    pendingAction: cloned.pendingAction || null,
+    armedAt: cloned.armedAt || null,
+    observedAt: cloned.observedAt || cloned.action?.observedAt || null,
+    updatedAt: cloned.updatedAt || timestamp,
+    stopReason: cloned.stopReason || null,
+    watching: Boolean(cloned.watching),
+  };
+}
+
+function isInteractionSessionExpired(session) {
+  const updatedAt = Date.parse(session?.updatedAt || 0) || 0;
+  if (!updatedAt) return true;
+  return (Date.now() - updatedAt) > INTERACTION_SESSION_TTL_MS;
+}
+
+function sessionMatchesPageKey(session, pageKey) {
+  if (!session) return false;
+  if (!pageKey) return true;
+  return !session.pageKey || session.pageKey === pageKey;
+}
+
+function getStoredInteractionSession(tabId, pageKey) {
+  const session = TAB_INTERACTION_SESSIONS.get(tabId);
+  if (!session) return null;
+  if (isInteractionSessionExpired(session) || !sessionMatchesPageKey(session, pageKey)) {
+    TAB_INTERACTION_SESSIONS.delete(tabId);
+    return null;
+  }
+  return cloneForTransport(session);
+}
+
+function persistInteractionSession(tabId, pageKey, session, frameId = null) {
+  const normalized = normalizeInteractionSessionForStorage(session, pageKey, frameId);
+  if (!normalized) return null;
+  TAB_INTERACTION_SESSIONS.set(tabId, normalized);
+  return cloneForTransport(normalized);
+}
+
+function clearStoredInteractionSession(tabId) {
+  TAB_INTERACTION_SESSIONS.delete(tabId);
+}
+
 async function handleAnalyze(tabId) {
   let tab;
   if (tabId) {
@@ -64,6 +150,7 @@ async function handleAnalyze(tabId) {
   }
 
   const hostname = url.hostname;
+  const pageKey = buildPageKey(tab.url);
   const isGovDomain = AECCS.GOV_SUFFIXES.some(suf => hostname.endsWith(suf));
 
   const runtime = await ensureScannerRuntimeAcrossFrames(tab.id);
@@ -82,12 +169,21 @@ async function handleAnalyze(tabId) {
     return { error: currentSite.error };
   }
 
-  const interactionSession = await getBestInteractionAuditSession(tab.id, runtime.frameIds);
+  const interactionSession = await getBestInteractionAuditSession(tab.id, pageKey, runtime.frameIds);
 
   if (consentScan?.bannerFound) {
     const baselineScore = Scorer.computeComplianceScore(currentSite.classifiedCookies, consentScan);
     const baseline = buildInteractionBaseline(currentSite, baselineScore, consentScan);
-    const armedSession = await armInteractionAuditSessionForFrame(tab.id, consentScanDetail.frameId, baseline);
+    const armedSession = await armInteractionAuditSessionForFrame(
+      tab.id,
+      consentScanDetail.frameId,
+      baseline,
+      pageKey
+    );
+    if (armedSession) {
+      persistInteractionSession(tab.id, pageKey, armedSession, consentScanDetail.frameId);
+      await syncInteractionAuditSessionToTopFrame(tab.id, armedSession, runtime.frameIds);
+    }
     const interactionAudit = buildArmedInteractionAudit(armedSession, baseline, currentSite);
     return buildAnalysisResponse({
       analysisMode: "baseline_banner",
@@ -117,6 +213,7 @@ async function handleAnalyze(tabId) {
     });
   }
 
+  clearStoredInteractionSession(tab.id);
   return buildUnavailableAnalysis(tab.url, hostname, consentScan, isGovDomain);
 }
 
@@ -810,8 +907,8 @@ function pickBetterInteractionSession(candidate, current) {
   return candidateFrameId < currentFrameId ? candidate : current;
 }
 
-async function getBestInteractionAuditSession(tabId, frameIds) {
-  if (!Array.isArray(frameIds) || frameIds.length === 0) return null;
+async function getInteractionAuditSessionsFromFrames(tabId, frameIds) {
+  if (!Array.isArray(frameIds) || frameIds.length === 0) return [];
 
   const results = (await browser.scripting.executeScript({
     target: buildFrameTarget(tabId, frameIds),
@@ -821,27 +918,94 @@ async function getBestInteractionAuditSession(tabId, frameIds) {
     },
   })).map(normalizeInteractionSessionResult);
 
-  let best = null;
-  for (const result of results) {
-    if (!result || result.status == null) continue;
-    best = pickBetterInteractionSession(result, best);
+  return results.filter(result => result && result.status != null);
+}
+
+async function syncInteractionAuditSessionToFrame(tabId, frameId, interactionSession) {
+  if (frameId == null || !interactionSession) return null;
+
+  const [result] = await browser.scripting.executeScript({
+    target: buildFrameTarget(tabId, [frameId]),
+    func: payload => {
+      if (!globalThis.AECCSConsentScanner?.syncInteractionAuditSession) return null;
+      return globalThis.AECCSConsentScanner.syncInteractionAuditSession(payload);
+    },
+    args: [interactionSession],
+  });
+
+  return normalizeInteractionSessionResult(result);
+}
+
+async function syncInteractionAuditSessionToTopFrame(tabId, interactionSession, readyFrameIds = null) {
+  if (!interactionSession) return null;
+  if (interactionSession.frameId === 0 && interactionSession.watching) {
+    return cloneForTransport(interactionSession);
   }
+
+  let frameIds = Array.isArray(readyFrameIds) && readyFrameIds.includes(0) ? readyFrameIds : null;
+  if (!frameIds) {
+    const runtime = await ensureScannerRuntimeAcrossFrames(tabId, [0]);
+    if (runtime.error || !runtime.frameIds.includes(0)) {
+      return null;
+    }
+    frameIds = runtime.frameIds;
+  }
+
+  if (!frameIds.includes(0)) return null;
+
+  try {
+    return await syncInteractionAuditSessionToFrame(tabId, 0, interactionSession);
+  } catch (_) {
+    return null;
+  }
+}
+
+async function getBestInteractionAuditSession(tabId, pageKey, frameIds) {
+  const storedSession = getStoredInteractionSession(tabId, pageKey);
+  const liveResults = await getInteractionAuditSessionsFromFrames(tabId, frameIds) || [];
+
+  const candidates = [];
+  if (storedSession) {
+    candidates.push(normalizeInteractionSessionForStorage(storedSession, pageKey));
+  }
+
+  const topFrameSession = liveResults.find(result => result.frameId === 0) || null;
+  if (topFrameSession && sessionMatchesPageKey(topFrameSession, pageKey)) {
+    candidates.push(normalizeInteractionSessionForStorage(topFrameSession, pageKey));
+  }
+
+  for (const result of liveResults) {
+    if (!result || result.status == null) continue;
+    if (!sessionMatchesPageKey(result, pageKey)) continue;
+    candidates.push(normalizeInteractionSessionForStorage(result, pageKey));
+  }
+
+  let best = null;
+  for (const candidate of candidates) {
+    best = pickBetterInteractionSession(candidate, best);
+  }
+
+  if (!best) return null;
+
+  persistInteractionSession(tabId, pageKey, best, best.frameId);
+  await syncInteractionAuditSessionToTopFrame(tabId, best, frameIds);
   return best;
 }
 
-async function armInteractionAuditSessionForFrame(tabId, frameId, baseline) {
+async function armInteractionAuditSessionForFrame(tabId, frameId, baseline, pageKey = null) {
   if (frameId == null) return null;
 
   const [result] = await browser.scripting.executeScript({
     target: buildFrameTarget(tabId, [frameId]),
-    func: (payload, currentFrameId) => {
+    func: (payload, currentFrameId, currentPageKey) => {
       if (!globalThis.AECCSConsentScanner?.armInteractionAuditSession) return null;
       return globalThis.AECCSConsentScanner.armInteractionAuditSession({
         baseline: payload,
         frameId: currentFrameId,
+        pageKey: currentPageKey,
       });
     },
-    args: [baseline, frameId],
+    args: [baseline, frameId, pageKey],
   });
 
   return normalizeInteractionSessionResult(result);
@@ -916,11 +1080,19 @@ async function handleConsentInteractionObserved(msg, sender) {
   const tabId = sender?.tab?.id;
   const tabUrl = sender?.tab?.url;
   const hostname = tabUrl ? new URL(tabUrl).hostname : null;
+  const pageKey = msg?.session?.pageKey || buildPageKey(tabUrl);
   const frameId = sender?.frameId ?? msg?.session?.frameId ?? null;
   const session = msg?.session || null;
 
   if (!tabId || !tabUrl || !hostname || !session) {
     return { ok: false };
+  }
+
+  const observedSession = persistInteractionSession(tabId, pageKey, session, frameId);
+
+  const runtime = await ensureScannerRuntimeAcrossFrames(tabId);
+  if (!runtime.error) {
+    await syncInteractionAuditSessionToTopFrame(tabId, observedSession, runtime.frameIds);
   }
 
   const captures = [];
@@ -936,7 +1108,20 @@ async function handleConsentInteractionObserved(msg, sender) {
 
   const best = selectBestCapturedInteractionAudit(captures);
   if (best) {
-    await storeInteractionOutcomeForFrame(tabId, frameId, best);
+    best.status = "completed";
+    best.frameId = frameId;
+    best.pageKey = pageKey;
+    best.updatedAt = new Date().toISOString();
+    const stored = persistInteractionSession(tabId, pageKey, best, frameId);
+    if (!runtime.error) {
+      await syncInteractionAuditSessionToTopFrame(tabId, stored, runtime.frameIds);
+    }
+    try {
+      await storeInteractionOutcomeForFrame(tabId, frameId, stored);
+    } catch (_) {
+      // The original banner frame may be gone; the top-frame mirror and
+      // background session remain the durable anchors.
+    }
   }
 
   return { ok: true };
