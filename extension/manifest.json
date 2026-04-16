@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AECCS Cookie Compliance Checker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Local, user-initiated GDPR cookie-consent auditor with session-limited post-interaction analysis using the AECCS methodology.",
   "permissions": [
     "cookies",
