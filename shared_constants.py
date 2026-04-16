@@ -355,6 +355,8 @@ CONSENT_ACTION_VOCABULARY: dict[str, dict[str, list[str]]] = {
         ],
         "contains": [
             "reject all cookies",
+            "reject optional cookies",
+            "reject non-essential cookies",
             "accept only necessary cookies",
             "accept only essential cookies",
             "only necessary cookies",
@@ -1214,13 +1216,6 @@ def _matches_action(normalized: str, action: str) -> bool:
 
     if normalized in exact:
         return True
-
-    if action in {"accept", "reject"}:
-        for term in exact:
-            if " " in term:
-                continue
-            if normalized.startswith(f"{term} "):
-                return True
 
     return any(term and term in normalized for term in contains)
 

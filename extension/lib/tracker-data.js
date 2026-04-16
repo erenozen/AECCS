@@ -6,44 +6,63 @@
  * combining those generated values with extension-only study metadata.
  */
 
-const AECCS = (() => {
+(() => {
   "use strict";
 
-  const SHARED = globalThis.AECCSSharedConfig;
-  if (!SHARED) {
-    throw new Error("AECCSSharedConfig missing. Load lib/shared-config.js before lib/tracker-data.js.");
+  const ROOT = typeof globalThis !== "undefined" ? globalThis : self;
+  const TRACKER_DATA_INIT_ERROR_KEY = "_AECCSTrackerDataInitError";
+  const TRACKER_DATA_INIT_STAGE_KEY = "_AECCSTrackerDataInitStage";
+
+  function setInitStage(stage) {
+    ROOT[TRACKER_DATA_INIT_STAGE_KEY] = stage;
   }
 
-  const FALLBACK_TRACKERS = SHARED.fallbackTrackers || {};
-  const COOKIE_HEURISTICS = (SHARED.cookieHeuristics || []).map(spec => ({
-    ...spec,
-    pattern: new RegExp(spec.pattern, spec.flags || ""),
-  }));
-  const CMP_SIGNATURES = SHARED.cmpSignatures || {};
-  const CONSENT_VOCABULARY = SHARED.consentVocabulary || {};
-  const CONSENT_BUTTON_KEYWORDS = SHARED.consentButtonKeywords || { accept: [], reject: [] };
-  const SETTINGS_KEYWORDS = SHARED.settingsKeywords || [];
-  const DISMISS_BUTTON_KEYWORDS = SHARED.dismissButtonKeywords || [];
-  const NECESSARY_KEYWORDS = SHARED.necessaryKeywords || [];
-  const BANNER_SELECTORS = SHARED.bannerSelectors || [];
-  const BANNER_TEXT_KEYWORDS = SHARED.bannerTextKeywords || [];
-  const BANNER_TEXT_PHRASES = SHARED.bannerTextPhrases || [];
-  const BANNER_ATTR_HINTS = SHARED.bannerAttrHints || [];
-  const COMPLIANCE_WEIGHTS = SHARED.complianceWeights || {};
-  const GRADES = SHARED.grades || [];
-  const PRIVACY_LINK_KEYWORDS = SHARED.privacyLinkKeywords || [];
-  const PURPOSE_KEYWORDS = SHARED.purposeKeywords || [];
-  const VENDOR_KEYWORDS = SHARED.vendorKeywords || [];
-  const GUILT_TRIP_PHRASES = SHARED.guiltTripPhrases || [];
-  const DOUBLE_NEGATIVE_PATTERNS = (SHARED.doubleNegativePatterns || []).map(
-    spec => new RegExp(spec.pattern, spec.flags || "")
-  );
+  function failInit(err) {
+    ROOT[TRACKER_DATA_INIT_ERROR_KEY] = err && err.message ? err.message : String(err);
+    delete ROOT._AECCSTrackerDataLoaded;
+    delete ROOT.AECCS;
+  }
+
+  try {
+    setInitStage("runtime");
+
+    const SHARED = ROOT.AECCSSharedConfig;
+    if (!SHARED) {
+      throw new Error("AECCSSharedConfig missing. Load lib/shared-config.js before lib/tracker-data.js.");
+    }
+
+    setInitStage("assembly");
+
+    const FALLBACK_TRACKERS = SHARED.fallbackTrackers || {};
+    const COOKIE_HEURISTICS = (SHARED.cookieHeuristics || []).map(spec => ({
+      ...spec,
+      pattern: new RegExp(spec.pattern, spec.flags || ""),
+    }));
+    const CMP_SIGNATURES = SHARED.cmpSignatures || {};
+    const CONSENT_VOCABULARY = SHARED.consentVocabulary || {};
+    const CONSENT_BUTTON_KEYWORDS = SHARED.consentButtonKeywords || { accept: [], reject: [] };
+    const SETTINGS_KEYWORDS = SHARED.settingsKeywords || [];
+    const DISMISS_BUTTON_KEYWORDS = SHARED.dismissButtonKeywords || [];
+    const NECESSARY_KEYWORDS = SHARED.necessaryKeywords || [];
+    const BANNER_SELECTORS = SHARED.bannerSelectors || [];
+    const BANNER_TEXT_KEYWORDS = SHARED.bannerTextKeywords || [];
+    const BANNER_TEXT_PHRASES = SHARED.bannerTextPhrases || [];
+    const BANNER_ATTR_HINTS = SHARED.bannerAttrHints || [];
+    const COMPLIANCE_WEIGHTS = SHARED.complianceWeights || {};
+    const GRADES = SHARED.grades || [];
+    const PRIVACY_LINK_KEYWORDS = SHARED.privacyLinkKeywords || [];
+    const PURPOSE_KEYWORDS = SHARED.purposeKeywords || [];
+    const VENDOR_KEYWORDS = SHARED.vendorKeywords || [];
+    const GUILT_TRIP_PHRASES = SHARED.guiltTripPhrases || [];
+    const DOUBLE_NEGATIVE_PATTERNS = (SHARED.doubleNegativePatterns || []).map(
+      spec => new RegExp(spec.pattern, spec.flags || "")
+    );
 
   // ── Frozen extension study snapshot (1000-site combined run) ────────────
   // The extension reads this lightweight generated layer first so popup copy,
   // PET context, and CMP stats stay aligned with data/real_combined.
 
-  const SNAPSHOT = globalThis.AECCSStudySnapshot || {
+    const SNAPSHOT = ROOT.AECCSStudySnapshot || {
     metadata: {
       label: "AECCS 1000-site combined study snapshot",
       sourceMode: "real_combined",
@@ -413,39 +432,43 @@ const AECCS = (() => {
     ],
   };
 
-  return {
-    FALLBACK_TRACKERS,
-    COOKIE_HEURISTICS,
-    CMP_SIGNATURES,
-    CONSENT_VOCABULARY,
-    CONSENT_BUTTON_KEYWORDS,
-    SETTINGS_KEYWORDS,
-    DISMISS_BUTTON_KEYWORDS,
-    NECESSARY_KEYWORDS,
-    BANNER_TEXT_KEYWORDS,
-    BANNER_TEXT_PHRASES,
-    BANNER_ATTR_HINTS,
-    COMPLIANCE_WEIGHTS,
-    GRADES,
-    PRIVACY_LINK_KEYWORDS,
-    PURPOSE_KEYWORDS,
-    VENDOR_KEYWORDS,
-    BANNER_SELECTORS,
-    GUILT_TRIP_PHRASES,
-    DOUBLE_NEGATIVE_PATTERNS,
-    STUDY_METADATA,
-    PET_STUDY_RESULTS,
-    PET_PROFILES,
-    CMP_STUDY_RESULTS,
-    GOV_SUFFIXES,
-    CMP_STATS,
-    DARK_PATTERN_INFO,
-    RESEARCH_HIGHLIGHTS,
-    CLAIM_GUARDRAILS,
-  };
-})();
+    const AECCS = {
+      FALLBACK_TRACKERS,
+      COOKIE_HEURISTICS,
+      CMP_SIGNATURES,
+      CONSENT_VOCABULARY,
+      CONSENT_BUTTON_KEYWORDS,
+      SETTINGS_KEYWORDS,
+      DISMISS_BUTTON_KEYWORDS,
+      NECESSARY_KEYWORDS,
+      BANNER_TEXT_KEYWORDS,
+      BANNER_TEXT_PHRASES,
+      BANNER_ATTR_HINTS,
+      COMPLIANCE_WEIGHTS,
+      GRADES,
+      PRIVACY_LINK_KEYWORDS,
+      PURPOSE_KEYWORDS,
+      VENDOR_KEYWORDS,
+      BANNER_SELECTORS,
+      GUILT_TRIP_PHRASES,
+      DOUBLE_NEGATIVE_PATTERNS,
+      STUDY_METADATA,
+      PET_STUDY_RESULTS,
+      PET_PROFILES,
+      CMP_STUDY_RESULTS,
+      GOV_SUFFIXES,
+      CMP_STATS,
+      DARK_PATTERN_INFO,
+      RESEARCH_HIGHLIGHTS,
+      CLAIM_GUARDRAILS,
+    };
 
-// Make available globally (for content scripts + importScripts in service worker)
-if (typeof globalThis !== "undefined") {
-  globalThis.AECCS = AECCS;
-}
+    ROOT.AECCS = AECCS;
+    ROOT._AECCSTrackerDataLoaded = true;
+    ROOT[TRACKER_DATA_INIT_STAGE_KEY] = "ready";
+    ROOT[TRACKER_DATA_INIT_ERROR_KEY] = null;
+  } catch (err) {
+    failInit(err);
+    throw err;
+  }
+})();

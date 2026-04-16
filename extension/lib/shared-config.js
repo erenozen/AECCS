@@ -620,6 +620,8 @@
       ],
       "contains": [
         "reject all cookies",
+        "reject optional cookies",
+        "reject non-essential cookies",
         "accept only necessary cookies",
         "accept only essential cookies",
         "only necessary cookies",
@@ -1409,6 +1411,8 @@
       "Yalnizca gerekli cerezler",
       "Yaln\u0131zca gerekli \u00e7erezler",
       "reject all cookies",
+      "reject optional cookies",
+      "reject non-essential cookies",
       "accept only necessary cookies",
       "accept only essential cookies",
       "only necessary cookies",

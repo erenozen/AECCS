@@ -15,76 +15,132 @@
 (() => {
   "use strict";
 
+  const ROOT = typeof globalThis !== "undefined" ? globalThis : self;
+  const SCANNER_INIT_ERROR_KEY = "_AECCSConsentScannerInitError";
+  const SCANNER_INIT_STAGE_KEY = "_AECCSConsentScannerInitStage";
+
   // Guard against duplicate injection (scripting.executeScript re-runs the
   // file even if it was already loaded).  Without this check, each injection
   // would register an additional runtime.onMessage listener.
-  if (globalThis._AECCSConsentScannerLoaded) return;
-  globalThis._AECCSConsentScannerLoaded = true;
-
-  const ACTIONABLE_SELECTOR = [
-    "button",
-    "a",
-    "[role='button']",
-    "input[type='submit']",
-    "input[type='button']",
-    "a.btn",
-    "a[class*='btn']",
-    "a[class*='button']",
-  ].join(", ");
-  const CANDIDATE_CONTAINER_SELECTOR = "div, section, aside, form, dialog";
-  const MAX_ANCESTOR_DEPTH = 6;
-  const DEFAULT_SCAN_ATTEMPTS = 4;
-  const DEFAULT_SCAN_DELAY_MS = 160;
-  const MAX_PRESENTATION_DESCENDANTS = 32;
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  function normalizeText(value) {
-    return String(value || "")
-      .replace(/[\u2018\u2019]/g, "'")
-      .replace(/[\u201C\u201D]/g, "\"")
-      .replace(/\s+/g, " ")
-      .trim();
+  if (ROOT.AECCSConsentScanner) {
+    ROOT._AECCSConsentScannerLoaded = true;
+    ROOT[SCANNER_INIT_STAGE_KEY] = "ready";
+    ROOT[SCANNER_INIT_ERROR_KEY] = null;
+    return;
   }
 
-  function normalizeForMatch(value) {
-    return normalizeText(value)
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
+  // Older failed loads may have set the flag before initialization completed.
+  // Clear the stale flag so reinjection can recover cleanly.
+  if (ROOT._AECCSConsentScannerLoaded && !ROOT.AECCSConsentScanner) {
+    delete ROOT._AECCSConsentScannerLoaded;
   }
 
-  function buildNormalizedMatcher(entries) {
-    const exact = new Set((entries?.exact || []).map(normalizeForMatch).filter(Boolean));
-    const contains = (entries?.contains || []).map(normalizeForMatch).filter(Boolean);
-    return { exact, contains };
+  let scannerInitStage = "boot";
+  function setInitStage(stage) {
+    scannerInitStage = stage;
+    ROOT[SCANNER_INIT_STAGE_KEY] = stage;
   }
 
-  function matchesAction(text, matcher, { exactOnly = false, allowPrefixFromExact = false } = {}) {
-    if (!text || !matcher) return false;
-    if (matcher.exact.has(text)) return true;
-    if (allowPrefixFromExact) {
-      for (const term of matcher.exact) {
-        if (term.includes(" ")) continue;
-        if (text.startsWith(`${term} `)) return true;
-      }
+  function failInit(err) {
+    ROOT[SCANNER_INIT_ERROR_KEY] = err && err.message ? err.message : String(err);
+    ROOT[SCANNER_INIT_STAGE_KEY] = scannerInitStage;
+    delete ROOT._AECCSConsentScannerLoaded;
+    delete ROOT.AECCSConsentScanner;
+  }
+
+  function requireRuntimeObject(runtime, key) {
+    const value = runtime && runtime[key];
+    if (!value || typeof value !== "object") {
+      throw new Error(`AECCS runtime missing ${key}`);
     }
-    if (exactOnly) return false;
-    return matcher.contains.some(term => text.includes(term));
+    return value;
   }
 
-  const ACCEPT_BUTTON_MATCHER = buildNormalizedMatcher(AECCS.CONSENT_VOCABULARY?.accept);
-  const REJECT_BUTTON_MATCHER = buildNormalizedMatcher(AECCS.CONSENT_VOCABULARY?.reject);
-  const SETTINGS_BUTTON_MATCHER = buildNormalizedMatcher(AECCS.CONSENT_VOCABULARY?.settings);
-  const DISMISS_BUTTON_TEXTS = new Set(
-    (AECCS.DISMISS_BUTTON_KEYWORDS || []).map(normalizeForMatch).filter(Boolean)
-  );
-  const NECESSARY_LABEL_KEYWORDS = (AECCS.NECESSARY_KEYWORDS || []).map(normalizeForMatch).filter(Boolean);
-  const BANNER_TEXT_KEYWORDS = (AECCS.BANNER_TEXT_KEYWORDS || []).map(normalizeForMatch).filter(Boolean);
-  const BANNER_TEXT_PHRASES = (AECCS.BANNER_TEXT_PHRASES || []).map(normalizeForMatch).filter(Boolean);
-  const BANNER_ATTR_HINTS = (AECCS.BANNER_ATTR_HINTS || []).map(normalizeForMatch).filter(Boolean);
-  const GUILT_TRIP_PHRASES = (AECCS.GUILT_TRIP_PHRASES || []).map(normalizeForMatch).filter(Boolean);
-  const DOUBLE_NEGATIVE_PATTERNS = AECCS.DOUBLE_NEGATIVE_PATTERNS || [];
+  function requireRuntimeArray(runtime, key) {
+    const value = runtime && runtime[key];
+    if (!Array.isArray(value)) {
+      throw new Error(`AECCS runtime missing ${key}`);
+    }
+    return value;
+  }
+
+  try {
+    setInitStage("runtime");
+
+    const AECCS_RUNTIME = ROOT.AECCS;
+    if (!AECCS_RUNTIME || typeof AECCS_RUNTIME !== "object") {
+      throw new Error("AECCS runtime unavailable. Load lib/tracker-data.js before content/consent-scanner.js.");
+    }
+
+    const CONSENT_VOCABULARY = requireRuntimeObject(AECCS_RUNTIME, "CONSENT_VOCABULARY");
+    const CMP_SIGNATURES = requireRuntimeObject(AECCS_RUNTIME, "CMP_SIGNATURES");
+    const BANNER_SELECTORS = requireRuntimeArray(AECCS_RUNTIME, "BANNER_SELECTORS");
+    const DISMISS_BUTTON_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "DISMISS_BUTTON_KEYWORDS");
+    const NECESSARY_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "NECESSARY_KEYWORDS");
+    const BANNER_TEXT_KEYWORDS_RAW = requireRuntimeArray(AECCS_RUNTIME, "BANNER_TEXT_KEYWORDS");
+    const BANNER_TEXT_PHRASES_RAW = requireRuntimeArray(AECCS_RUNTIME, "BANNER_TEXT_PHRASES");
+    const BANNER_ATTR_HINTS_RAW = requireRuntimeArray(AECCS_RUNTIME, "BANNER_ATTR_HINTS");
+    const GUILT_TRIP_PHRASES_RAW = requireRuntimeArray(AECCS_RUNTIME, "GUILT_TRIP_PHRASES");
+    const DOUBLE_NEGATIVE_PATTERNS = requireRuntimeArray(AECCS_RUNTIME, "DOUBLE_NEGATIVE_PATTERNS");
+    const PURPOSE_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "PURPOSE_KEYWORDS");
+    const VENDOR_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "VENDOR_KEYWORDS");
+    const PRIVACY_LINK_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "PRIVACY_LINK_KEYWORDS");
+
+    const ACTIONABLE_SELECTOR = [
+      "button",
+      "a",
+      "[role='button']",
+      "input[type='submit']",
+      "input[type='button']",
+      "a.btn",
+      "a[class*='btn']",
+      "a[class*='button']",
+    ].join(", ");
+    const CANDIDATE_CONTAINER_SELECTOR = "div, section, aside, form, dialog";
+    const MAX_ANCESTOR_DEPTH = 6;
+    const DEFAULT_SCAN_ATTEMPTS = 4;
+    const DEFAULT_SCAN_DELAY_MS = 160;
+    const MAX_PRESENTATION_DESCENDANTS = 32;
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function normalizeText(value) {
+      return String(value || "")
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, "\"")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function normalizeForMatch(value) {
+      return normalizeText(value)
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+    }
+
+    function buildNormalizedMatcher(entries) {
+      const exact = new Set((entries?.exact || []).map(normalizeForMatch).filter(Boolean));
+      const contains = (entries?.contains || []).map(normalizeForMatch).filter(Boolean);
+      return { exact, contains };
+    }
+
+    function matchesAction(text, matcher, { exactOnly = false } = {}) {
+      if (!text || !matcher) return false;
+      if (matcher.exact.has(text)) return true;
+      if (exactOnly) return false;
+      return matcher.contains.some(term => text.includes(term));
+    }
+
+    const ACCEPT_BUTTON_MATCHER = buildNormalizedMatcher(CONSENT_VOCABULARY.accept);
+    const REJECT_BUTTON_MATCHER = buildNormalizedMatcher(CONSENT_VOCABULARY.reject);
+    const SETTINGS_BUTTON_MATCHER = buildNormalizedMatcher(CONSENT_VOCABULARY.settings);
+    const DISMISS_BUTTON_TEXTS = new Set(DISMISS_BUTTON_KEYWORDS.map(normalizeForMatch).filter(Boolean));
+    const NECESSARY_LABEL_KEYWORDS = NECESSARY_KEYWORDS.map(normalizeForMatch).filter(Boolean);
+    const BANNER_TEXT_KEYWORDS = BANNER_TEXT_KEYWORDS_RAW.map(normalizeForMatch).filter(Boolean);
+    const BANNER_TEXT_PHRASES = BANNER_TEXT_PHRASES_RAW.map(normalizeForMatch).filter(Boolean);
+    const BANNER_ATTR_HINTS = BANNER_ATTR_HINTS_RAW.map(normalizeForMatch).filter(Boolean);
+    const GUILT_TRIP_PHRASES = GUILT_TRIP_PHRASES_RAW.map(normalizeForMatch).filter(Boolean);
 
   function parsePx(value) {
     if (!value) return 0;
@@ -205,8 +261,8 @@
     if (matchesAction(normalized, REJECT_BUTTON_MATCHER, { exactOnly: true })) return "reject";
     if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER, { exactOnly: true })) return "accept";
     if (matchesAction(normalized, SETTINGS_BUTTON_MATCHER, { exactOnly: true })) return "settings";
-    if (matchesAction(normalized, REJECT_BUTTON_MATCHER, { allowPrefixFromExact: true })) return "reject";
-    if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER, { allowPrefixFromExact: true })) return "accept";
+    if (matchesAction(normalized, REJECT_BUTTON_MATCHER)) return "reject";
+    if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER)) return "accept";
     if (matchesAction(normalized, SETTINGS_BUTTON_MATCHER)) return "settings";
     return "unknown";
   }
@@ -679,7 +735,7 @@
 
     const searchText = scriptSrcs.join(" ") + " " + idAndClassTokens.join(" ");
 
-    for (const [cmpName, signatures] of Object.entries(AECCS.CMP_SIGNATURES)) {
+    for (const [cmpName, signatures] of Object.entries(CMP_SIGNATURES)) {
       for (const sig of signatures) {
         if (searchText.includes(sig.toLowerCase())) {
           return cmpName;
@@ -700,7 +756,7 @@
       candidates.add(el);
     };
 
-    for (const selector of AECCS.BANNER_SELECTORS) {
+    for (const selector of BANNER_SELECTORS) {
       try {
         const elements = document.querySelectorAll(selector);
         for (const el of elements) {
@@ -1138,15 +1194,15 @@
 
     const text = (bannerEl.innerText || bannerEl.textContent || "").toLowerCase();
 
-    result.mentionsPurposes = AECCS.PURPOSE_KEYWORDS.some(kw => text.includes(kw));
-    result.mentionsVendors = AECCS.VENDOR_KEYWORDS.some(kw => text.includes(kw));
+    result.mentionsPurposes = PURPOSE_KEYWORDS.some(kw => text.includes(kw));
+    result.mentionsVendors = VENDOR_KEYWORDS.some(kw => text.includes(kw));
 
     // Check for privacy policy links via DOM traversal rather than innerHTML.
     const links = bannerEl.querySelectorAll("a[href]");
     result.hasPrivacyPolicyLink = Array.from(links).some(a => {
       const href = (a.href || "").toLowerCase();
       const linkText = (a.textContent || "").toLowerCase();
-      return AECCS.PRIVACY_LINK_KEYWORDS.some(kw => href.includes(kw) || linkText.includes(kw));
+      return PRIVACY_LINK_KEYWORDS.some(kw => href.includes(kw) || linkText.includes(kw));
     });
 
     if (text.length > 0) {
@@ -1345,22 +1401,29 @@
 
   // ── Runtime wiring ───────────────────────────────────────────────────────
 
-  if (typeof globalThis !== "undefined") {
-    globalThis.AECCSConsentScanner = {
+    setInitStage("wiring");
+    ROOT.AECCSConsentScanner = {
       scanPage: scanPageOnce,
       scanPageWithRetries,
       scoreResult: scanResultQuality,
     };
-  }
 
-  if (typeof browser !== "undefined" && browser.runtime && browser.runtime.onMessage) {
-    browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    ROOT._AECCSConsentScannerLoaded = true;
+    ROOT[SCANNER_INIT_STAGE_KEY] = "ready";
+    ROOT[SCANNER_INIT_ERROR_KEY] = null;
+
+    if (typeof browser !== "undefined" && browser.runtime && browser.runtime.onMessage) {
+      browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       if (msg.action === "scanConsent") {
         scanPageWithRetries()
           .then(result => sendResponse(result))
           .catch(err => sendResponse({ error: err.message }));
         return true;
       }
-    });
+      });
+    }
+  } catch (err) {
+    failInit(err);
+    throw err;
   }
 })();

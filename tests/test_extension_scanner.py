@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from html import escape
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from threading import Thread
 
 import pytest
 from playwright.sync_api import sync_playwright
 
+from tests._consent_cases import CONSENT_ACTION_CASES
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "extension_scanner"
@@ -20,16 +24,25 @@ SCORER = ROOT / "extension" / "lib" / "scorer.js"
 POPUP = ROOT / "extension" / "popup" / "popup.js"
 POPUP_CSS = ROOT / "extension" / "popup" / "popup.css"
 POPUP_HTML = ROOT / "extension" / "popup" / "popup.html"
+SERVICE_WORKER = ROOT / "extension" / "background" / "service-worker.js"
 MANIFEST = ROOT / "extension" / "manifest.json"
 README = ROOT / "README.md"
 STORE_LISTING = ROOT / "docs" / "extension_store_listing.md"
 
 
-def _install_scanner(target) -> None:
+def _install_runtime(target) -> None:
     target.add_script_tag(path=str(STUDY_SNAPSHOT))
     target.add_script_tag(path=str(SHARED_CONFIG))
     target.add_script_tag(path=str(TRACKER_DATA))
+
+
+def _install_scanner_script(target) -> None:
     target.add_script_tag(path=str(SCANNER))
+
+
+def _install_scanner(target) -> None:
+    _install_runtime(target)
+    _install_scanner_script(target)
 
 
 def _scan_fixture(page, fixture_name: str) -> dict:
@@ -82,12 +95,23 @@ def _scan_fixture_all_frames(page, fixture_name: str) -> dict:
     }
 
 
-def _scan_inline_banner(page, *, accept: str = "Accept All", reject: str | None = None, settings: str | None = None) -> dict:
-    buttons: list[str] = [f'<button type="button">{escape(accept)}</button>']
+def _scan_inline_banner(
+    page,
+    *,
+    accept: str | None = "Accept All",
+    reject: str | None = None,
+    settings: str | None = None,
+    dismiss: str | None = None,
+) -> dict:
+    buttons: list[str] = []
+    if accept:
+        buttons.append(f'<button type="button">{escape(accept)}</button>')
     if reject:
         buttons.append(f'<button type="button">{escape(reject)}</button>')
     if settings:
         buttons.append(f'<button type="button">{escape(settings)}</button>')
+    if dismiss:
+        buttons.append(f'<button type="button">{escape(dismiss)}</button>')
 
     page.set_content(
         f"""
@@ -250,6 +274,67 @@ def _render_popup(page, result: dict) -> None:
     page.add_script_tag(path=str(POPUP))
 
 
+def _install_service_worker_harness(page) -> None:
+    page.set_content("<!DOCTYPE html><html><body></body></html>")
+    page.evaluate(
+        """() => {
+            window.browser = {
+                runtime: {
+                    onMessage: {
+                        addListener() {}
+                    }
+                }
+            };
+        }"""
+    )
+    page.add_script_tag(path=str(SERVICE_WORKER))
+
+
+@contextmanager
+def _serve_fixture_dir(directory: Path):
+    class QuietHandler(SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=str(directory), **kwargs)
+
+        def log_message(self, format, *args):  # noqa: A003 - stdlib signature
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), QuietHandler)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address
+        yield f"http://{host}:{port}"
+    finally:
+        server.shutdown()
+        thread.join(timeout=5)
+        server.server_close()
+
+
+def _launch_extension_context_or_skip(playwright):
+    extension_dir = (ROOT / "extension").resolve()
+    try:
+        return playwright.chromium.launch_persistent_context(
+            user_data_dir="/tmp/aeccs-extension-integration-profile",
+            headless=True,
+            args=[
+                f"--disable-extensions-except={extension_dir}",
+                f"--load-extension={extension_dir}",
+            ],
+        )
+    except Exception as exc:  # pragma: no cover - environment dependent
+        pytest.skip(f"Extension-backed browser context unavailable in this environment: {exc}")
+
+
+def _get_extension_service_worker(context):
+    if context.service_workers:
+        return context.service_workers[0]
+    try:
+        return context.wait_for_event("serviceworker", timeout=10000)
+    except Exception as exc:  # pragma: no cover - environment dependent
+        pytest.skip(f"Extension service worker unavailable in this environment: {exc}")
+
+
 def test_consent_scanner_detects_nested_reddit_like_buttons() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -363,42 +448,43 @@ def test_consent_scanner_detects_sourcepoint_like_buttons() -> None:
     assert result["rejectClicksRequired"] == 1
 
 
-@pytest.mark.parametrize(
-    ("label", "expected_field"),
-    [
-        ("Necessary cookies only", "reject"),
-        ("Continue without accepting", "reject"),
-        ("View Options", "settings"),
-        ("Manage Preferences", "settings"),
-        ("Gerir preferências", "settings"),
-        ("Tylko niezbędne pliki cookie", "reject"),
-        ("Προβολή επιλογών", "settings"),
-        ("Endast nödvändiga cookies", "reject"),
-    ],
-)
-def test_consent_scanner_matches_multilingual_action_labels(label: str, expected_field: str) -> None:
+@pytest.mark.parametrize(("language", "label", "expected_field"), CONSENT_ACTION_CASES)
+def test_consent_scanner_matches_multilingual_action_labels(
+    language: str, label: str, expected_field: str
+) -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1280, "height": 900})
         result = _scan_inline_banner(
             page,
+            accept=label if expected_field == "accept" else (None if expected_field == "dismiss" else "Accept All"),
             reject=label if expected_field == "reject" else None,
             settings=label if expected_field == "settings" else None,
+            dismiss=label if expected_field == "dismiss" else None,
         )
         browser.close()
 
     assert result["bannerFound"] is True
-    assert result["hasAcceptButton"] is True
-    assert result["acceptButtonText"] == "Accept All"
 
-    if expected_field == "reject":
+    if expected_field == "accept":
+        assert result["hasAcceptButton"] is True
+        assert result["acceptButtonText"] == label
+    elif expected_field == "reject":
+        assert result["hasAcceptButton"] is True
+        assert result["acceptButtonText"] == "Accept All"
         assert result["hasRejectButton"] is True
         assert result["rejectButtonText"] == label
         assert result["rejectClicksRequired"] == 1
-    else:
+    elif expected_field == "settings":
+        assert result["hasAcceptButton"] is True
+        assert result["acceptButtonText"] == "Accept All"
         assert result["hasSettingsButton"] is True
         assert result["settingsButtonText"] == label
         assert result["rejectClicksRequired"] == 2
+    else:
+        assert result["hasAcceptButton"] is False
+        assert result["hasRejectButton"] is False
+        assert result["hasSettingsButton"] is False
 
 
 def test_consent_scanner_prefers_iframe_hosted_banner_via_frame_aggregation() -> None:
@@ -430,6 +516,336 @@ def test_consent_scanner_prefers_iframe_hosted_banner_via_frame_aggregation() ->
     ]
     assert len(iframe_scans) == 1
     assert iframe_scans[0]["scanResult"]["bannerFound"] is True
+
+
+def test_consent_scanner_bootstrap_exports_runtime_contract_in_order() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "sourcepoint_like.html").as_uri())
+
+        _install_runtime(page)
+        runtime_status = page.evaluate(
+            """() => ({
+                hasSharedConfig: !!globalThis.AECCSSharedConfig,
+                hasAECCS: !!globalThis.AECCS,
+                hasScanner: !!globalThis.AECCSConsentScanner
+            })"""
+        )
+
+        _install_scanner_script(page)
+        scanner_status = page.evaluate(
+            """() => ({
+                hasAECCS: !!globalThis.AECCS,
+                hasScanner: !!globalThis.AECCSConsentScanner,
+                loaded: !!globalThis._AECCSConsentScannerLoaded,
+                initStage: globalThis._AECCSConsentScannerInitStage,
+                initError: globalThis._AECCSConsentScannerInitError
+            })"""
+        )
+        browser.close()
+
+    assert runtime_status == {
+        "hasSharedConfig": True,
+        "hasAECCS": True,
+        "hasScanner": False,
+    }
+    assert scanner_status["hasAECCS"] is True
+    assert scanner_status["hasScanner"] is True
+    assert scanner_status["loaded"] is True
+    assert scanner_status["initStage"] == "ready"
+    assert scanner_status["initError"] is None
+
+
+def test_tracker_data_records_init_error_when_shared_config_is_missing() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "sourcepoint_like.html").as_uri())
+
+        page.add_script_tag(path=str(TRACKER_DATA))
+        tracker_state = page.evaluate(
+            """() => ({
+                loaded: !!globalThis._AECCSTrackerDataLoaded,
+                hasAECCS: !!globalThis.AECCS,
+                initStage: globalThis._AECCSTrackerDataInitStage,
+                initError: globalThis._AECCSTrackerDataInitError
+            })"""
+        )
+        browser.close()
+
+    assert tracker_state["loaded"] is False
+    assert tracker_state["hasAECCS"] is False
+    assert tracker_state["initStage"] == "runtime"
+    assert tracker_state["initError"] is not None
+    assert "AECCSSharedConfig missing" in tracker_state["initError"]
+
+
+def test_consent_scanner_recovers_after_failed_init_without_poisoning_frame() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "sourcepoint_like.html").as_uri())
+
+        _install_scanner_script(page)
+
+        failed_state = page.evaluate(
+            """() => ({
+                loaded: !!globalThis._AECCSConsentScannerLoaded,
+                hasScanner: !!globalThis.AECCSConsentScanner,
+                initStage: globalThis._AECCSConsentScannerInitStage,
+                initError: globalThis._AECCSConsentScannerInitError
+            })"""
+        )
+
+        _install_runtime(page)
+        _install_scanner_script(page)
+        recovered_state = page.evaluate(
+            """async () => ({
+                loaded: !!globalThis._AECCSConsentScannerLoaded,
+                hasScanner: !!globalThis.AECCSConsentScanner,
+                initStage: globalThis._AECCSConsentScannerInitStage,
+                initError: globalThis._AECCSConsentScannerInitError,
+                scanResult: await globalThis.AECCSConsentScanner.scanPageWithRetries({
+                    attempts: 2,
+                    delayMs: 20
+                })
+            })"""
+        )
+        browser.close()
+
+    assert failed_state["loaded"] is False
+    assert failed_state["hasScanner"] is False
+    assert failed_state["initStage"] == "runtime"
+    assert failed_state["initError"] is not None
+    assert "AECCS runtime unavailable" in failed_state["initError"]
+
+    assert recovered_state["loaded"] is True
+    assert recovered_state["hasScanner"] is True
+    assert recovered_state["initStage"] == "ready"
+    assert recovered_state["initError"] is None
+    assert recovered_state["scanResult"]["bannerFound"] is True
+    assert recovered_state["scanResult"]["rejectButtonText"] == "Essential cookies only"
+
+
+def test_consent_scanner_bootstraps_on_sky_news_like_sourcepoint_fixture() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        top_frame_result = _scan_fixture(page, "sky_news_sourcepoint_like.html")
+        merged = _scan_fixture_all_frames(page, "sky_news_sourcepoint_like.html")
+        browser.close()
+
+    assert top_frame_result["bannerFound"] is False
+
+    best = merged["best"]
+    assert best is not None
+    assert best["cmpDetected"] == "Sourcepoint"
+    assert best["bannerFound"] is True
+    assert best["hasAcceptButton"] is True
+    assert best["hasRejectButton"] is True
+    assert best["hasSettingsButton"] is True
+    assert best["acceptButtonText"] == "Accept all"
+    assert best["rejectButtonText"] == "Essential cookies only"
+    assert best["settingsButtonText"] == "View options"
+
+    iframe_scans = [
+        entry for entry in merged["frames"]
+        if entry["frameUrl"].endswith("sourcepoint_iframe_inner.html")
+    ]
+    assert len(iframe_scans) == 1
+    assert iframe_scans[0]["scanResult"]["bannerFound"] is True
+    assert iframe_scans[0]["scanResult"]["cmpDetected"] == "Sourcepoint"
+    assert iframe_scans[0]["scanResult"]["acceptButtonText"] == "Accept all"
+
+
+def test_service_worker_reports_scanner_init_context_when_all_frames_fail() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        result = page.evaluate(
+            """() => selectBestConsentScan([
+                {
+                    frameId: 0,
+                    result: {
+                        scanResult: null,
+                        scanScore: -1,
+                        error: "Consent scanner unavailable: stage=runtime; AECCS runtime unavailable. Load lib/tracker-data.js before content/consent-scanner.js.",
+                        initStage: "runtime",
+                        initError: "AECCS runtime unavailable. Load lib/tracker-data.js before content/consent-scanner.js."
+                    }
+                }
+            ])"""
+        )
+        browser.close()
+
+    assert "Content script unavailable in all frames" in result["error"]
+    assert "stage=runtime" in result["error"]
+    assert "AECCS runtime unavailable" in result["error"]
+
+
+def test_service_worker_stages_injection_across_verified_frames() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.set_content("<!DOCTYPE html><html><body></body></html>")
+        page.evaluate(
+            """() => {
+                window.__executeCalls = [];
+                window.browser = {
+                    runtime: {
+                        onMessage: {
+                            addListener() {}
+                        }
+                    },
+                    scripting: {
+                        executeScript: async request => {
+                            window.__executeCalls.push({
+                                target: request.target,
+                                files: request.files || null,
+                                hasFunc: !!request.func
+                            });
+                            const step = window.__executeCalls.length;
+                            if (step === 1) return [];
+                            if (step === 2) {
+                                return [
+                                    { frameId: 0, result: { hasSharedConfig: true, hasAECCSSharedConfig: true, sharedConfigKeys: 14, error: null } },
+                                    { frameId: 2, result: { hasSharedConfig: true, hasAECCSSharedConfig: true, sharedConfigKeys: 14, error: null } }
+                                ];
+                            }
+                            if (step === 3) return [];
+                            if (step === 4) {
+                                return [
+                                    { frameId: 0, result: { hasAECCS: true, initStage: "ready", initError: null, error: null } },
+                                    { frameId: 2, result: { hasAECCS: false, initStage: "runtime", initError: "AECCS runtime missing", error: "AECCS runtime missing" } }
+                                ];
+                            }
+                            if (step === 5) return [];
+                            if (step === 6) {
+                                return [
+                                    { frameId: 0, result: { hasScanner: true, initStage: "ready", initError: null, error: null } }
+                                ];
+                            }
+                            if (step === 7) {
+                                return [
+                                    {
+                                        frameId: 0,
+                                        result: {
+                                            scanResult: {
+                                                cmpDetected: "Sourcepoint",
+                                                bannerFound: true,
+                                                hasAcceptButton: true,
+                                                hasRejectButton: true,
+                                                hasSettingsButton: true,
+                                                acceptButtonText: "Accept all",
+                                                rejectButtonText: "Essential cookies only",
+                                                settingsButtonText: "View options",
+                                                acceptClicksRequired: 1,
+                                                rejectClicksRequired: 1,
+                                                darkPatterns: { count: 0, detected: [] }
+                                            },
+                                            scanScore: 14,
+                                            initStage: "ready",
+                                            initError: null
+                                        }
+                                    }
+                                ];
+                            }
+                            throw new Error(`Unexpected executeScript step ${step}`);
+                        }
+                    }
+                };
+            }"""
+        )
+        page.add_script_tag(path=str(SERVICE_WORKER))
+        payload = page.evaluate(
+            """async () => ({
+                result: await scanConsentAcrossFrames(123),
+                calls: window.__executeCalls
+            })"""
+        )
+        browser.close()
+
+    assert payload["result"]["bannerFound"] is True
+    assert payload["result"]["cmpDetected"] == "Sourcepoint"
+    assert payload["result"]["acceptButtonText"] == "Accept all"
+    assert payload["result"]["rejectButtonText"] == "Essential cookies only"
+
+    calls = payload["calls"]
+    assert calls[0]["files"] == ["lib/browser-polyfill.js", "lib/study-snapshot.js", "lib/shared-config.js"]
+    assert calls[1]["target"]["allFrames"] is True
+    assert calls[2]["files"] == ["lib/tracker-data.js"]
+    assert calls[2]["target"]["frameIds"] == [0, 2]
+    assert calls[4]["files"] == ["content/consent-scanner.js"]
+    assert calls[4]["target"]["frameIds"] == [0]
+    assert calls[6]["hasFunc"] is True
+    assert calls[6]["target"]["frameIds"] == [0]
+
+
+def test_service_worker_reports_shared_config_stage_error_when_unavailable() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.set_content("<!DOCTYPE html><html><body></body></html>")
+        page.evaluate(
+            """() => {
+                let step = 0;
+                window.browser = {
+                    runtime: {
+                        onMessage: {
+                            addListener() {}
+                        }
+                    },
+                    scripting: {
+                        executeScript: async request => {
+                            step += 1;
+                            if (step === 1) return [];
+                            if (step === 2) {
+                                return [
+                                    { frameId: 0, result: { hasSharedConfig: false, hasAECCSSharedConfig: false, sharedConfigKeys: 0, error: "AECCSSharedConfig missing" } },
+                                    { frameId: 1, result: { hasSharedConfig: false, hasAECCSSharedConfig: false, sharedConfigKeys: 0, error: "AECCSSharedConfig missing" } }
+                                ];
+                            }
+                            throw new Error(`Unexpected executeScript step ${step}`);
+                        }
+                    }
+                };
+            }"""
+        )
+        page.add_script_tag(path=str(SERVICE_WORKER))
+        result = page.evaluate("""async () => await scanConsentAcrossFrames(55)""")
+        browser.close()
+
+    assert "shared config unavailable in all frames" in result["error"]
+    assert "AECCSSharedConfig missing" in result["error"]
+
+
+def test_extension_background_analyze_succeeds_on_sky_news_fixture_when_supported() -> None:
+    with sync_playwright() as p:
+        with _serve_fixture_dir(FIXTURES) as base_url:
+            context = _launch_extension_context_or_skip(p)
+            try:
+                page = context.new_page()
+                page.goto(f"{base_url}/sky_news_sourcepoint_like.html", wait_until="domcontentloaded")
+                page.bring_to_front()
+                service_worker = _get_extension_service_worker(context)
+                result = service_worker.evaluate(
+                    """async () => {
+                        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+                        const tabId = tabs[0]?.id;
+                        return await handleAnalyze(tabId);
+                    }"""
+                )
+            finally:
+                context.close()
+
+    assert result["consentScan"]["cmpDetected"] == "Sourcepoint"
+    assert result["consentScan"]["bannerFound"] is True
+    assert result["consentScan"]["acceptButtonText"] == "Accept all"
+    assert result["consentScan"]["rejectButtonText"] == "Essential cookies only"
+    assert result["consentScan"]["settingsButtonText"] == "View options"
+    assert "error" not in result
 
 
 def test_consent_scanner_tracks_passive_parity_dark_patterns_for_direct_banner() -> None:

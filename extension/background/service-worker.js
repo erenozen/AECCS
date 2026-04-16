@@ -158,46 +158,217 @@ function buildDisabledAnalysis(url, hostname, consentScan, isGovDomain) {
 
 async function scanConsentAcrossFrames(tabId) {
   try {
-    // Inject scripts into every accessible frame. The consent scanner IIFE has
-    // a guard that skips re-initialisation if it was already loaded, so this
-    // remains idempotent even when the popup is reopened.
-    await browser.scripting.executeScript({
-      target: { tabId, allFrames: true },
-      files: [
-        "lib/browser-polyfill.js",
-        "lib/study-snapshot.js",
-        "lib/shared-config.js",
-        "lib/tracker-data.js",
-        "content/consent-scanner.js",
-      ],
-    });
+    const sharedStage = await injectAndVerifyStage(
+      tabId,
+      null,
+      ["lib/browser-polyfill.js", "lib/study-snapshot.js", "lib/shared-config.js"],
+      "shared config",
+      probeSharedConfigInFrame,
+      result => result.hasSharedConfig
+    );
+    if (sharedStage.error) return { error: sharedStage.error };
+
+    const trackerStage = await injectAndVerifyStage(
+      tabId,
+      sharedStage.frameIds,
+      ["lib/tracker-data.js"],
+      "tracker runtime",
+      probeTrackerRuntimeInFrame,
+      result => result.hasAECCS
+    );
+    if (trackerStage.error) return { error: trackerStage.error };
+
+    const scannerStage = await injectAndVerifyStage(
+      tabId,
+      trackerStage.frameIds,
+      ["content/consent-scanner.js"],
+      "scanner",
+      probeScannerRuntimeInFrame,
+      result => result.hasScanner
+    );
+    if (scannerStage.error) return { error: scannerStage.error };
 
     const frameResults = await browser.scripting.executeScript({
-      target: { tabId, allFrames: true },
-      func: async () => {
-        try {
-          if (!globalThis.AECCSConsentScanner) {
-            throw new Error("Consent scanner unavailable");
-          }
-
-          const scanResult = await globalThis.AECCSConsentScanner.scanPageWithRetries();
-          const scoreFn = globalThis.AECCSConsentScanner.scoreResult;
-          const scanScore = typeof scoreFn === "function" ? scoreFn(scanResult) : -1;
-
-          return { scanResult, scanScore };
-        } catch (err) {
-          return {
-            error: err && err.message ? err.message : String(err),
-            scanResult: null,
-            scanScore: -1,
-          };
-        }
-      },
+      target: buildFrameTarget(tabId, scannerStage.frameIds),
+      func: runScannerInFrame,
     });
 
     return selectBestConsentScan(frameResults);
   } catch (err) {
     return { error: `Content script unavailable: ${err.message}` };
+  }
+}
+
+function buildFrameTarget(tabId, frameIds = null) {
+  if (Array.isArray(frameIds) && frameIds.length > 0) {
+    return { tabId, frameIds: Array.from(new Set(frameIds)).sort((a, b) => a - b) };
+  }
+  return { tabId, allFrames: true };
+}
+
+function normalizeStageResult(executionResult) {
+  return {
+    frameId: executionResult?.frameId ?? null,
+    ...(executionResult?.result || {}),
+  };
+}
+
+async function injectAndVerifyStage(tabId, frameIds, files, stageLabel, probeFunc, isReady) {
+  let injectionError = null;
+  try {
+    await browser.scripting.executeScript({
+      target: buildFrameTarget(tabId, frameIds),
+      files,
+    });
+  } catch (err) {
+    injectionError = err && err.message ? err.message : String(err);
+  }
+
+  let probeResults = [];
+  try {
+    probeResults = (await browser.scripting.executeScript({
+      target: buildFrameTarget(tabId, frameIds),
+      func: probeFunc,
+    })).map(normalizeStageResult);
+  } catch (err) {
+    const probeError = err && err.message ? err.message : String(err);
+    return { error: buildStageUnavailableError(stageLabel, [], injectionError || probeError) };
+  }
+
+  const readyFrameIds = probeResults
+    .filter(result => {
+      try {
+        return isReady(result);
+      } catch (_) {
+        return false;
+      }
+    })
+    .map(result => result.frameId)
+    .filter(frameId => frameId != null);
+
+  if (readyFrameIds.length === 0) {
+    return {
+      error: buildStageUnavailableError(stageLabel, probeResults, injectionError),
+      results: probeResults,
+      frameIds: [],
+    };
+  }
+
+  return {
+    error: null,
+    results: probeResults,
+    frameIds: Array.from(new Set(readyFrameIds)).sort((a, b) => a - b),
+    injectionError,
+  };
+}
+
+function buildStageUnavailableError(stageLabel, probeResults, injectionError = null) {
+  const diagnostics = Array.from(
+    new Set(
+      (probeResults || [])
+        .map(result => {
+          const parts = [];
+          if (result.error) parts.push(result.error);
+          if (result.initStage) parts.push(`stage=${result.initStage}`);
+          if (result.initError) parts.push(result.initError);
+          if (result.hasAECCSSharedConfig === false) parts.push("AECCSSharedConfig missing");
+          if (result.hasAECCS === false) parts.push("AECCS runtime missing");
+          if (result.hasScanner === false) parts.push("AECCSConsentScanner missing");
+          if (result.sharedConfigKeys === 0 && result.hasSharedConfig === false) {
+            parts.push("shared config unavailable");
+          }
+          return parts.filter(Boolean).join("; ");
+        })
+        .filter(Boolean)
+    )
+  );
+
+  if (injectionError && !diagnostics.includes(injectionError)) {
+    diagnostics.unshift(injectionError);
+  }
+
+  if (diagnostics.length > 0) {
+    return `${stageLabel} unavailable in all frames: ${diagnostics.join("; ")}`;
+  }
+  return `${stageLabel} unavailable in all frames`;
+}
+
+function probeSharedConfigInFrame() {
+  const shared = globalThis.AECCSSharedConfig;
+  return {
+    hasSharedConfig: Boolean(shared),
+    hasAECCSSharedConfig: Boolean(shared),
+    sharedConfigKeys: shared && typeof shared === "object" ? Object.keys(shared).length : 0,
+    error: shared ? null : "AECCSSharedConfig missing",
+  };
+}
+
+function probeTrackerRuntimeInFrame() {
+  return {
+    hasSharedConfig: Boolean(globalThis.AECCSSharedConfig),
+    hasAECCSSharedConfig: Boolean(globalThis.AECCSSharedConfig),
+    hasAECCS: Boolean(globalThis.AECCS),
+    initStage: globalThis._AECCSTrackerDataInitStage || null,
+    initError: globalThis._AECCSTrackerDataInitError || null,
+    error: globalThis.AECCS
+      ? null
+      : (globalThis._AECCSTrackerDataInitError || "AECCS runtime missing"),
+  };
+}
+
+function probeScannerRuntimeInFrame() {
+  return {
+    hasAECCS: Boolean(globalThis.AECCS),
+    hasScanner: Boolean(globalThis.AECCSConsentScanner),
+    initStage: globalThis._AECCSConsentScannerInitStage || null,
+    initError: globalThis._AECCSConsentScannerInitError || null,
+    error: globalThis.AECCSConsentScanner
+      ? null
+      : (globalThis._AECCSConsentScannerInitError || "AECCSConsentScanner missing"),
+  };
+}
+
+async function runScannerInFrame() {
+  try {
+    if (!globalThis.AECCSConsentScanner) {
+      const diagnostics = [];
+      if (globalThis._AECCSTrackerDataInitStage) {
+        diagnostics.push(`tracker-stage=${globalThis._AECCSTrackerDataInitStage}`);
+      }
+      if (globalThis._AECCSTrackerDataInitError) {
+        diagnostics.push(globalThis._AECCSTrackerDataInitError);
+      }
+      if (globalThis._AECCSConsentScannerInitStage) {
+        diagnostics.push(`scanner-stage=${globalThis._AECCSConsentScannerInitStage}`);
+      }
+      if (globalThis._AECCSConsentScannerInitError) {
+        diagnostics.push(globalThis._AECCSConsentScannerInitError);
+      }
+      throw new Error(
+        diagnostics.length > 0
+          ? `Consent scanner unavailable: ${diagnostics.join("; ")}`
+          : "Consent scanner unavailable"
+      );
+    }
+
+    const scanResult = await globalThis.AECCSConsentScanner.scanPageWithRetries();
+    const scoreFn = globalThis.AECCSConsentScanner.scoreResult;
+    const scanScore = typeof scoreFn === "function" ? scoreFn(scanResult) : -1;
+
+    return {
+      scanResult,
+      scanScore,
+      initStage: globalThis._AECCSConsentScannerInitStage || null,
+      initError: globalThis._AECCSConsentScannerInitError || null,
+    };
+  } catch (err) {
+    return {
+      error: err && err.message ? err.message : String(err),
+      scanResult: null,
+      scanScore: -1,
+      initStage: globalThis._AECCSConsentScannerInitStage || null,
+      initError: globalThis._AECCSConsentScannerInitError || null,
+    };
   }
 }
 
@@ -212,6 +383,8 @@ function normalizeFrameScan(executionResult) {
     scanResult,
     scanScore,
     error: scanError,
+    initStage: payload.initStage || null,
+    initError: payload.initError || null,
   };
 }
 
@@ -251,6 +424,21 @@ function selectBestConsentScan(executionResults) {
 
   if (successful.length === 0) {
     const messages = Array.from(new Set(normalized.map(item => item.error).filter(Boolean)));
+    const initDetails = Array.from(
+      new Set(
+        normalized
+          .map(item => {
+            if (!item.initStage && !item.initError) return null;
+            return [item.initStage ? `stage=${item.initStage}` : null, item.initError].filter(Boolean).join("; ");
+          })
+          .filter(Boolean)
+      )
+    );
+    for (const detail of initDetails) {
+      if (!messages.includes(detail)) {
+        messages.push(detail);
+      }
+    }
     if (messages.length > 0) {
       return { error: `Content script unavailable in all frames: ${messages.join("; ")}` };
     }
