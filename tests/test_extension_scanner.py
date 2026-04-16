@@ -170,7 +170,7 @@ def _is_better_frame_scan(candidate: dict, current: dict | None) -> bool:
     return candidate["frameIndex"] < current["frameIndex"]
 
 
-def _render_popup(page, result: dict) -> None:
+def _mount_popup_shell(page) -> None:
     page.set_content(
         """
         <!DOCTYPE html>
@@ -271,6 +271,10 @@ def _render_popup(page, result: dict) -> None:
         """
     )
     page.add_style_tag(path=str(POPUP_CSS))
+
+
+def _render_popup(page, result: dict) -> None:
+    _mount_popup_shell(page)
     page.evaluate(
         """data => {
             window.browser = {
@@ -290,10 +294,11 @@ def _render_popup(page, result: dict) -> None:
     page.add_script_tag(path=str(POPUP))
 
 
-def _install_service_worker_harness(page) -> None:
+def _install_service_worker_harness(page, timeout_overrides: dict | None = None) -> None:
     page.set_content("<!DOCTYPE html><html><body></body></html>")
     page.evaluate(
-        """() => {
+        """overrides => {
+            window.__AECCS_TIMEOUTS = overrides || {};
             window.browser = {
                 runtime: {
                     onMessage: {
@@ -301,7 +306,8 @@ def _install_service_worker_harness(page) -> None:
                     }
                 }
             };
-        }"""
+        }""",
+        timeout_overrides or {},
     )
     page.add_script_tag(path=str(STUDY_SNAPSHOT))
     page.add_script_tag(path=str(SHARED_CONFIG))
@@ -858,6 +864,219 @@ def test_consent_scanner_keeps_watching_after_settings_click_until_final_action(
     assert final_session["action"]["text"] == "Reject All"
 
 
+def test_consent_scanner_keeps_eksi_session_armed_after_manage_choices_click() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "eksisozluk_settings_interaction.html").as_uri())
+        _install_scanner(page)
+
+        page.evaluate(
+            """() => AECCSConsentScanner.armInteractionAuditSession({
+                baseline: {
+                    totalCookies: 4,
+                    thirdPartyCount: 1,
+                    trackerCount: 0,
+                    categoryCounts: { Functional: 1, Unknown: 3 },
+                    cookieKeys: [],
+                    score: {
+                        kind: "gdpr_compliance",
+                        label: "GDPR Compliance Score",
+                        overall_score: 52,
+                        grade: "D",
+                        criteria: {}
+                    },
+                    consentScan: { bannerFound: true, cmpDetected: null }
+                },
+                frameId: 0
+            })"""
+        )
+
+        page.click("text=Seçenekleri yönetin")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert session["status"] == "armed"
+    assert session["watching"] is True
+    assert session["action"] is None
+
+
+def test_consent_scanner_infers_essential_from_confirm_choices_when_all_toggles_off() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "eksisozluk_settings_interaction.html").as_uri())
+        _install_scanner(page)
+
+        page.evaluate(
+            """() => AECCSConsentScanner.armInteractionAuditSession({
+                baseline: {
+                    totalCookies: 5,
+                    thirdPartyCount: 2,
+                    trackerCount: 1,
+                    categoryCounts: { Advertising: 1, Functional: 1, Unknown: 3 },
+                    cookieKeys: [],
+                    score: {
+                        kind: "gdpr_compliance",
+                        label: "GDPR Compliance Score",
+                        overall_score: 28,
+                        grade: "F",
+                        criteria: {}
+                    },
+                    consentScan: { bannerFound: true, cmpDetected: null }
+                },
+                frameId: 0,
+                pageKey: "https://eksisozluk.com/"
+            })"""
+        )
+
+        page.click("text=Seçenekleri yönetin")
+        page.evaluate("""() => window.__eksiSettings.setAllPreferences(false)""")
+        page.click("text=Seçimleri onayla")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert session["status"] == "observed"
+    assert session["watching"] is False
+    assert session["action"]["type"] == "essential"
+    assert session["action"]["text"] == "Seçimleri onayla"
+    assert session["action"]["observed"] is True
+
+
+def test_consent_scanner_infers_accept_from_confirm_choices_when_all_toggles_on() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "eksisozluk_settings_interaction.html").as_uri())
+        _install_scanner(page)
+
+        page.evaluate(
+            """() => AECCSConsentScanner.armInteractionAuditSession({
+                baseline: {
+                    totalCookies: 5,
+                    thirdPartyCount: 2,
+                    trackerCount: 1,
+                    categoryCounts: { Advertising: 1, Functional: 1, Unknown: 3 },
+                    cookieKeys: [],
+                    score: {
+                        kind: "gdpr_compliance",
+                        label: "GDPR Compliance Score",
+                        overall_score: 28,
+                        grade: "F",
+                        criteria: {}
+                    },
+                    consentScan: { bannerFound: true, cmpDetected: null }
+                },
+                frameId: 0
+            })"""
+        )
+
+        page.click("text=Seçenekleri yönetin")
+        page.evaluate("""() => window.__eksiSettings.setAllPreferences(true)""")
+        page.click("text=Seçimleri onayla")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert session["status"] == "observed"
+    assert session["watching"] is False
+    assert session["action"]["type"] == "accept"
+    assert session["action"]["text"] == "Seçimleri onayla"
+    assert session["action"]["observed"] is True
+
+
+def test_consent_scanner_marks_confirm_choices_unknown_when_toggle_state_is_mixed() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "eksisozluk_settings_interaction.html").as_uri())
+        _install_scanner(page)
+
+        page.evaluate(
+            """() => AECCSConsentScanner.armInteractionAuditSession({
+                baseline: {
+                    totalCookies: 5,
+                    thirdPartyCount: 2,
+                    trackerCount: 1,
+                    categoryCounts: { Advertising: 1, Functional: 1, Unknown: 3 },
+                    cookieKeys: [],
+                    score: {
+                        kind: "gdpr_compliance",
+                        label: "GDPR Compliance Score",
+                        overall_score: 28,
+                        grade: "F",
+                        criteria: {}
+                    },
+                    consentScan: { bannerFound: true, cmpDetected: null }
+                },
+                frameId: 0
+            })"""
+        )
+
+        page.click("text=Seçenekleri yönetin")
+        page.evaluate("""() => window.__eksiSettings.setPreferenceStates([true, false, true])""")
+        page.click("text=Seçimleri onayla")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert session["status"] == "observed"
+    assert session["watching"] is False
+    assert session["action"]["type"] == "unknown"
+    assert session["action"]["text"] == "Seçimleri onayla"
+    assert session["action"]["observed"] is True
+
+
+def test_consent_scanner_promotes_pending_confirm_choices_action_on_fast_teardown() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto((FIXTURES / "eksisozluk_settings_interaction.html").as_uri())
+        _install_scanner(page)
+
+        page.evaluate(
+            """() => {
+                AECCSConsentScanner.armInteractionAuditSession({
+                    baseline: {
+                        totalCookies: 5,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        categoryCounts: { Advertising: 1, Functional: 1, Unknown: 3 },
+                        cookieKeys: [],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 28,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: { bannerFound: true, cmpDetected: null }
+                    },
+                    frameId: 4,
+                    pageKey: "https://eksisozluk.com/"
+                });
+
+                window.__eksiSettings.setAllPreferences(false);
+                const confirm = document.getElementById("confirm-choices");
+                confirm.addEventListener("pointerdown", () => {
+                    document.getElementById("eksi-settings-modal").remove();
+                    document.getElementById("eksi-consent-banner").remove();
+                    window.dispatchEvent(new Event("pagehide"));
+                }, { once: true });
+            }"""
+        )
+
+        page.click("text=Seçenekleri yönetin")
+        page.locator("#confirm-choices").dispatch_event("pointerdown")
+        session = page.evaluate("""() => AECCSConsentScanner.getInteractionAuditSession()""")
+        browser.close()
+
+    assert session["status"] == "observed"
+    assert session["watching"] is False
+    assert session["action"]["type"] == "essential"
+    assert session["action"]["text"] == "Seçimleri onayla"
+    assert session["action"]["observed"] is False
+    assert session["pageKey"] == "https://eksisozluk.com/"
+
+
 def test_service_worker_reports_scanner_init_context_when_all_frames_fail() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -1292,6 +1511,328 @@ def test_service_worker_returns_accept_action_from_background_session_store() ->
     assert result["interactionAudit"]["honesty"]["verdict"] == "not_applicable"
 
 
+def test_service_worker_inject_and_verify_stage_times_out_with_stage_error() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page, {"frameStage": 20})
+        result = page.evaluate(
+            """async () => {
+                browser.scripting = {
+                    executeScript: async () => new Promise(() => {})
+                };
+
+                return await injectAndVerifyStage(
+                    5,
+                    [0],
+                    ["lib/shared-config.js"],
+                    "Shared config",
+                    () => ({ hasSharedConfig: Boolean(globalThis.AECCSSharedConfig) }),
+                    probe => probe.hasSharedConfig === true
+                );
+            }"""
+        )
+        browser.close()
+
+    assert "Shared config unavailable in all frames" in result["error"]
+    assert "timed out" in result["error"].lower()
+
+
+def test_service_worker_falls_back_to_stored_session_when_consent_scan_times_out() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(
+            page,
+            {
+                "analyzeTotal": 120,
+                "consentScan": 20,
+                "cookieRead": 20,
+                "sessionRead": 20,
+            },
+        )
+        result = page.evaluate(
+            """async () => {
+                const url = "https://news.sky.com/world";
+                const pageKey = buildPageKey(url);
+                const now = new Date().toISOString();
+
+                browser.tabs = {
+                    get: async () => ({ id: 21, url })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0] });
+                runConsentScanAcrossReadyFrames = async () => new Promise(() => {});
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["cmp|news.sky.com|/", "pref|news.sky.com|/"],
+                    classifiedCookies: [
+                        { name: "cmp", domain: "news.sky.com", path: "/", category: "Functional", is_tracker: false, vendor: "First Party" },
+                        { name: "pref", domain: "news.sky.com", path: "/", category: "Unknown", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 2,
+                    categoryCounts: { Functional: 1, Unknown: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getBestInteractionAuditSession = async () => ({
+                    status: "completed",
+                    pageKey,
+                    action: {
+                        type: "accept",
+                        text: "Accept all",
+                        observed: true,
+                        observedAt: now
+                    },
+                    baseline: {
+                        totalCookies: 7,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        cookieKeys: ["cmp|news.sky.com|/"],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 42,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: {
+                            cmpDetected: "Sourcepoint",
+                            bannerFound: true,
+                            hasAcceptButton: true,
+                            hasRejectButton: true,
+                            hasSettingsButton: true,
+                            acceptButtonText: "Accept all",
+                            rejectButtonText: "Essential cookies only",
+                            settingsButtonText: "View options",
+                            acceptClicksRequired: 1,
+                            rejectClicksRequired: 1,
+                            transparency: {},
+                            darkPatterns: { count: 0, detected: [] },
+                            buttonComparison: null
+                        }
+                    },
+                    current: null,
+                    delta: null,
+                    honesty: {
+                        verdict: "not_applicable",
+                        findings: ["Honesty checks are only applied to reject or essential-only outcomes."]
+                    },
+                    frameId: 0,
+                    updatedAt: now
+                });
+
+                return await handleAnalyze(21);
+            }"""
+        )
+        browser.close()
+
+    assert result["analysisMode"] == "post_interaction"
+    assert result["interactionAudit"]["status"] == "completed"
+    assert result["interactionAudit"]["action"]["type"] == "accept"
+    assert result["score"]["kind"] == "state_outcome"
+
+
+def test_service_worker_returns_unknown_current_state_when_consent_scan_times_out_without_session() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(
+            page,
+            {
+                "analyzeTotal": 120,
+                "consentScan": 20,
+                "cookieRead": 20,
+                "sessionRead": 20,
+            },
+        )
+        result = page.evaluate(
+            """async () => {
+                const url = "https://example.com/article";
+
+                browser.tabs = {
+                    get: async () => ({ id: 22, url })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0] });
+                runConsentScanAcrossReadyFrames = async () => new Promise(() => {});
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["pref|example.com|/"],
+                    classifiedCookies: [
+                        { name: "pref", domain: "example.com", path: "/", category: "Unknown", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 1,
+                    categoryCounts: { Unknown: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getBestInteractionAuditSession = async () => null;
+
+                return await handleAnalyze(22);
+            }"""
+        )
+        browser.close()
+
+    assert result["analysisMode"] == "post_interaction"
+    assert result["interactionAudit"]["status"] == "unknown_current_state"
+    assert result["interactionAudit"]["action"]["type"] == "unknown"
+
+
+def test_service_worker_returns_explicit_timeout_error_when_no_fallback_is_available() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(
+            page,
+            {
+                "analyzeTotal": 120,
+                "consentScan": 20,
+                "cookieRead": 20,
+                "sessionRead": 20,
+            },
+        )
+        result = page.evaluate(
+            """async () => {
+                const url = "https://example.com/plain";
+
+                browser.tabs = {
+                    get: async () => ({ id: 23, url })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0] });
+                runConsentScanAcrossReadyFrames = async () => ({
+                    error: null,
+                    frameId: 0,
+                    scanResult: {
+                        cmpDetected: null,
+                        bannerFound: false,
+                        hasAcceptButton: false,
+                        hasRejectButton: false,
+                        hasSettingsButton: false,
+                        acceptButtonText: null,
+                        rejectButtonText: null,
+                        settingsButtonText: null,
+                        acceptClicksRequired: 999,
+                        rejectClicksRequired: 999,
+                        transparency: {},
+                        darkPatterns: { count: 0, detected: [] },
+                        buttonComparison: null
+                    }
+                });
+                readCurrentSiteSnapshot = async () => new Promise(() => {});
+                getBestInteractionAuditSession = async () => null;
+
+                return await handleAnalyze(23);
+            }"""
+        )
+        browser.close()
+
+    assert result["error"] == (
+        "Analysis timed out on this page before AECCS could finish scanning. Try reopening the popup."
+    )
+
+
+def test_service_worker_dead_frame_and_timeout_fallback_do_not_surface_raw_frame_errors() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(
+            page,
+            {
+                "analyzeTotal": 120,
+                "consentScan": 20,
+                "cookieRead": 20,
+                "sessionRead": 20,
+            },
+        )
+        result = page.evaluate(
+            """async () => {
+                const url = "https://eksisozluk.com/baslik";
+                const pageKey = buildPageKey(url);
+                const now = new Date().toISOString();
+
+                browser.tabs = {
+                    get: async () => ({ id: 24, url })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0, 77] });
+                runConsentScanAcrossReadyFrames = async () => new Promise(() => {});
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["cmp_saved|eksisozluk.com|/"],
+                    classifiedCookies: [
+                        { name: "cmp_saved", domain: "eksisozluk.com", path: "/", category: "Functional", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 1,
+                    categoryCounts: { Functional: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getInteractionAuditSessionsFromFrames = async () => {
+                    throw new Error("No frame with id 77 in tab with id 24");
+                };
+                syncInteractionAuditSessionToTopFrame = async () => null;
+
+                persistInteractionSession(24, pageKey, {
+                    status: "completed",
+                    action: {
+                        type: "essential",
+                        text: "Seçimleri onayla",
+                        observed: false,
+                        observedAt: now
+                    },
+                    baseline: {
+                        totalCookies: 6,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        cookieKeys: ["cmp|eksisozluk.com|/"],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 41,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: {
+                            cmpDetected: "Funding Choices",
+                            bannerFound: true,
+                            hasAcceptButton: true,
+                            hasRejectButton: false,
+                            hasSettingsButton: true,
+                            acceptButtonText: "İzin ver",
+                            rejectButtonText: null,
+                            settingsButtonText: "Seçenekleri yönetin",
+                            acceptClicksRequired: 1,
+                            rejectClicksRequired: 2,
+                            transparency: {},
+                            darkPatterns: { count: 1, detected: ["Missing reject option"] },
+                            buttonComparison: null
+                        }
+                    },
+                    current: null,
+                    delta: null,
+                    honesty: {
+                        verdict: "mixed",
+                        findings: ["Only functional or unknown cookies remained after essential-only action."]
+                    },
+                    frameId: 77,
+                    updatedAt: now
+                }, 77);
+
+                return await handleAnalyze(24);
+            }"""
+        )
+        browser.close()
+
+    assert result["analysisMode"] == "post_interaction"
+    assert result["interactionAudit"]["action"]["type"] == "essential"
+    assert "error" not in result
+
+
 def test_service_worker_returns_accept_action_from_top_frame_mirror_when_background_is_empty() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -1411,6 +1952,160 @@ def test_service_worker_returns_accept_action_from_top_frame_mirror_when_backgro
     assert result["interactionAudit"]["action"]["text"] == "Accept all"
     assert payload["stored"]["action"]["type"] == "accept"
     assert payload["synced"]["action"]["type"] == "accept"
+
+
+def test_service_worker_ignores_dead_frames_when_collecting_interaction_sessions() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        sessions = page.evaluate(
+            """async () => {
+                browser.scripting = {
+                    executeScript: async request => {
+                        const frameId = request.target.frameIds[0];
+                        if (frameId === 77) {
+                            throw new Error("No frame with id 77 in tab with id 5");
+                        }
+                        return [{
+                            frameId,
+                            result: {
+                                status: "completed",
+                                pageKey: "https://eksisozluk.com/",
+                                action: {
+                                    type: "essential",
+                                    text: "Seçimleri onayla",
+                                    observed: false,
+                                    observedAt: "2026-04-16T13:00:00.000Z"
+                                },
+                                updatedAt: "2026-04-16T13:00:01.000Z"
+                            }
+                        }];
+                    }
+                };
+
+                return await getInteractionAuditSessionsFromFrames(5, [77, 0]);
+            }"""
+        )
+        browser.close()
+
+    assert len(sessions) == 1
+    assert sessions[0]["frameId"] == 0
+    assert sessions[0]["action"]["type"] == "essential"
+    assert sessions[0]["action"]["text"] == "Seçimleri onayla"
+
+
+def test_service_worker_handle_analyze_degrades_cleanly_when_dead_frame_lookup_fails() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _install_service_worker_harness(page)
+        result = page.evaluate(
+            """async () => {
+                const url = "https://eksisozluk.com/baslik";
+                const pageKey = buildPageKey(url);
+                const now = new Date();
+                const recent = new Date(now.getTime() - 1000).toISOString();
+                const updatedAt = now.toISOString();
+
+                browser.tabs = {
+                    get: async () => ({ id: 13, url })
+                };
+
+                ensureScannerRuntimeAcrossFrames = async () => ({ error: null, frameIds: [0, 77] });
+                runConsentScanAcrossReadyFrames = async () => ({
+                    error: null,
+                    frameId: 0,
+                    scanResult: {
+                        cmpDetected: "Funding Choices",
+                        bannerFound: false,
+                        hasAcceptButton: false,
+                        hasRejectButton: false,
+                        hasSettingsButton: false,
+                        acceptButtonText: null,
+                        rejectButtonText: null,
+                        settingsButtonText: null,
+                        acceptClicksRequired: 999,
+                        rejectClicksRequired: 999,
+                        transparency: {},
+                        darkPatterns: { count: 0, detected: [] },
+                        buttonComparison: null
+                    }
+                });
+                readCurrentSiteSnapshot = async () => ({
+                    cookies: [],
+                    cookieKeys: ["cmp_saved|eksisozluk.com|/", "consent_mode|eksisozluk.com|/"],
+                    classifiedCookies: [
+                        { name: "cmp_saved", domain: "eksisozluk.com", path: "/", category: "Functional", is_tracker: false, vendor: "First Party" },
+                        { name: "consent_mode", domain: "eksisozluk.com", path: "/", category: "Unknown", is_tracker: false, vendor: "First Party" }
+                    ],
+                    totalCookies: 2,
+                    categoryCounts: { Functional: 1, Unknown: 1 },
+                    trackersByVendor: {},
+                    trackerCount: 0,
+                    thirdPartyCount: 0
+                });
+                getInteractionAuditSessionsFromFrames = async () => {
+                    throw new Error("No frame with id 77 in tab with id 13");
+                };
+                syncInteractionAuditSessionToTopFrame = async () => null;
+
+                persistInteractionSession(13, pageKey, {
+                    status: "completed",
+                    action: {
+                        type: "essential",
+                        text: "Seçimleri onayla",
+                        observed: false,
+                        observedAt: recent
+                    },
+                    baseline: {
+                        totalCookies: 6,
+                        thirdPartyCount: 2,
+                        trackerCount: 1,
+                        cookieKeys: ["cmp|eksisozluk.com|/"],
+                        score: {
+                            kind: "gdpr_compliance",
+                            label: "GDPR Compliance Score",
+                            overall_score: 41,
+                            grade: "F",
+                            criteria: {}
+                        },
+                        consentScan: {
+                            cmpDetected: "Funding Choices",
+                            bannerFound: true,
+                            hasAcceptButton: true,
+                            hasRejectButton: false,
+                            hasSettingsButton: true,
+                            acceptButtonText: "İzin ver",
+                            rejectButtonText: null,
+                            settingsButtonText: "Seçenekleri yönetin",
+                            acceptClicksRequired: 1,
+                            rejectClicksRequired: 2,
+                            transparency: {},
+                            darkPatterns: { count: 1, detected: ["Missing reject option"] },
+                            buttonComparison: null
+                        }
+                    },
+                    current: null,
+                    delta: null,
+                    honesty: {
+                        verdict: "mixed",
+                        findings: ["Only functional or unknown cookies remained after the restrictive choice."]
+                    },
+                    frameId: 77,
+                    updatedAt
+                }, 77);
+
+                return await handleAnalyze(13);
+            }"""
+        )
+        browser.close()
+
+    assert "error" not in result
+    assert result["analysisMode"] == "post_interaction"
+    assert result["interactionAudit"]["status"] == "completed"
+    assert result["interactionAudit"]["action"]["type"] == "essential"
+    assert result["interactionAudit"]["action"]["text"] == "Seçimleri onayla"
 
 
 def test_service_worker_selects_richest_captured_post_interaction_outcome() -> None:
@@ -1659,6 +2354,47 @@ def test_extension_background_preserves_accept_action_on_sky_news_fixture_when_s
     assert after_click["interactionAudit"]["action"]["type"] == "accept"
     assert after_click["interactionAudit"]["action"]["text"] == "Accept all"
     assert after_click["interactionAudit"]["honesty"]["verdict"] == "not_applicable"
+
+
+def test_extension_background_preserves_essential_action_on_eksi_settings_fixture_when_supported() -> None:
+    with sync_playwright() as p:
+        with _serve_fixture_dir(FIXTURES) as base_url:
+            context = _launch_extension_context_or_skip(p)
+            try:
+                page = context.new_page()
+                page.goto(f"{base_url}/eksisozluk_settings_interaction.html", wait_until="domcontentloaded")
+                page.bring_to_front()
+                service_worker = _get_extension_service_worker(context)
+
+                baseline = service_worker.evaluate(
+                    """async () => {
+                        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+                        const tabId = tabs[0]?.id;
+                        return await handleAnalyze(tabId);
+                    }"""
+                )
+
+                page.get_by_text("Seçenekleri yönetin").click()
+                page.evaluate("""() => window.__eksiSettings.setAllPreferences(false)""")
+                page.get_by_text("Seçimleri onayla").click()
+                page.wait_for_timeout(3500)
+
+                after_click = service_worker.evaluate(
+                    """async () => {
+                        const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+                        const tabId = tabs[0]?.id;
+                        return await handleAnalyze(tabId);
+                    }"""
+                )
+            finally:
+                context.close()
+
+    assert baseline["analysisMode"] == "baseline_banner"
+    assert baseline["interactionAudit"]["status"] == "armed"
+    assert after_click["analysisMode"] == "post_interaction"
+    assert after_click["interactionAudit"]["action"]["type"] == "essential"
+    assert after_click["interactionAudit"]["action"]["text"] == "Seçimleri onayla"
+    assert "error" not in after_click
 
 
 def test_consent_scanner_matches_expected_dark_patterns_for_direct_banner() -> None:
@@ -2043,6 +2779,84 @@ def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
     assert state["disabledBorderColor"] == "rgb(191, 219, 254)"
     assert state["disabledMessageColor"] == "rgb(95, 112, 136)"
     assert state["disabledIconBackground"] == "rgb(37, 99, 235)"
+
+
+def test_popup_shows_error_when_background_analyze_never_resolves() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _mount_popup_shell(page)
+        page.evaluate(
+            """timeoutMs => {
+                window.__AECCS_POPUP_ANALYZE_TIMEOUT_MS = timeoutMs;
+                window.browser = {
+                    tabs: {
+                        query: async () => [{ id: 1, url: "https://eksisozluk.com" }]
+                    },
+                    runtime: {
+                        sendMessage: async () => new Promise(() => {})
+                    }
+                };
+            }""",
+            20,
+        )
+        page.add_script_tag(path=str(STUDY_SNAPSHOT))
+        page.add_script_tag(path=str(SHARED_CONFIG))
+        page.add_script_tag(path=str(TRACKER_DATA))
+        page.add_script_tag(path=str(POPUP))
+        page.wait_for_function(
+            """() => !document.getElementById("errorState").classList.contains("hidden")"""
+        )
+        state = page.evaluate(
+            """() => ({
+                loadingHidden: document.getElementById("loading").classList.contains("hidden"),
+                errorHidden: document.getElementById("errorState").classList.contains("hidden"),
+                message: document.getElementById("errorMsg").textContent,
+            })"""
+        )
+        browser.close()
+
+    assert state["loadingHidden"] is True
+    assert state["errorHidden"] is False
+    assert "did not receive an analysis response in time" in state["message"]
+
+
+def test_popup_shows_error_when_background_returns_undefined() -> None:
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        _mount_popup_shell(page)
+        page.evaluate(
+            """() => {
+                window.browser = {
+                    tabs: {
+                        query: async () => [{ id: 1, url: "https://eksisozluk.com" }]
+                    },
+                    runtime: {
+                        sendMessage: async () => undefined
+                    }
+                };
+            }"""
+        )
+        page.add_script_tag(path=str(STUDY_SNAPSHOT))
+        page.add_script_tag(path=str(SHARED_CONFIG))
+        page.add_script_tag(path=str(TRACKER_DATA))
+        page.add_script_tag(path=str(POPUP))
+        page.wait_for_function(
+            """() => !document.getElementById("errorState").classList.contains("hidden")"""
+        )
+        state = page.evaluate(
+            """() => ({
+                loadingHidden: document.getElementById("loading").classList.contains("hidden"),
+                errorHidden: document.getElementById("errorState").classList.contains("hidden"),
+                message: document.getElementById("errorMsg").textContent,
+            })"""
+        )
+        browser.close()
+
+    assert state["loadingHidden"] is True
+    assert state["errorHidden"] is False
+    assert "did not receive a usable analysis response" in state["message"]
 
 
 def test_popup_renders_post_interaction_scores_and_honesty_details() -> None:

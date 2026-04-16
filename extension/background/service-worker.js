@@ -43,6 +43,14 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
+const TIMEOUT_OVERRIDES = globalThis.__AECCS_TIMEOUTS || {};
+const ANALYZE_TOTAL_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.analyzeTotal, 10000);
+const FRAME_STAGE_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.frameStage, 3500);
+const CONSENT_SCAN_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.consentScan, 3500);
+const COOKIE_READ_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.cookieRead, 2500);
+const SESSION_READ_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.sessionRead, 1500);
+const ANALYZE_TIMEOUT_MESSAGE =
+  "Analysis timed out on this page before AECCS could finish scanning. Try reopening the popup.";
 const INTERACTION_SESSION_TTL_MS = 10 * 60 * 1000;
 const TAB_INTERACTION_SESSIONS = new Map();
 
@@ -62,6 +70,106 @@ function cloneForTransport(value) {
     }
   }
   return JSON.parse(JSON.stringify(value));
+}
+
+function getPositiveTimeoutOverride(value, fallback) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : fallback;
+}
+
+function buildTimeoutError(message) {
+  const err = new Error(message);
+  err.name = "AECCSTimeoutError";
+  err.aeccsTimeout = true;
+  return err;
+}
+
+function isTimeoutError(err) {
+  return Boolean(err?.aeccsTimeout);
+}
+
+async function withTimeout(promiseOrFactory, timeoutMs, message) {
+  if (!(timeoutMs > 0)) {
+    return typeof promiseOrFactory === "function"
+      ? promiseOrFactory()
+      : promiseOrFactory;
+  }
+
+  let timeoutId = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(buildTimeoutError(message));
+    }, timeoutMs);
+  });
+
+  try {
+    const mainPromise = typeof promiseOrFactory === "function"
+      ? Promise.resolve().then(() => promiseOrFactory())
+      : Promise.resolve(promiseOrFactory);
+    return await Promise.race([mainPromise, timeoutPromise]);
+  } finally {
+    if (timeoutId != null) {
+      clearTimeout(timeoutId);
+    }
+  }
+}
+
+function createAnalyzeProgress() {
+  return {
+    hostname: null,
+    url: null,
+    isGovDomain: false,
+    consentScan: null,
+    currentSite: null,
+    interactionSession: null,
+    baselineScore: null,
+  };
+}
+
+function buildBestEffortAnalysisFromProgress(progress) {
+  if (!progress?.hostname || !progress?.url) return null;
+
+  if (progress.currentSite && progress.consentScan?.bannerFound && progress.baselineScore) {
+    const baseline = buildInteractionBaseline(progress.currentSite, progress.baselineScore, progress.consentScan);
+    const interactionAudit = buildArmedInteractionAudit(progress.interactionSession, baseline, progress.currentSite);
+    return buildAnalysisResponse({
+      analysisMode: "baseline_banner",
+      hostname: progress.hostname,
+      url: progress.url,
+      currentSite: progress.currentSite,
+      consentScan: progress.consentScan,
+      score: progress.baselineScore,
+      baselineScore: null,
+      interactionAudit,
+      isGovDomain: progress.isGovDomain,
+    });
+  }
+
+  if (progress.currentSite && hasMeaningfulCurrentState(progress.currentSite, progress.consentScan, progress.interactionSession)) {
+    const interactionAudit = buildPostInteractionAudit(progress.currentSite, progress.interactionSession);
+    return buildAnalysisResponse({
+      analysisMode: "post_interaction",
+      hostname: progress.hostname,
+      url: progress.url,
+      currentSite: progress.currentSite,
+      consentScan: progress.consentScan,
+      score: interactionAudit.current.score,
+      baselineScore: interactionAudit.baseline?.score || progress.baselineScore || null,
+      interactionAudit,
+      isGovDomain: progress.isGovDomain,
+    });
+  }
+
+  return null;
+}
+
+function buildAnalyzeFailureResponse(progress, err) {
+  const fallback = buildBestEffortAnalysisFromProgress(progress);
+  if (fallback) return fallback;
+  if (isTimeoutError(err)) {
+    return { error: ANALYZE_TIMEOUT_MESSAGE };
+  }
+  return { error: extractScriptErrorMessage(err) };
 }
 
 function buildPageKey(rawUrl) {
@@ -130,91 +238,177 @@ function clearStoredInteractionSession(tabId) {
 }
 
 async function handleAnalyze(tabId) {
-  let tab;
-  if (tabId) {
-    tab = await browser.tabs.get(tabId);
-  } else {
-    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-    tab = tabs[0];
+  const progress = createAnalyzeProgress();
+
+  try {
+    return await withTimeout(async () => {
+      let tab;
+      if (tabId) {
+        tab = await withTimeout(
+          () => browser.tabs.get(tabId),
+          SESSION_READ_TIMEOUT_MS,
+          "Active tab lookup timed out"
+        );
+      } else {
+        const tabs = await withTimeout(
+          () => browser.tabs.query({ active: true, currentWindow: true }),
+          SESSION_READ_TIMEOUT_MS,
+          "Active tab lookup timed out"
+        );
+        tab = tabs[0];
+      }
+
+      if (!tab || !tab.url) {
+        return { error: "No active tab found" };
+      }
+
+      const url = new URL(tab.url);
+
+      // Only analyze http/https pages
+      if (!url.protocol.startsWith("http")) {
+        return { error: "Cannot analyze this page (not HTTP/HTTPS)" };
+      }
+
+      const hostname = url.hostname;
+      const pageKey = buildPageKey(tab.url);
+      const isGovDomain = AECCS.GOV_SUFFIXES.some(suf => hostname.endsWith(suf));
+      progress.hostname = hostname;
+      progress.url = tab.url;
+      progress.isGovDomain = isGovDomain;
+
+      let recoverableError = null;
+      let runtime = { error: null, frameIds: [] };
+      try {
+        runtime = await ensureScannerRuntimeAcrossFrames(tab.id);
+      } catch (err) {
+        recoverableError = recoverableError || err;
+        runtime = { error: extractScriptErrorMessage(err), frameIds: [] };
+      }
+      if (runtime.error) {
+        recoverableError = recoverableError || new Error(runtime.error);
+      }
+
+      const readyFrameIds = Array.isArray(runtime.frameIds) ? runtime.frameIds : [];
+
+      let consentScanDetail = { error: runtime.error || null, frameId: null, scanResult: null };
+      if (!runtime.error && readyFrameIds.length > 0) {
+        try {
+          consentScanDetail = await withTimeout(
+            () => runConsentScanAcrossReadyFrames(tab.id, readyFrameIds),
+            CONSENT_SCAN_TIMEOUT_MS,
+            "Consent scan timed out"
+          );
+        } catch (err) {
+          recoverableError = recoverableError || err;
+          consentScanDetail = { error: extractScriptErrorMessage(err), frameId: null, scanResult: null };
+        }
+        if (consentScanDetail.error) {
+          recoverableError = recoverableError || new Error(consentScanDetail.error);
+        }
+      }
+
+      progress.consentScan = consentScanDetail.scanResult || null;
+
+      let currentSite = null;
+      try {
+        currentSite = await withTimeout(
+          () => readCurrentSiteSnapshot(tab.url, hostname),
+          COOKIE_READ_TIMEOUT_MS,
+          "Cookie read timed out"
+        );
+      } catch (err) {
+        recoverableError = recoverableError || err;
+      }
+      if (currentSite?.error) {
+        recoverableError = recoverableError || new Error(currentSite.error);
+      }
+      if (currentSite && !currentSite.error) {
+        progress.currentSite = currentSite;
+      }
+
+      let interactionSession = null;
+      try {
+        interactionSession = await withTimeout(
+          () => getBestInteractionAuditSession(tab.id, pageKey, readyFrameIds),
+          SESSION_READ_TIMEOUT_MS,
+          "Interaction session read timed out"
+        );
+      } catch (err) {
+        recoverableError = recoverableError || err;
+      }
+      progress.interactionSession = interactionSession;
+
+      if (progress.consentScan?.bannerFound && progress.currentSite) {
+        const baselineScore = Scorer.computeComplianceScore(progress.currentSite.classifiedCookies, progress.consentScan);
+        progress.baselineScore = baselineScore;
+        const baseline = buildInteractionBaseline(progress.currentSite, baselineScore, progress.consentScan);
+        let armedSession = null;
+        try {
+          armedSession = await withTimeout(
+            () => armInteractionAuditSessionForFrame(
+              tab.id,
+              consentScanDetail.frameId,
+              baseline,
+              pageKey
+            ),
+            SESSION_READ_TIMEOUT_MS,
+            "Interaction watcher setup timed out"
+          );
+        } catch (_) {
+          armedSession = null;
+        }
+        if (armedSession) {
+          persistInteractionSession(tab.id, pageKey, armedSession, consentScanDetail.frameId);
+          progress.interactionSession = armedSession;
+          try {
+            await withTimeout(
+              () => syncInteractionAuditSessionToTopFrame(tab.id, armedSession, readyFrameIds),
+              SESSION_READ_TIMEOUT_MS,
+              "Top-frame interaction sync timed out"
+            );
+          } catch (_) {
+            // Best effort only.
+          }
+        }
+        const interactionAudit = buildArmedInteractionAudit(progress.interactionSession, baseline, progress.currentSite);
+        return buildAnalysisResponse({
+          analysisMode: "baseline_banner",
+          hostname,
+          url: tab.url,
+          currentSite: progress.currentSite,
+          consentScan: progress.consentScan,
+          score: baselineScore,
+          baselineScore: null,
+          interactionAudit,
+          isGovDomain,
+        });
+      }
+
+      if (progress.currentSite && hasMeaningfulCurrentState(progress.currentSite, progress.consentScan, progress.interactionSession)) {
+        const interactionAudit = buildPostInteractionAudit(progress.currentSite, progress.interactionSession);
+        return buildAnalysisResponse({
+          analysisMode: "post_interaction",
+          hostname,
+          url: tab.url,
+          currentSite: progress.currentSite,
+          consentScan: progress.consentScan,
+          score: interactionAudit.current.score,
+          baselineScore: interactionAudit.baseline?.score || progress.baselineScore || null,
+          interactionAudit,
+          isGovDomain,
+        });
+      }
+
+      if (recoverableError) {
+        return buildAnalyzeFailureResponse(progress, recoverableError);
+      }
+
+      clearStoredInteractionSession(tab.id);
+      return buildUnavailableAnalysis(tab.url, hostname, progress.consentScan, isGovDomain);
+    }, ANALYZE_TOTAL_TIMEOUT_MS, ANALYZE_TIMEOUT_MESSAGE);
+  } catch (err) {
+    return buildAnalyzeFailureResponse(progress, err);
   }
-
-  if (!tab || !tab.url) {
-    return { error: "No active tab found" };
-  }
-
-  const url = new URL(tab.url);
-
-  // Only analyze http/https pages
-  if (!url.protocol.startsWith("http")) {
-    return { error: "Cannot analyze this page (not HTTP/HTTPS)" };
-  }
-
-  const hostname = url.hostname;
-  const pageKey = buildPageKey(tab.url);
-  const isGovDomain = AECCS.GOV_SUFFIXES.some(suf => hostname.endsWith(suf));
-
-  const runtime = await ensureScannerRuntimeAcrossFrames(tab.id);
-  if (runtime.error) {
-    return { error: runtime.error };
-  }
-
-  const consentScanDetail = await runConsentScanAcrossReadyFrames(tab.id, runtime.frameIds);
-  if (consentScanDetail.error) {
-    return { error: consentScanDetail.error };
-  }
-
-  const consentScan = consentScanDetail.scanResult;
-  const currentSite = await readCurrentSiteSnapshot(tab.url, hostname);
-  if (currentSite.error) {
-    return { error: currentSite.error };
-  }
-
-  const interactionSession = await getBestInteractionAuditSession(tab.id, pageKey, runtime.frameIds);
-
-  if (consentScan?.bannerFound) {
-    const baselineScore = Scorer.computeComplianceScore(currentSite.classifiedCookies, consentScan);
-    const baseline = buildInteractionBaseline(currentSite, baselineScore, consentScan);
-    const armedSession = await armInteractionAuditSessionForFrame(
-      tab.id,
-      consentScanDetail.frameId,
-      baseline,
-      pageKey
-    );
-    if (armedSession) {
-      persistInteractionSession(tab.id, pageKey, armedSession, consentScanDetail.frameId);
-      await syncInteractionAuditSessionToTopFrame(tab.id, armedSession, runtime.frameIds);
-    }
-    const interactionAudit = buildArmedInteractionAudit(armedSession, baseline, currentSite);
-    return buildAnalysisResponse({
-      analysisMode: "baseline_banner",
-      hostname,
-      url: tab.url,
-      currentSite,
-      consentScan,
-      score: baselineScore,
-      baselineScore: null,
-      interactionAudit,
-      isGovDomain,
-    });
-  }
-
-  if (hasMeaningfulCurrentState(currentSite, consentScan, interactionSession)) {
-    const interactionAudit = buildPostInteractionAudit(currentSite, interactionSession);
-    return buildAnalysisResponse({
-      analysisMode: "post_interaction",
-      hostname,
-      url: tab.url,
-      currentSite,
-      consentScan,
-      score: interactionAudit.current.score,
-      baselineScore: interactionAudit.baseline?.score || null,
-      interactionAudit,
-      isGovDomain,
-    });
-  }
-
-  clearStoredInteractionSession(tab.id);
-  return buildUnavailableAnalysis(tab.url, hostname, consentScan, isGovDomain);
 }
 
 function sleep(ms) {
@@ -578,10 +772,15 @@ async function ensureScannerRuntimeAcrossFrames(tabId, frameIds = null) {
 
 async function runConsentScanAcrossReadyFrames(tabId, frameIds) {
   try {
-    const frameResults = await browser.scripting.executeScript({
-      target: buildFrameTarget(tabId, frameIds),
-      func: runScannerInFrame,
-    });
+    const frameResults = await executeScriptAcrossSpecificFrames(
+      tabId,
+      frameIds,
+      { func: runScannerInFrame },
+      {
+        ignoreMissingFrames: true,
+        timeoutMs: CONSENT_SCAN_TIMEOUT_MS,
+      }
+    );
 
     return selectBestConsentScanDetailed(frameResults);
   } catch (err) {
@@ -614,20 +813,28 @@ function normalizeStageResult(executionResult) {
 async function injectAndVerifyStage(tabId, frameIds, files, stageLabel, probeFunc, isReady) {
   let injectionError = null;
   try {
-    await browser.scripting.executeScript({
-      target: buildFrameTarget(tabId, frameIds),
-      files,
-    });
+    await withTimeout(
+      () => browser.scripting.executeScript({
+        target: buildFrameTarget(tabId, frameIds),
+        files,
+      }),
+      FRAME_STAGE_TIMEOUT_MS,
+      `${stageLabel} injection timed out`
+    );
   } catch (err) {
     injectionError = err && err.message ? err.message : String(err);
   }
 
   let probeResults = [];
   try {
-    probeResults = (await browser.scripting.executeScript({
-      target: buildFrameTarget(tabId, frameIds),
-      func: probeFunc,
-    })).map(normalizeStageResult);
+    probeResults = (await withTimeout(
+      () => browser.scripting.executeScript({
+        target: buildFrameTarget(tabId, frameIds),
+        func: probeFunc,
+      }),
+      FRAME_STAGE_TIMEOUT_MS,
+      `${stageLabel} probe timed out`
+    )).map(normalizeStageResult);
   } catch (err) {
     const probeError = err && err.message ? err.message : String(err);
     return { error: buildStageUnavailableError(stageLabel, [], injectionError || probeError) };
@@ -872,6 +1079,48 @@ function normalizeInteractionSessionResult(executionResult) {
   };
 }
 
+function extractScriptErrorMessage(err) {
+  return err && err.message ? err.message : String(err);
+}
+
+function isMissingFrameError(err) {
+  return extractScriptErrorMessage(err).toLowerCase().includes("no frame with id");
+}
+
+async function executeScriptAcrossSpecificFrames(
+  tabId,
+  frameIds,
+  spec,
+  { ignoreMissingFrames = false, timeoutMs = null } = {}
+) {
+  const uniqueFrameIds = Array.from(new Set(frameIds || []))
+    .filter(frameId => frameId != null)
+    .sort((a, b) => a - b);
+  if (uniqueFrameIds.length === 0) return [];
+
+  const results = [];
+  for (const frameId of uniqueFrameIds) {
+    try {
+      const frameResults = await withTimeout(
+        () => browser.scripting.executeScript({
+          target: buildFrameTarget(tabId, [frameId]),
+          ...spec,
+        }),
+        timeoutMs,
+        `Frame ${frameId} script execution timed out`
+      );
+      results.push(...frameResults);
+    } catch (err) {
+      if (ignoreMissingFrames && (isMissingFrameError(err) || isTimeoutError(err))) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  return results;
+}
+
 function interactionStatusRank(status) {
   switch (status) {
     case "completed": return 4;
@@ -910,13 +1159,20 @@ function pickBetterInteractionSession(candidate, current) {
 async function getInteractionAuditSessionsFromFrames(tabId, frameIds) {
   if (!Array.isArray(frameIds) || frameIds.length === 0) return [];
 
-  const results = (await browser.scripting.executeScript({
-    target: buildFrameTarget(tabId, frameIds),
-    func: () => {
-      if (!globalThis.AECCSConsentScanner?.getInteractionAuditSession) return null;
-      return globalThis.AECCSConsentScanner.getInteractionAuditSession();
+  const results = (await executeScriptAcrossSpecificFrames(
+    tabId,
+    frameIds,
+    {
+      func: () => {
+        if (!globalThis.AECCSConsentScanner?.getInteractionAuditSession) return null;
+        return globalThis.AECCSConsentScanner.getInteractionAuditSession();
+      },
     },
-  })).map(normalizeInteractionSessionResult);
+    {
+      ignoreMissingFrames: true,
+      timeoutMs: SESSION_READ_TIMEOUT_MS,
+    }
+  )).map(normalizeInteractionSessionResult);
 
   return results.filter(result => result && result.status != null);
 }
@@ -924,14 +1180,22 @@ async function getInteractionAuditSessionsFromFrames(tabId, frameIds) {
 async function syncInteractionAuditSessionToFrame(tabId, frameId, interactionSession) {
   if (frameId == null || !interactionSession) return null;
 
-  const [result] = await browser.scripting.executeScript({
-    target: buildFrameTarget(tabId, [frameId]),
-    func: payload => {
-      if (!globalThis.AECCSConsentScanner?.syncInteractionAuditSession) return null;
-      return globalThis.AECCSConsentScanner.syncInteractionAuditSession(payload);
+  const [result] = await executeScriptAcrossSpecificFrames(
+    tabId,
+    [frameId],
+    {
+      func: payload => {
+        if (!globalThis.AECCSConsentScanner?.syncInteractionAuditSession) return null;
+        return globalThis.AECCSConsentScanner.syncInteractionAuditSession(payload);
+      },
+      args: [interactionSession],
     },
-    args: [interactionSession],
-  });
+    {
+      ignoreMissingFrames: true,
+      timeoutMs: SESSION_READ_TIMEOUT_MS,
+    }
+  );
+  if (!result) return null;
 
   return normalizeInteractionSessionResult(result);
 }
@@ -962,7 +1226,12 @@ async function syncInteractionAuditSessionToTopFrame(tabId, interactionSession, 
 
 async function getBestInteractionAuditSession(tabId, pageKey, frameIds) {
   const storedSession = getStoredInteractionSession(tabId, pageKey);
-  const liveResults = await getInteractionAuditSessionsFromFrames(tabId, frameIds) || [];
+  let liveResults = [];
+  try {
+    liveResults = await getInteractionAuditSessionsFromFrames(tabId, frameIds) || [];
+  } catch (_) {
+    liveResults = [];
+  }
 
   const candidates = [];
   if (storedSession) {
@@ -988,25 +1257,35 @@ async function getBestInteractionAuditSession(tabId, pageKey, frameIds) {
   if (!best) return null;
 
   persistInteractionSession(tabId, pageKey, best, best.frameId);
-  await syncInteractionAuditSessionToTopFrame(tabId, best, frameIds);
+  if (Array.isArray(frameIds) && frameIds.length > 0) {
+    await syncInteractionAuditSessionToTopFrame(tabId, best, frameIds);
+  }
   return best;
 }
 
 async function armInteractionAuditSessionForFrame(tabId, frameId, baseline, pageKey = null) {
   if (frameId == null) return null;
 
-  const [result] = await browser.scripting.executeScript({
-    target: buildFrameTarget(tabId, [frameId]),
-    func: (payload, currentFrameId, currentPageKey) => {
-      if (!globalThis.AECCSConsentScanner?.armInteractionAuditSession) return null;
-      return globalThis.AECCSConsentScanner.armInteractionAuditSession({
-        baseline: payload,
-        frameId: currentFrameId,
-        pageKey: currentPageKey,
-      });
+  const [result] = await executeScriptAcrossSpecificFrames(
+    tabId,
+    [frameId],
+    {
+      func: (payload, currentFrameId, currentPageKey) => {
+        if (!globalThis.AECCSConsentScanner?.armInteractionAuditSession) return null;
+        return globalThis.AECCSConsentScanner.armInteractionAuditSession({
+          baseline: payload,
+          frameId: currentFrameId,
+          pageKey: currentPageKey,
+        });
+      },
+      args: [baseline, frameId, pageKey],
     },
-    args: [baseline, frameId, pageKey],
-  });
+    {
+      ignoreMissingFrames: true,
+      timeoutMs: SESSION_READ_TIMEOUT_MS,
+    }
+  );
+  if (!result) return null;
 
   return normalizeInteractionSessionResult(result);
 }
@@ -1014,14 +1293,22 @@ async function armInteractionAuditSessionForFrame(tabId, frameId, baseline, page
 async function storeInteractionOutcomeForFrame(tabId, frameId, interactionAudit) {
   if (frameId == null) return null;
 
-  const [result] = await browser.scripting.executeScript({
-    target: buildFrameTarget(tabId, [frameId]),
-    func: payload => {
-      if (!globalThis.AECCSConsentScanner?.storeInteractionOutcome) return null;
-      return globalThis.AECCSConsentScanner.storeInteractionOutcome(payload);
+  const [result] = await executeScriptAcrossSpecificFrames(
+    tabId,
+    [frameId],
+    {
+      func: payload => {
+        if (!globalThis.AECCSConsentScanner?.storeInteractionOutcome) return null;
+        return globalThis.AECCSConsentScanner.storeInteractionOutcome(payload);
+      },
+      args: [interactionAudit],
     },
-    args: [interactionAudit],
-  });
+    {
+      ignoreMissingFrames: true,
+      timeoutMs: SESSION_READ_TIMEOUT_MS,
+    }
+  );
+  if (!result) return null;
 
   return normalizeInteractionSessionResult(result);
 }

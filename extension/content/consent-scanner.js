@@ -147,6 +147,27 @@
     const BANNER_TEXT_PHRASES = BANNER_TEXT_PHRASES_RAW.map(normalizeForMatch).filter(Boolean);
     const BANNER_ATTR_HINTS = BANNER_ATTR_HINTS_RAW.map(normalizeForMatch).filter(Boolean);
     const GUILT_TRIP_PHRASES = GUILT_TRIP_PHRASES_RAW.map(normalizeForMatch).filter(Boolean);
+    const SETTINGS_CONFIRM_TEXTS = new Set([
+      "confirm choices",
+      "save choices",
+      "apply choices",
+      "confirm selection",
+      "confirm selections",
+      "save preferences",
+      "apply preferences",
+      "save settings",
+      "apply settings",
+      "secimleri onayla",
+      "seçimleri onayla",
+    ].map(normalizeForMatch).filter(Boolean));
+    const SETTINGS_PREFERENCE_SELECTOR = [
+      ".fc-preference-consent",
+      ".atp-vendor",
+      ".atp-purpose",
+      "input[type='checkbox']",
+      "[role='checkbox']",
+      "[role='switch']",
+    ].join(", ");
 
   function parsePx(value) {
     if (!value) return 0;
@@ -277,6 +298,7 @@
     const normalized = normalizeForMatch(text);
     if (!normalized) return "unknown";
     if (DISMISS_BUTTON_TEXTS.has(normalized)) return "dismiss";
+    if (SETTINGS_CONFIRM_TEXTS.has(normalized)) return "confirm";
 
     const type = classifyButtonText(text);
     if (type === "reject") {
@@ -996,6 +1018,9 @@
       frameId: cloned.frameId ?? null,
       pageKey: cloned.pageKey || null,
       pendingAction: cloned.pendingAction || null,
+      pendingInferredAction: cloned.pendingInferredAction || null,
+      settingsSnapshot: cloned.settingsSnapshot || null,
+      confirmSource: cloned.confirmSource || null,
       armedAt: cloned.armedAt || null,
       observedAt: cloned.observedAt || cloned.action?.observedAt || null,
       updatedAt: cloned.updatedAt || new Date().toISOString(),
@@ -1015,6 +1040,13 @@
     return (Date.now() - startedAt) <= INTERACTION_PENDING_WINDOW_MS;
   }
 
+  function hasFreshPendingInferredAction() {
+    if (!interactionSession?.pendingInferredAction?.startedAt) return false;
+    const startedAt = Date.parse(interactionSession.pendingInferredAction.startedAt) || 0;
+    if (!startedAt) return false;
+    return (Date.now() - startedAt) <= INTERACTION_PENDING_WINDOW_MS;
+  }
+
   function setPendingInteractionAction(actionEl, type) {
     if (!interactionSession || !actionEl || !type || type === "unknown" || type === "settings") {
       return false;
@@ -1028,6 +1060,137 @@
     };
     interactionSession.updatedAt = timestamp;
     return true;
+  }
+
+  function readBooleanAttribute(el, attributeName) {
+    if (!el || !el.getAttribute) return null;
+    const value = el.getAttribute(attributeName);
+    if (value == null) return null;
+    const normalized = String(value).trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+    return null;
+  }
+
+  function isFundingChoicesPreferenceControl(el) {
+    if (!el || !el.classList) return false;
+    return el.classList.contains("fc-preference-consent") ||
+      el.classList.contains("atp-vendor") ||
+      el.classList.contains("atp-purpose");
+  }
+
+  function readPreferenceControlState(control) {
+    if (!control || !control.isConnected) return null;
+
+    if ("checked" in control && typeof control.checked === "boolean") {
+      return control.checked;
+    }
+
+    const ariaChecked = readBooleanAttribute(control, "aria-checked");
+    if (ariaChecked != null) return ariaChecked;
+
+    const ariaPressed = readBooleanAttribute(control, "aria-pressed");
+    if (ariaPressed != null) return ariaPressed;
+
+    return null;
+  }
+
+  function isPreferenceContainerVisible(control) {
+    if (!control || !control.isConnected) return false;
+    const container = control.closest(".fc-preference-slider-container, .fc-preference-container, label, li");
+    if (container) return isElementVisible(container);
+    return isElementVisible(control);
+  }
+
+  function hasKnownSettingsControls(root) {
+    if (!root || !root.querySelector) return false;
+    return Boolean(
+      root.querySelector(".fc-confirm-choices") ||
+      root.querySelector(SETTINGS_PREFERENCE_SELECTOR)
+    );
+  }
+
+  function resolveSettingsSurface(actionEl = null) {
+    if (!interactionSession) return null;
+
+    const refreshedRoot = refreshTrackedBannerRoot();
+    if (refreshedRoot && hasKnownSettingsControls(refreshedRoot)) {
+      return refreshedRoot;
+    }
+
+    let current = actionEl;
+    let depth = 0;
+    while (current && depth < MAX_ANCESTOR_DEPTH) {
+      if (current.matches && current.matches(CANDIDATE_CONTAINER_SELECTOR) && hasKnownSettingsControls(current)) {
+        interactionSession.rootElement = current;
+        interactionSession.bannerSelector = describeElement(current);
+        return current;
+      }
+      current = current.parentElement;
+      depth += 1;
+    }
+
+    return interactionSession.rootElement || null;
+  }
+
+  function inferActionTypeFromSettingsSnapshot(snapshot) {
+    if (!snapshot || Number(snapshot.total || 0) === 0) return "unknown";
+    if (Number(snapshot.enabledCount || 0) === 0) return "essential";
+    if (Number(snapshot.disabledCount || 0) === 0) return "accept";
+    return "unknown";
+  }
+
+  function captureSettingsPreferenceSnapshot(actionEl = null) {
+    if (!interactionSession) return null;
+
+    const root = resolveSettingsSurface(actionEl);
+    if (!root || !root.querySelectorAll) return null;
+
+    const controls = Array.from(root.querySelectorAll(SETTINGS_PREFERENCE_SELECTOR))
+      .filter(control => control && control.isConnected)
+      .filter(control => isFundingChoicesPreferenceControl(control) || isPreferenceContainerVisible(control));
+
+    let enabledCount = 0;
+    let disabledCount = 0;
+    let total = 0;
+
+    for (const control of controls) {
+      const state = readPreferenceControlState(control);
+      if (state == null) continue;
+      total += 1;
+      if (state) enabledCount += 1;
+      else disabledCount += 1;
+    }
+
+    const snapshot = {
+      total,
+      enabledCount,
+      disabledCount,
+      inferredType: inferActionTypeFromSettingsSnapshot({ total, enabledCount, disabledCount }),
+      capturedAt: new Date().toISOString(),
+      source: root.querySelector(".fc-confirm-choices") ? "funding_choices" : "generic_settings",
+    };
+
+    interactionSession.settingsSnapshot = snapshot;
+    interactionSession.updatedAt = snapshot.capturedAt;
+    return snapshot;
+  }
+
+  function setPendingInferredInteractionAction(actionEl, snapshot) {
+    if (!interactionSession || !actionEl) return null;
+
+    const timestamp = new Date().toISOString();
+    const pending = {
+      type: snapshot?.inferredType || "unknown",
+      text: getElementLabel(actionEl) || null,
+      startedAt: timestamp,
+      snapshot: snapshot || null,
+    };
+
+    interactionSession.confirmSource = pending.text;
+    interactionSession.pendingInferredAction = pending;
+    interactionSession.updatedAt = timestamp;
+    return pending;
   }
 
   function finalizeInteractionAction(action, observed, stopReason) {
@@ -1044,6 +1207,7 @@
     interactionSession.observedAt = timestamp;
     interactionSession.updatedAt = timestamp;
     interactionSession.pendingAction = null;
+    interactionSession.pendingInferredAction = null;
     interactionSession.honesty = { verdict: "unknown", findings: [] };
     stopInteractionWatcher(stopReason);
     void notifyBackgroundOfObservedInteraction();
@@ -1051,7 +1215,26 @@
   }
 
   function promotePendingInteractionAction(stopReason = "pending_action_promoted") {
-    if (!interactionSession || interactionSession.action || !hasFreshPendingAction()) {
+    if (!interactionSession || interactionSession.action) {
+      return false;
+    }
+
+    if (hasFreshPendingInferredAction()) {
+      const pendingInferred = interactionSession.pendingInferredAction;
+      if (pendingInferred?.type) {
+        return finalizeInteractionAction(
+          {
+            type: pendingInferred.type,
+            text: pendingInferred.text,
+            observedAt: pendingInferred.startedAt,
+          },
+          false,
+          stopReason
+        );
+      }
+    }
+
+    if (!hasFreshPendingAction()) {
       return false;
     }
 
@@ -1115,6 +1298,9 @@
       frameId: interactionSession.frameId ?? null,
       pageKey: interactionSession.pageKey || null,
       pendingAction: interactionSession.pendingAction || null,
+      pendingInferredAction: interactionSession.pendingInferredAction || null,
+      settingsSnapshot: interactionSession.settingsSnapshot || null,
+      confirmSource: interactionSession.confirmSource || null,
       armedAt: interactionSession.armedAt || null,
       observedAt: interactionSession.observedAt || null,
       updatedAt: interactionSession.updatedAt || null,
@@ -1167,7 +1353,11 @@
     while (current && depth < MAX_ANCESTOR_DEPTH) {
       if (
         isStrongBannerSurface(current) &&
-        (hasBannerLikeText(getElementText(current)) || hasBannerLikeAttributes(elementAttributeHaystack(current)))
+        (
+          hasBannerLikeText(getElementText(current)) ||
+          hasBannerLikeAttributes(elementAttributeHaystack(current)) ||
+          hasKnownSettingsControls(current)
+        )
       ) {
         interactionSession.rootElement = current;
         interactionSession.bannerSelector = describeElement(current);
@@ -1248,6 +1438,9 @@
       frameId: options.frameId ?? null,
       pageKey: options.pageKey || null,
       pendingAction: null,
+      pendingInferredAction: null,
+      settingsSnapshot: null,
+      confirmSource: null,
       armedAt: new Date().toISOString(),
       observedAt: null,
       updatedAt: new Date().toISOString(),
@@ -1265,18 +1458,24 @@
       const actionable = event.target && event.target.closest ? event.target.closest(ACTIONABLE_SELECTOR) : null;
       if (!actionable || !isWithinTrackedConsentFlow(actionable)) return null;
 
-      const actionType = classifyInteractionAction(getElementLabel(actionable));
+      const actionText = getElementLabel(actionable);
+      const actionType = classifyInteractionAction(actionText);
       if (actionType === "unknown") return null;
 
       interactionSession.updatedAt = new Date().toISOString();
       scheduleInteractionTimeout();
 
-      return { actionable, actionType };
+      return { actionable, actionType, actionText };
     };
 
     const onPointerDown = event => {
       const tracked = trackInteractionEvent(event);
       if (!tracked || tracked.actionType === "settings") return;
+      if (tracked.actionType === "confirm") {
+        const snapshot = captureSettingsPreferenceSnapshot(tracked.actionable);
+        setPendingInferredInteractionAction(tracked.actionable, snapshot);
+        return;
+      }
       setPendingInteractionAction(tracked.actionable, tracked.actionType);
     };
 
@@ -1284,6 +1483,11 @@
       if (!isActivationKey(event)) return;
       const tracked = trackInteractionEvent(event);
       if (!tracked || tracked.actionType === "settings") return;
+      if (tracked.actionType === "confirm") {
+        const snapshot = captureSettingsPreferenceSnapshot(tracked.actionable);
+        setPendingInferredInteractionAction(tracked.actionable, snapshot);
+        return;
+      }
       setPendingInteractionAction(tracked.actionable, tracked.actionType);
     };
 
@@ -1293,6 +1497,21 @@
 
       if (tracked.actionType === "settings") {
         refreshTrackedBannerRoot();
+        return;
+      }
+
+      if (tracked.actionType === "confirm") {
+        const snapshot = captureSettingsPreferenceSnapshot(tracked.actionable);
+        const pending = setPendingInferredInteractionAction(tracked.actionable, snapshot);
+        finalizeInteractionAction(
+          {
+            type: pending?.type || "unknown",
+            text: pending?.text || tracked.actionText || null,
+            observedAt: new Date().toISOString(),
+          },
+          true,
+          snapshot?.inferredType === "unknown" ? "settings_confirm_observed_unknown" : "settings_confirm_observed"
+        );
         return;
       }
 
@@ -1370,6 +1589,9 @@
         frameId: outcome?.frameId ?? null,
         pageKey: outcome?.pageKey || null,
         pendingAction: null,
+        pendingInferredAction: null,
+        settingsSnapshot: null,
+        confirmSource: null,
         armedAt: null,
         observedAt: outcome?.action?.observedAt || null,
         updatedAt: now,
@@ -1392,6 +1614,9 @@
     interactionSession.honesty = cloneForTransport(outcome?.honesty || { verdict: "unknown", findings: [] });
     interactionSession.pageKey = outcome?.pageKey || interactionSession.pageKey || null;
     interactionSession.pendingAction = null;
+    interactionSession.pendingInferredAction = null;
+    interactionSession.settingsSnapshot = null;
+    interactionSession.confirmSource = null;
     interactionSession.updatedAt = now;
     interactionSession.stopReason = "stored_outcome";
     interactionSession.notified = true;

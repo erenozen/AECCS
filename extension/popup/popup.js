@@ -8,6 +8,13 @@
 (() => {
   "use strict";
 
+  const POPUP_ANALYZE_TIMEOUT_MS = getPositiveTimeoutOverride(
+    globalThis.__AECCS_POPUP_ANALYZE_TIMEOUT_MS,
+    12000
+  );
+  const POPUP_ANALYZE_TIMEOUT_MESSAGE =
+    "AECCS did not receive an analysis response in time on this page. Try reopening the popup.";
+
   const GRADE_COLORS = {
     A: "#22c55e",
     B: "#84cc16",
@@ -88,6 +95,42 @@
     footerNote:        $("footerNote"),
   };
 
+  function getPositiveTimeoutOverride(value, fallback) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : fallback;
+  }
+
+  function buildTimeoutError(message) {
+    const err = new Error(message);
+    err.name = "AECCSTimeoutError";
+    err.aeccsTimeout = true;
+    return err;
+  }
+
+  async function withTimeout(promiseOrFactory, timeoutMs, message) {
+    if (!(timeoutMs > 0)) {
+      return typeof promiseOrFactory === "function"
+        ? promiseOrFactory()
+        : promiseOrFactory;
+    }
+
+    let timeoutId = null;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(buildTimeoutError(message)), timeoutMs);
+    });
+
+    try {
+      const mainPromise = typeof promiseOrFactory === "function"
+        ? Promise.resolve().then(() => promiseOrFactory())
+        : Promise.resolve(promiseOrFactory);
+      return await Promise.race([mainPromise, timeoutPromise]);
+    } finally {
+      if (timeoutId != null) {
+        clearTimeout(timeoutId);
+      }
+    }
+  }
+
   // ── Init ──────────────────────────────────────────────────────────────────
 
   async function init() {
@@ -101,7 +144,15 @@
 
       els.siteDomain.textContent = new URL(tab.url).hostname;
 
-      const result = await browser.runtime.sendMessage({ action: "analyze", tabId: tab.id });
+      const result = await withTimeout(
+        () => browser.runtime.sendMessage({ action: "analyze", tabId: tab.id }),
+        POPUP_ANALYZE_TIMEOUT_MS,
+        POPUP_ANALYZE_TIMEOUT_MESSAGE
+      );
+
+      if (result == null) {
+        return showError("AECCS did not receive a usable analysis response from the background worker.");
+      }
 
       if (result.error) return showError(result.error);
 
