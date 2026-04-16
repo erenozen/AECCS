@@ -3551,19 +3551,23 @@ def test_scorer_distinguishes_direct_and_settings_reject_paths() -> None:
 
     assert scores["direct"]["criteria"]["reject_option_available"]["score"] == 100
     assert scores["direct"]["criteria"]["equal_accept_reject_effort"]["score"] == 100
-    assert scores["direct"]["criteria"]["post_reject_compliance"]["score"] == 0
-    assert scores["direct"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
+    assert scores["direct"]["criteria"]["post_reject_compliance"]["score"] is None
+    assert scores["direct"]["criteria"]["post_reject_compliance"]["details"] == "Not available in baseline audit (no verified post-reject data)"
+    assert scores["direct"]["overall_score"] == 88.2
+    assert scores["direct"]["grade"] == "B"
     assert scores["settingsPath"]["criteria"]["reject_option_available"]["score"] == 50
     assert scores["settingsPath"]["criteria"]["equal_accept_reject_effort"]["score"] == 50
-    assert scores["settingsPath"]["criteria"]["post_reject_compliance"]["score"] == 0
-    assert scores["settingsPath"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
+    assert scores["settingsPath"]["criteria"]["post_reject_compliance"]["score"] is None
+    assert scores["settingsPath"]["criteria"]["post_reject_compliance"]["details"] == "Not available in baseline audit (no verified post-reject data)"
+    assert scores["settingsPath"]["overall_score"] == 70.6
+    assert scores["settingsPath"]["grade"] == "C"
     assert scores["noReject"]["criteria"]["reject_option_available"]["score"] == 0
     assert scores["noReject"]["criteria"]["equal_accept_reject_effort"]["score"] == 0
     assert scores["noReject"]["criteria"]["post_reject_compliance"]["score"] == 0
-    assert scores["noReject"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
+    assert scores["noReject"]["criteria"]["post_reject_compliance"]["details"] == "No reject option available"
     assert scores["noBanner"]["criteria"]["reject_option_available"]["score"] == 0
-    assert scores["noBanner"]["criteria"]["post_reject_compliance"]["score"] == 0
-    assert scores["noBanner"]["criteria"]["post_reject_compliance"]["details"] == "No post-reject data available"
+    assert scores["noBanner"]["criteria"]["post_reject_compliance"]["score"] is None
+    assert scores["noBanner"]["criteria"]["post_reject_compliance"]["details"] == "Not available without a visible consent banner"
 
 
 def test_scorer_computes_post_interaction_state_score_and_honesty() -> None:
@@ -3613,8 +3617,8 @@ def test_scorer_computes_post_interaction_state_score_and_honesty() -> None:
 
     assert scores["essentialOutcome"]["kind"] == "state_outcome"
     assert scores["essentialOutcome"]["label"] == "Post-Interaction State Score"
-    assert scores["essentialOutcome"]["overall_score"] == 94
+    assert scores["essentialOutcome"]["overall_score"] == 86
     assert scores["essentialOutcome"]["criteria"]["claimed_action_honesty"]["score"] == 60
     assert "Only functional or unknown cookies remained" in scores["essentialOutcome"]["criteria"]["claimed_action_honesty"]["details"]
     assert scores["acceptOutcome"]["criteria"]["claimed_action_honesty"]["score"] is None
-    assert scores["acceptOutcome"]["overall_score"] == 28.2
+    assert scores["acceptOutcome"]["overall_score"] == 28.5

@@ -326,14 +326,16 @@ Scores each site from 0 to 100 based on 6 weighted GDPR compliance criteria:
 
 | Criterion | Weight | Description |
 |-----------|--------|-------------|
-| No pre-consent trackers | 25% | No tracking before user consent |
+| No pre-consent trackers | 30% | No tracking before user consent |
 | Reject option available | 20% | Easy-to-find reject/decline button |
-| Equal accept/reject effort | 15% | Same number of clicks to accept or reject |
+| Equal accept/reject effort | 10% | Same number of clicks to accept or reject |
 | No dark patterns | 15% | No deceptive UI elements |
-| Post-reject compliance | 15% | Trackers actually stop after rejection |
+| Post-reject compliance | 15% | Trackers actually stop after rejection when verified post-reject evidence exists |
 | Transparent information | 10% | Clear privacy/cookie information |
 
 Grades: A (90–100), B (75–89), C (60–74), D (40–59), F (0–39).
+
+When a criterion cannot be verified in the current evidence context, AECCS treats it as `n/a` and redistributes its weight across the remaining scored criteria instead of forcing an automatic zero.
 
 ```bash
 # Score all classified sites

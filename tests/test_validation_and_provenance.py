@@ -280,7 +280,26 @@ def test_compute_compliance_score_handles_compliant_and_no_banner_cases() -> Non
     }
     no_banner_result = compute_compliance_score(no_banner_site, compliant_dp, [])
     assert no_banner_result["criterion_scores"]["reject_option_available"]["score"] == 0
-    assert no_banner_result["criterion_scores"]["post_reject_compliance"]["score"] == 0
+    assert no_banner_result["criterion_scores"]["post_reject_compliance"]["score"] is None
+    assert no_banner_result["criterion_scores"]["post_reject_compliance"]["weighted_score"] is None
+
+    unverified_reject_site = {
+        "domain": "unverified.example",
+        "category": "News",
+        "pre_consent": {"cookies": [], "third_party_domains": [], "total_cookies": 0},
+        "consent_banner": {
+            "found": True,
+            "has_reject_button": True,
+            "accept_clicks_required": 1,
+            "reject_clicks_required": 1,
+            "text_content": "",
+            "html": "",
+        },
+    }
+    unverified_result = compute_compliance_score(unverified_reject_site, compliant_dp, [])
+    assert unverified_result["criterion_scores"]["post_reject_compliance"]["score"] is None
+    assert unverified_result["criterion_scores"]["post_reject_compliance"]["weighted_score"] is None
+    assert unverified_result["overall_score"] == 88.24
 
 
 def test_run_scoring_skips_failed_crawl_fixture(tmp_path: Path) -> None:

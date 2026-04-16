@@ -3,9 +3,9 @@
  *
  * Six criteria, weighted 0-100 each, producing an overall score + letter grade.
  *
- *   1. No pre-consent trackers       (0.25)
+ *   1. No pre-consent trackers       (0.30)
  *   2. Reject option available        (0.20)
- *   3. Equal accept/reject effort     (0.15)
+ *   3. Equal accept/reject effort     (0.10)
  *   4. No dark patterns               (0.15)
  *   5. Post-reject compliance         (0.15)
  *   6. Transparent information        (0.10)
@@ -118,8 +118,9 @@ const Scorer = (() => {
   }
 
   // ── Criterion 5: Post-reject compliance (weight 0.15) ───────────────────
-  // The baseline banner audit does not auto-click banners, so this criterion
-  // stays at zero unless a future verified post-reject dataset is explicitly attached.
+  // The baseline banner audit does not auto-click banners. When no verified
+  // post-reject evidence is attached, this criterion is treated as not
+  // applicable rather than a hard zero.
 
   function _scoreVerifiedPostRejectCompliance(postRejectData) {
     if (!postRejectData || postRejectData.verified !== true) {
@@ -148,7 +149,11 @@ const Scorer = (() => {
 
   function _scorePostRejectCompliance(consentScan) {
     if (!consentScan || consentScan.error) {
-      return { score: 0, details: "Consent scan unavailable" };
+      return { score: null, details: "Not available without a verified consent scan" };
+    }
+
+    if (!consentScan.bannerFound) {
+      return { score: null, details: "Not available without a visible consent banner" };
     }
 
     const verifiedScore = _scoreVerifiedPostRejectCompliance(consentScan.postRejectData);
@@ -156,7 +161,11 @@ const Scorer = (() => {
       return verifiedScore;
     }
 
-    return { score: 0, details: "No post-reject data available" };
+    if (!consentScan.hasRejectButton && !(consentScan.hasSettingsButton && consentScan.rejectClicksRequired < 999)) {
+      return { score: 0, details: "No reject option available" };
+    }
+
+    return { score: null, details: "Not available in baseline audit (no verified post-reject data)" };
   }
 
   // ── Criterion 6: Transparent information (weight 0.10) ──────────────────
@@ -194,10 +203,19 @@ const Scorer = (() => {
       transparent_information:    _scoreTransparentInformation(consentScan),
     };
 
+    let totalWeight = 0;
     let overall = 0;
     for (const [key, { score }] of Object.entries(criteria)) {
+      if (typeof score !== "number") {
+        continue;
+      }
       const weight = AECCS.COMPLIANCE_WEIGHTS[key] || 0;
+      totalWeight += weight;
       overall += score * weight;
+    }
+
+    if (totalWeight > 0 && totalWeight !== 1) {
+      overall = overall / totalWeight;
     }
 
     overall = Math.round(overall * 10) / 10;

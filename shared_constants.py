@@ -1003,19 +1003,19 @@ CMP_SIGNATURES: dict[str, list[str]] = {
 }
 
 COMPLIANCE_WEIGHTS: dict[str, float] = {
-    "no_pre_consent_trackers": 0.25,
+    "no_pre_consent_trackers": 0.30,
     "reject_option_available": 0.20,
-    "equal_accept_reject_effort": 0.15,
+    "equal_accept_reject_effort": 0.10,
     "no_dark_patterns": 0.15,
     "post_reject_compliance": 0.15,
     "transparent_information": 0.10,
 }
 
 STATE_OUTCOME_WEIGHTS: dict[str, float] = {
-    "low_tracker_load": 0.45,
-    "low_third_party_load": 0.25,
-    "low_total_cookie_load": 0.15,
-    "claimed_action_honesty": 0.15,
+    "low_tracker_load": 0.35,
+    "low_third_party_load": 0.20,
+    "low_total_cookie_load": 0.10,
+    "claimed_action_honesty": 0.35,
 }
 
 GRADE_THRESHOLDS = [
