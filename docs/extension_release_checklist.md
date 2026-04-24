@@ -2,7 +2,7 @@
 
 ## Release Baseline
 
-- Release target: `1.0.1`
+- Release target: `1.0.2`
 - Publisher identity: personal publisher account, using AECCS as the product brand
 - Release model: listed add-on / public extension on both Firefox AMO and Chrome Web Store
 - Product posture:
@@ -21,7 +21,7 @@
 
 ## Freeze The Release Candidate
 
-1. Use the current extension behavior and current permission set for the `1.0.1` store update.
+1. Use the current extension behavior and current permission set for the `1.0.2` store update.
 2. If code changes after this point, bump `extension/manifest.json` before packaging.
 3. Submit both stores from the same commit and the same packaged extension contents.
 
@@ -39,7 +39,7 @@
 ## Build Submission Artifacts
 
 1. Run:
-   - `python scripts/package_extension_release.py --version 1.0.1`
+   - `python scripts/package_extension_release.py --version 1.0.2`
 2. Confirm this generates into `dist/extension-release/`:
    - Chrome upload ZIP
    - Firefox upload ZIP
