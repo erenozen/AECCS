@@ -9,6 +9,7 @@ AECCS Cookie Compliance Checker is a local, user-initiated browser extension tha
 - `cookies`: read cookies already set on the active page so they can be classified and counted
 - `activeTab`: determine which page the user explicitly asked the extension to analyze
 - `scripting`: inject the consent scanner into the active tab only when the user opens the popup
+- `storage`: persist the user's optional browsing-setup declaration locally (`browser protection`, `extra tools`, `updatedAt`) so the popup can explain how their setup may affect measured results
 - `<all_urls>` host permission: required by the cookies API to read cookies for the current page URL; not used for background fetching or remote communication
 
 ## Generated Static Assets
@@ -33,8 +34,10 @@ These files are not downloaded at runtime, do not execute remote code, and do no
 - no analytics or telemetry
 - no account system
 - no cloud sync or server storage
+- no stored site URLs, audit results, or compare history
 - no remote configuration or remote code loading
 - all analysis stays local to the user’s browser session
+- only one optional local preference object is persisted: the user-declared browsing-setup profile shown in the popup
 - no page-wide click logging; only tracked consent controls inside the observed banner flow are watched after the user opens the popup
 
 ## Packaging Notes

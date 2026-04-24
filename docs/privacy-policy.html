@@ -229,7 +229,7 @@
 </header>
 
 <main>
-  <p class="last-updated">Last updated: April 13, 2026</p>
+  <p class="last-updated">Last updated: April 23, 2026</p>
 
   <h2>Overview</h2>
   <p>
@@ -241,9 +241,10 @@
 
   <div class="highlight-box">
     <p>
-      <strong>The short version:</strong> AECCS does not collect, sell, store,
-      or transmit personal data. All analysis happens locally in your browser
-      and stays only in transient memory for the current tab session.
+      <strong>The short version:</strong> AECCS does not collect, sell, or
+      transmit personal data. Page analysis stays local in your browser, and
+      the only persistent item is an optional browsing-setup preference you can
+      choose to save locally in the extension.
     </p>
   </div>
 
@@ -298,6 +299,12 @@
         <td class="status-no">No</td>
       </tr>
       <tr>
+        <td>Browsing setup profile</td>
+        <td>An optional user-declared profile stored in <code>browser.storage.local</code> so the popup can remember declared browser protections and explain how they may affect measured results. This object contains only the selected protection labels and an update timestamp.</td>
+        <td class="status-yes">Local only</td>
+        <td class="status-no">No</td>
+      </tr>
+      <tr>
         <td>Bundled study snapshot</td>
         <td>Static AECCS reference data bundled in the extension package (<code>shared-config.js</code>, <code>study-snapshot.js</code>, <code>tracker-index.js</code>) to provide frozen study context without making network requests.</td>
         <td class="status-no">No</td>
@@ -307,10 +314,12 @@
   </table>
 
   <p>
-    All data listed above is processed in-memory. Results are displayed in the
+    Page analysis data is processed in-memory. Results are displayed in the
     extension popup, and any session-limited consent-interaction state is kept
-    only for the current tab session. Nothing is written to disk, local
-    storage, sync storage, or any remote server.
+    only for the current tab session. AECCS does not write site URLs, audit
+    results, or compare history to storage. The only stored item is the
+    optional browsing-setup profile described above, which remains local to
+    your browser and is never transmitted to any remote server.
   </p>
 
   <p>
@@ -326,6 +335,7 @@
     <li><strong><code>cookies</code></strong> &mdash; Read cookies set by the current website so they can be classified and counted.</li>
     <li><strong><code>activeTab</code></strong> &mdash; Access the URL of the currently active tab when you click the extension icon.</li>
     <li><strong><code>scripting</code></strong> &mdash; Inject the consent-scanner content script into the active tab on demand (only when you click the extension).</li>
+    <li><strong><code>storage</code></strong> &mdash; Save your optional browsing-setup declaration locally so AECCS can remember it between popup opens and explain how protections may affect measured results.</li>
     <li><strong><code>host_permissions: &lt;all_urls&gt;</code></strong> &mdash; Required by the <code>cookies</code> API, which needs a host permission matching the URL whose cookies are being read. The extension never fetches or sends data to those URLs.</li>
   </ul>
 
@@ -366,8 +376,10 @@
   <p>
     AECCS does not retain browsing data after the popup closes, does not share
     browsing data with any third party, and does not sell personal information.
-    Because the extension does not transmit browsing data off-device, there is
-    no server-side account system, no cloud storage, and no data broker access.
+    The only persistent item is the optional browsing-setup profile you choose
+    to save locally in the extension. Because AECCS does not transmit browsing
+    data off-device, there is no server-side account system, no cloud storage,
+    and no data broker access.
   </p>
 
   <h2>Academic Context</h2>
@@ -412,8 +424,9 @@
   <h2>Changes to This Policy</h2>
   <p>
     If this privacy policy is updated, the changes will be reflected on this
-    page with an updated date.  Because the extension collects no data, material
-    changes are unlikely.
+    page with an updated date. Because the extension keeps data processing
+    local-only and stores only a small optional preference object, material
+    privacy changes are expected to be rare.
   </p>
 
   <h2>Contact</h2>

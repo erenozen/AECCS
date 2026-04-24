@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>ekşi sözlük realistic Funding Choices fixture</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Open Sans", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f3f4f6;
+      color: #202124;
+    }
+
+    main {
+      min-height: 140vh;
+      padding: 48px;
+    }
+
+    .fc-consent-root {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      background: rgba(17, 24, 39, 0.42);
+    }
+
+    .fc-dialog-container.fc-fullscreen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 24px;
+    }
+
+    .fc-choice-dialog.fc-dialog {
+      width: min(760px, calc(100vw - 32px));
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 20px 80px rgba(15, 23, 42, 0.28);
+      padding: 42px 46px 28px;
+    }
+
+    .fc-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .fc-header-logo {
+      font-size: 56px;
+      font-weight: 700;
+      color: #7ebd4d;
+      line-height: 1;
+    }
+
+    .fc-choice-dialog h2 {
+      margin: 0 0 18px;
+      font-size: 22px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .fc-choice-dialog p {
+      margin: 0 0 18px;
+      font-size: 15px;
+      line-height: 1.55;
+      color: #4b5563;
+    }
+
+    .fc-dialog-actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .fc-button {
+      flex: 1 1 0;
+      min-height: 54px;
+      border: 0;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .fc-secondary-button {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .fc-primary-button {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .fc-choice-dialog .fc-link-row {
+      margin-top: 14px;
+      color: #2563eb;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .fc-preferences-shell {
+      display: none;
+    }
+
+    .fc-preferences-shell[hidden] {
+      display: none !important;
+    }
+
+    .fc-preferences-shell .fc-dialog {
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 24px;
+    }
+
+    .fc-preference-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .fc-preference-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    .fc-preference-consent {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+    }
+
+    .fc-footer-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ekşi sözlük fixture</h1>
+    <p>
+      This fixture mirrors the richer Funding Choices style wrapper structure from the
+      live site: a full-screen consent root, a centered first-layer dialog, and a
+      hidden settings subtree with confirm controls and many preference rows.
+    </p>
+  </main>
+
+  <div
+    class="fc-consent-root sp_choice_type_11"
+    data-google-query-id="fixture-query-id"
+    data-fc-dialog-state="initial"
+  >
+    <div class="fc-dialog-container fc-fullscreen" data-surface="overlay">
+      <div class="fc-choice-dialog fc-dialog" role="dialog" aria-modal="true" aria-label="Çerez tercihleri">
+        <div class="fc-header">
+          <div class="fc-header-logo">eksi<span style="color:#111827">sözlük</span></div>
+        </div>
+        <h2>eksisozluk.com size daha iyi reklam deneyimi sunabilmek için izninizi istiyor</h2>
+        <p>
+          Kişiselleştirilmiş reklam ve içerik, reklam ve içerik ölçümü, hedef kitle araştırması
+          ve hizmetlerin geliştirilmesi için tercihlerinizi yönetebilirsiniz.
+        </p>
+        <p>
+          Bazı tedarikçiler, meşru menfaate dayalı olarak veri işleyebilir. Gizlilik ve çerez
+          ayarlarında izninizi yönetebilir veya geri alabilirsiniz.
+        </p>
+
+        <div class="fc-dialog-actions">
+          <button type="button" class="fc-button fc-secondary-button">Seçenekleri yönetin</button>
+          <button type="button" class="fc-button fc-primary-button">İzin ver</button>
+        </div>
+        <div class="fc-link-row">Daha fazla bilgi edinin</div>
+      </div>
+
+      <div class="fc-preferences-shell" hidden>
+        <div class="fc-dialog" role="dialog" aria-modal="true" aria-label="Veri tercihleri">
+          <div class="fc-preference-container">
+            <div>
+              <strong>Bilgileri bir cihazda depolamak</strong>
+              <div>Çerezler ve benzer tanımlayıcılar ile cihazınıza erişim sağlanabilir.</div>
+            </div>
+            <label class="fc-preference-slider-container">
+              <span>İzin</span>
+              <input
+                class="fc-preference-consent atp-vendor"
+                type="checkbox"
+                role="button"
+                checked
+                aria-pressed="true"
+                aria-checked="true"
+              >
+            </label>
+          </div>
+          <div class="fc-preference-container">
+            <div>
+              <strong>Kişiselleştirilmiş reklam ve içerik</strong>
+              <div>Davranışsal reklam ve içerik kişiselleştirme için veriler kullanılabilir.</div>
+            </div>
+            <label class="fc-preference-slider-container">
+              <span>İzin</span>
+              <input
+                class="fc-preference-consent atp-vendor"
+                type="checkbox"
+                role="button"
+                checked
+                aria-pressed="true"
+                aria-checked="true"
+              >
+            </label>
+          </div>
+          <div class="fc-preference-container">
+            <div>
+              <strong>İçerik performansını ölçmek</strong>
+              <div>İçeriğin nasıl kullanıldığı ve ne kadar etkili olduğu ölçülebilir.</div>
+            </div>
+            <label class="fc-preference-slider-container">
+              <span>İzin</span>
+              <input
+                class="fc-preference-consent atp-vendor"
+                type="checkbox"
+                role="button"
+                checked
+                aria-pressed="true"
+                aria-checked="true"
+              >
+            </label>
+          </div>
+
+          <div class="fc-footer-buttons">
+            <button type="button" class="fc-button fc-secondary-button fc-vendor-preferences-accept-all">Tümünü kabul et</button>
+            <button type="button" class="fc-button fc-primary-button fc-confirm-choices">Seçimleri onayla</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

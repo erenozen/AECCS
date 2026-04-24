@@ -34,6 +34,14 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
+  if (msg.action === "clearInteractionSession") {
+    handleClearInteractionSession(msg.tabId)
+      .then(result => sendResponse(result))
+      .catch(err => sendResponse({ ok: false, error: err.message }));
+
+    return true;
+  }
+
   if (msg.action === "consentInteractionObserved") {
     handleConsentInteractionObserved(msg, sender)
       .then(result => sendResponse(result))
@@ -44,7 +52,7 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 const TIMEOUT_OVERRIDES = globalThis.__AECCS_TIMEOUTS || {};
-const ANALYZE_TOTAL_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.analyzeTotal, 10000);
+const ANALYZE_TOTAL_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.analyzeTotal, 60000);
 const FRAME_STAGE_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.frameStage, 3500);
 const CONSENT_SCAN_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.consentScan, 3500);
 const COOKIE_READ_TIMEOUT_MS = getPositiveTimeoutOverride(TIMEOUT_OVERRIDES.cookieRead, 2500);
@@ -88,6 +96,19 @@ function isTimeoutError(err) {
   return Boolean(err?.aeccsTimeout);
 }
 
+function buildConsentScanBudgetMs(frameIds) {
+  const uniqueFrameIds = Array.from(new Set(frameIds || []))
+    .filter(frameId => frameId != null);
+  if (uniqueFrameIds.length === 0) return CONSENT_SCAN_TIMEOUT_MS;
+
+  const extraFrameBudget = Math.ceil(CONSENT_SCAN_TIMEOUT_MS * 0.35);
+  const topFrameBudget = uniqueFrameIds.includes(0)
+    ? Math.ceil(CONSENT_SCAN_TIMEOUT_MS * 1.5)
+    : CONSENT_SCAN_TIMEOUT_MS;
+
+  return Math.min(20000, topFrameBudget + Math.max(0, uniqueFrameIds.length - 1) * extraFrameBudget);
+}
+
 async function withTimeout(promiseOrFactory, timeoutMs, message) {
   if (!(timeoutMs > 0)) {
     return typeof promiseOrFactory === "function"
@@ -120,6 +141,12 @@ function createAnalyzeProgress() {
     url: null,
     isGovDomain: false,
     consentScan: null,
+    consentScanCompleted: false,
+    consentScanError: null,
+    readyFrameIds: [],
+    consentScanFrameId: null,
+    successfulConsentScanFrameIds: [],
+    timedOutConsentScanFrameIds: [],
     currentSite: null,
     interactionSession: null,
     baselineScore: null,
@@ -145,7 +172,7 @@ function buildBestEffortAnalysisFromProgress(progress) {
     });
   }
 
-  if (progress.currentSite && hasMeaningfulCurrentState(progress.currentSite, progress.consentScan, progress.interactionSession)) {
+  if (canBuildPostInteractionAnalysis(progress)) {
     const interactionAudit = buildPostInteractionAudit(progress.currentSite, progress.interactionSession);
     return buildAnalysisResponse({
       analysisMode: "post_interaction",
@@ -237,6 +264,50 @@ function clearStoredInteractionSession(tabId) {
   TAB_INTERACTION_SESSIONS.delete(tabId);
 }
 
+async function clearInteractionAuditSessionsInFrames(tabId, frameIds) {
+  if (!Array.isArray(frameIds) || frameIds.length === 0) return [];
+
+  return await executeScriptAcrossSpecificFrames(
+    tabId,
+    frameIds,
+    {
+      func: () => {
+        if (!globalThis.AECCSConsentScanner?.clearInteractionAuditSession) return null;
+        return globalThis.AECCSConsentScanner.clearInteractionAuditSession();
+      },
+    },
+    {
+      ignoreMissingFrames: true,
+      timeoutMs: SESSION_READ_TIMEOUT_MS,
+    }
+  );
+}
+
+async function handleClearInteractionSession(tabId) {
+  if (tabId == null) {
+    return { ok: false, error: "No tab id provided" };
+  }
+
+  clearStoredInteractionSession(tabId);
+
+  let runtime = null;
+  try {
+    runtime = await ensureScannerRuntimeAcrossFrames(tabId);
+  } catch (_) {
+    runtime = null;
+  }
+
+  if (!runtime?.error && Array.isArray(runtime?.frameIds) && runtime.frameIds.length > 0) {
+    try {
+      await clearInteractionAuditSessionsInFrames(tabId, runtime.frameIds);
+    } catch (_) {
+      // Best effort only. The durable background session is already cleared.
+    }
+  }
+
+  return { ok: true };
+}
+
 async function handleAnalyze(tabId) {
   const progress = createAnalyzeProgress();
 
@@ -289,13 +360,20 @@ async function handleAnalyze(tabId) {
       }
 
       const readyFrameIds = Array.isArray(runtime.frameIds) ? runtime.frameIds : [];
+      progress.readyFrameIds = readyFrameIds;
 
-      let consentScanDetail = { error: runtime.error || null, frameId: null, scanResult: null };
+      let consentScanDetail = {
+        error: runtime.error || null,
+        frameId: null,
+        scanResult: null,
+        successfulFrameIds: [],
+        timedOutFrameIds: [],
+      };
       if (!runtime.error && readyFrameIds.length > 0) {
         try {
           consentScanDetail = await withTimeout(
             () => runConsentScanAcrossReadyFrames(tab.id, readyFrameIds),
-            CONSENT_SCAN_TIMEOUT_MS,
+            buildConsentScanBudgetMs(readyFrameIds),
             "Consent scan timed out"
           );
         } catch (err) {
@@ -305,9 +383,26 @@ async function handleAnalyze(tabId) {
         if (consentScanDetail.error) {
           recoverableError = recoverableError || new Error(consentScanDetail.error);
         }
+        if (
+          Array.isArray(consentScanDetail.timedOutFrameIds) &&
+          consentScanDetail.timedOutFrameIds.includes(0)
+        ) {
+          recoverableError = recoverableError || new Error(
+            "Consent scan timed out in the top frame before AECCS could confirm the banner state."
+          );
+        }
       }
 
       progress.consentScan = consentScanDetail.scanResult || null;
+      progress.consentScanCompleted = Boolean(consentScanDetail.scanResult && !consentScanDetail.error);
+      progress.consentScanError = consentScanDetail.error || runtime.error || null;
+      progress.consentScanFrameId = consentScanDetail.frameId ?? null;
+      progress.successfulConsentScanFrameIds = Array.isArray(consentScanDetail.successfulFrameIds)
+        ? consentScanDetail.successfulFrameIds
+        : [];
+      progress.timedOutConsentScanFrameIds = Array.isArray(consentScanDetail.timedOutFrameIds)
+        ? consentScanDetail.timedOutFrameIds
+        : [];
 
       let currentSite = null;
       try {
@@ -384,7 +479,7 @@ async function handleAnalyze(tabId) {
         });
       }
 
-      if (progress.currentSite && hasMeaningfulCurrentState(progress.currentSite, progress.consentScan, progress.interactionSession)) {
+      if (canBuildPostInteractionAnalysis(progress)) {
         const interactionAudit = buildPostInteractionAudit(progress.currentSite, progress.interactionSession);
         return buildAnalysisResponse({
           analysisMode: "post_interaction",
@@ -636,6 +731,19 @@ function buildPostInteractionAudit(currentSite, session) {
   return draft;
 }
 
+function isUnavailableConsentScanError(error) {
+  const message = String(error || "").toLowerCase();
+  if (!message) return false;
+  return (
+    message.includes("content script unavailable") ||
+    message.includes("scanner runtime lost") ||
+    message.includes("scanner unavailable") ||
+    message.includes("runtime unavailable") ||
+    message.includes("unavailable in all frames") ||
+    message.includes("aeccsconsentscanner missing")
+  );
+}
+
 function hasMeaningfulCurrentState(currentSite, consentScan, interactionSession) {
   return Boolean(
     Number(currentSite?.totalCookies || 0) > 0 ||
@@ -644,6 +752,19 @@ function hasMeaningfulCurrentState(currentSite, consentScan, interactionSession)
     consentScan?.cmpDetected ||
     interactionSession
   );
+}
+
+function canBuildPostInteractionAnalysis(progress) {
+  if (!progress?.currentSite) return false;
+  if (!hasMeaningfulCurrentState(progress.currentSite, progress.consentScan, progress.interactionSession)) {
+    return false;
+  }
+  if (progress.interactionSession) return true;
+  if (!progress.consentScanCompleted) return false;
+  if (progress.consentScan?.bannerFound !== false) return false;
+  if (!didTopFrameConsentScanSucceed(progress)) return false;
+  if (isUnavailableConsentScanError(progress.consentScanError)) return false;
+  return true;
 }
 
 function buildUnavailableAnalysis(url, hostname, consentScan, isGovDomain) {
@@ -672,6 +793,16 @@ function buildUnavailableAnalysis(url, hostname, consentScan, isGovDomain) {
     cmpStats: null,
     petRecommendations: [],
   };
+}
+
+function didTopFrameConsentScanSucceed(progress) {
+  const readyFrameIds = Array.isArray(progress?.readyFrameIds) ? progress.readyFrameIds : [];
+  if (!readyFrameIds.includes(0)) return false;
+
+  const successfulFrameIds = Array.isArray(progress?.successfulConsentScanFrameIds)
+    ? progress.successfulConsentScanFrameIds
+    : [];
+  return successfulFrameIds.includes(0);
 }
 
 function sanitizeInteractionAuditForResponse(interactionAudit) {
@@ -772,15 +903,48 @@ async function ensureScannerRuntimeAcrossFrames(tabId, frameIds = null) {
 
 async function runConsentScanAcrossReadyFrames(tabId, frameIds) {
   try {
-    const frameResults = await executeScriptAcrossSpecificFrames(
-      tabId,
-      frameIds,
-      { func: runScannerInFrame },
-      {
-        ignoreMissingFrames: true,
-        timeoutMs: CONSENT_SCAN_TIMEOUT_MS,
+    const orderedFrameIds = Array.from(new Set(frameIds || []))
+      .filter(frameId => frameId != null)
+      .sort((a, b) => {
+        if (a === 0 && b !== 0) return -1;
+        if (b === 0 && a !== 0) return 1;
+        return a - b;
+      });
+    const frameResults = [];
+
+    for (const frameId of orderedFrameIds) {
+      try {
+        const frameTimeoutMs = frameId === 0
+          ? Math.ceil(CONSENT_SCAN_TIMEOUT_MS * 1.5)
+          : CONSENT_SCAN_TIMEOUT_MS;
+        const [frameResult] = await executeScriptAcrossSpecificFrames(
+          tabId,
+          [frameId],
+          { func: runScannerInFrame },
+          {
+            ignoreMissingFrames: false,
+            timeoutMs: frameTimeoutMs,
+          }
+        );
+        if (frameResult) {
+          frameResults.push(frameResult);
+        }
+      } catch (err) {
+        if (isMissingFrameError(err)) {
+          continue;
+        }
+
+        frameResults.push({
+          frameId,
+          result: {
+            error: extractScriptErrorMessage(err),
+            timedOut: isTimeoutError(err),
+            scanResult: null,
+            scanScore: -1,
+          },
+        });
       }
-    );
+    }
 
     return selectBestConsentScanDetailed(frameResults);
   } catch (err) {
@@ -988,6 +1152,7 @@ function normalizeFrameScan(executionResult) {
     scanResult,
     scanScore,
     error: scanError,
+    timedOut: Boolean(payload.timedOut),
     initStage: payload.initStage || null,
     initError: payload.initError || null,
   };
@@ -1026,6 +1191,13 @@ function isBetterFrameScan(candidate, current) {
 function selectBestConsentScanDetailed(executionResults) {
   const normalized = (executionResults || []).map(normalizeFrameScan);
   const successful = normalized.filter(item => item.scanResult && !item.error);
+  const successfulFrameIds = successful
+    .map(item => item.frameId)
+    .filter(frameId => frameId != null);
+  const timedOutFrameIds = normalized
+    .filter(item => item.timedOut)
+    .map(item => item.frameId)
+    .filter(frameId => frameId != null);
 
   if (successful.length === 0) {
     const messages = Array.from(new Set(normalized.map(item => item.error).filter(Boolean)));
@@ -1044,10 +1216,17 @@ function selectBestConsentScanDetailed(executionResults) {
         messages.push(detail);
       }
     }
-    if (messages.length > 0) {
-      return { error: `Content script unavailable in all frames: ${messages.join("; ")}` };
+    if (timedOutFrameIds.length > 0) {
+      messages.push(`timed out in frames ${timedOutFrameIds.join(", ")}`);
     }
-    return { error: "Content script unavailable in all frames" };
+    if (messages.length > 0) {
+      return {
+        error: `Content script unavailable in all frames: ${messages.join("; ")}`,
+        successfulFrameIds,
+        timedOutFrameIds,
+      };
+    }
+    return { error: "Content script unavailable in all frames", successfulFrameIds, timedOutFrameIds };
   }
 
   let best = null;
@@ -1062,8 +1241,10 @@ function selectBestConsentScanDetailed(executionResults) {
         error: null,
         frameId: best.frameId,
         scanResult: best.scanResult,
+        successfulFrameIds,
+        timedOutFrameIds,
       }
-    : { error: "Content script unavailable in all frames" };
+    : { error: "Content script unavailable in all frames", successfulFrameIds, timedOutFrameIds };
 }
 
 function selectBestConsentScan(executionResults) {

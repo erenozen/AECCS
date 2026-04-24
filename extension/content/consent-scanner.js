@@ -168,6 +168,18 @@
       "[role='checkbox']",
       "[role='switch']",
     ].join(", ");
+    const FUNDING_CHOICES_SURFACE_HINTS = [
+      "fc-consent-root",
+      "fc-dialog-container",
+      "fc-choice-dialog",
+      "fc-dialog",
+      "fc-footer-buttons",
+      "fc-confirm-choices",
+      "fc-preference-consent",
+      "fc-vendor-preferences",
+      "sp_choice_type",
+      "fundingchoices",
+    ].map(normalizeForMatch).filter(Boolean);
 
   function parsePx(value) {
     if (!value) return 0;
@@ -348,6 +360,117 @@
     const normalized = normalizeForMatch(attrs);
     if (!normalized) return false;
     return BANNER_ATTR_HINTS.some(hint => normalized.includes(hint));
+  }
+
+  const bannerCandidateProfileCache = new WeakMap();
+  const focusedConsentDescendantCache = new WeakMap();
+
+  function countHintMatches(value, hints) {
+    const normalized = normalizeForMatch(value);
+    if (!normalized) return 0;
+    let matches = 0;
+    for (const hint of hints) {
+      if (normalized.includes(hint)) matches += 1;
+    }
+    return matches;
+  }
+
+  function hasFundingChoicesSurfaceHint(attrs) {
+    return countHintMatches(attrs, FUNDING_CHOICES_SURFACE_HINTS) > 0;
+  }
+
+  function countVisibleConsentActions(summary) {
+    if (!summary) return 0;
+    return (
+      Number(summary.acceptCount || 0) +
+      Number(summary.rejectCount || 0) +
+      Number(summary.settingsCount || 0)
+    );
+  }
+
+  function hasFocusedConsentDescendant(el) {
+    if (!el || !el.querySelectorAll) return false;
+    if (focusedConsentDescendantCache.has(el)) {
+      return focusedConsentDescendantCache.get(el);
+    }
+
+    const rootRect = el.getBoundingClientRect();
+    const rootArea = getRectArea(rootRect);
+    if (rootArea <= 0) {
+      focusedConsentDescendantCache.set(el, false);
+      return false;
+    }
+
+    let found = false;
+
+    for (const descendant of el.querySelectorAll(CANDIDATE_CONTAINER_SELECTOR)) {
+      if (!descendant || descendant === el || !isElementVisible(descendant)) continue;
+
+      const rect = descendant.getBoundingClientRect();
+      const area = getRectArea(rect);
+      if (area <= 0 || area >= rootArea) continue;
+
+      const relativeArea = area / rootArea;
+      if (relativeArea < 0.015 || relativeArea > 0.9) continue;
+
+      const attrs = elementAttributeHaystack(descendant);
+      const summary = summarizeButtons(descendant, { includeHidden: false });
+      const visibleActionCount = countVisibleConsentActions(summary);
+      const dialogLike = attrs.includes("dialog") || descendant.getAttribute("aria-modal") === "true";
+
+      if ((visibleActionCount >= 2 || dialogLike || hasFundingChoicesSurfaceHint(attrs)) && relativeArea < 0.85) {
+        found = true;
+        break;
+      }
+    }
+
+    focusedConsentDescendantCache.set(el, found);
+    return found;
+  }
+
+  function getBannerCandidateProfile(el) {
+    if (!el) return null;
+    if (bannerCandidateProfileCache.has(el)) {
+      return bannerCandidateProfileCache.get(el);
+    }
+
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    const text = getElementText(el);
+    const matchText = normalizeForMatch(text);
+    const attrs = elementAttributeHaystack(el);
+    const summary = summarizeButtons(el, { includeHidden: false });
+    const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
+    const areaRatio = getRectArea(rect) / viewportArea;
+    const visibleActionCount = countVisibleConsentActions(summary);
+    const fixedLike = style.position === "fixed" || style.position === "sticky";
+    const dialogLike = attrs.includes("dialog") || el.getAttribute("aria-modal") === "true";
+    const edgeAnchored = rect.top < 160 || rect.bottom > (window.innerHeight - 160);
+    const fullScreenLike = rect.width >= window.innerWidth * 0.92 && rect.height >= window.innerHeight * 0.92;
+    const fundingChoicesHintCount = countHintMatches(attrs, FUNDING_CHOICES_SURFACE_HINTS);
+    const hasNestedConsentSurface = (areaRatio > 0.8 || fullScreenLike)
+      ? hasFocusedConsentDescendant(el)
+      : false;
+
+    const profile = {
+      rect,
+      style,
+      text,
+      matchText,
+      attrs,
+      summary,
+      areaRatio,
+      visibleActionCount,
+      fixedLike,
+      dialogLike,
+      edgeAnchored,
+      fullScreenLike,
+      fundingChoicesHintCount,
+      hasNestedConsentSurface,
+    };
+
+    bannerCandidateProfileCache.set(el, profile);
+    return profile;
   }
 
   function findDismissButton(root, { visibleOnly = false } = {}) {
@@ -805,7 +928,7 @@
         for (const el of elements) {
           const text = getElementText(el);
           const attrs = elementAttributeHaystack(el);
-          if (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs)) {
+          if (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs) || hasFundingChoicesSurfaceHint(attrs)) {
             maybeAdd(el);
           }
         }
@@ -826,9 +949,12 @@
       const fixedLike = style.position === "fixed" || style.position === "sticky";
       const dialogLike = attrs.includes("dialog") || el.getAttribute("aria-modal") === "true";
       const edgeAnchored = rect.top < 160 || rect.bottom > (window.innerHeight - 160);
-      const actionable = summary.acceptCount > 0 || summary.rejectCount > 0 || summary.settingsCount > 0;
+      const actionable = countVisibleConsentActions(summary) > 0;
 
-      if ((fixedLike || dialogLike || edgeAnchored) && (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs) || actionable)) {
+      if (
+        (fixedLike || dialogLike || edgeAnchored) &&
+        (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs) || hasFundingChoicesSurfaceHint(attrs) || actionable)
+      ) {
         maybeAdd(el);
       }
     }
@@ -853,31 +979,36 @@
   function scoreBannerCandidate(el) {
     if (!el || !isElementVisible(el)) return Number.NEGATIVE_INFINITY;
 
-    const rect = el.getBoundingClientRect();
-    const style = getComputedStyle(el);
-    const text = getElementText(el);
-    const matchText = normalizeForMatch(text);
-    const attrs = elementAttributeHaystack(el);
-    const summary = summarizeButtons(el, { includeHidden: false });
+    const profile = getBannerCandidateProfile(el);
+    const { text, matchText, attrs, summary } = profile;
+    const hasBannerTextEvidence = hasBannerLikeText(text) || BANNER_TEXT_KEYWORDS.some(term => matchText.includes(term));
+    const hasBannerAttributeEvidence = hasBannerLikeAttributes(attrs) || profile.fundingChoicesHintCount > 0;
 
     let score = 0;
 
     if (hasBannerLikeText(text)) score += 5;
     if (BANNER_TEXT_KEYWORDS.some(term => matchText.includes(term))) score += 3;
     if (hasBannerLikeAttributes(attrs)) score += 3;
+    if (profile.fundingChoicesHintCount > 0) score += Math.min(5, profile.fundingChoicesHintCount + 1);
 
     if (summary.acceptCount > 0) score += 7;
     if (summary.rejectCount > 0) score += 7;
     if (summary.settingsCount > 0) score += 4;
+    if (profile.visibleActionCount >= 2) score += 2;
 
-    if (style.position === "fixed" || style.position === "sticky") score += 4;
-    if (attrs.includes("dialog") || el.getAttribute("aria-modal") === "true") score += 3;
+    if (profile.fixedLike) score += 4;
+    if (profile.dialogLike) score += 3;
 
-    const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
-    const areaRatio = (rect.width * rect.height) / viewportArea;
+    const areaRatio = profile.areaRatio;
     if (areaRatio >= 0.03 && areaRatio <= 0.95) score += 2;
     if (areaRatio > 0.95) score -= 4;
-    if (rect.top < 140 || rect.bottom > (window.innerHeight - 140)) score += 2;
+    if (profile.edgeAnchored) score += 2;
+    if (profile.fullScreenLike && profile.visibleActionCount > 0) score -= 2;
+    if (profile.hasNestedConsentSurface) score -= 6;
+    if (profile.dialogLike && areaRatio <= 0.8 && profile.visibleActionCount > 0) score += 2;
+    if (!profile.fixedLike && !profile.dialogLike && !profile.edgeAnchored && profile.visibleActionCount > 0) score -= 6;
+    if (areaRatio < 0.02 && profile.visibleActionCount > 0) score -= 4;
+    if (!hasBannerTextEvidence && !hasBannerAttributeEvidence && profile.visibleActionCount > 0) score -= 3;
 
     if (text.length > 80) score += 1;
     if (text.length > 4000) score -= 3;
@@ -885,6 +1016,84 @@
     if (el.querySelector("a[href*='privacy'], a[href*='cookie']")) score += 1;
 
     return score;
+  }
+
+  function isBetterBannerCandidate(candidate, candidateScore, current, currentScore) {
+    if (!current) return true;
+    if (candidateScore !== currentScore) return candidateScore > currentScore;
+
+    const candidateProfile = getBannerCandidateProfile(candidate);
+    const currentProfile = getBannerCandidateProfile(current);
+
+    if (candidateProfile.hasNestedConsentSurface !== currentProfile.hasNestedConsentSurface) {
+      return !candidateProfile.hasNestedConsentSurface;
+    }
+
+    if (candidateProfile.visibleActionCount !== currentProfile.visibleActionCount) {
+      return candidateProfile.visibleActionCount > currentProfile.visibleActionCount;
+    }
+
+    if (candidateProfile.dialogLike !== currentProfile.dialogLike) {
+      return candidateProfile.dialogLike;
+    }
+
+    if (candidateProfile.fundingChoicesHintCount !== currentProfile.fundingChoicesHintCount) {
+      return candidateProfile.fundingChoicesHintCount > currentProfile.fundingChoicesHintCount;
+    }
+
+    if (candidateProfile.fullScreenLike !== currentProfile.fullScreenLike) {
+      return !candidateProfile.fullScreenLike;
+    }
+
+    return false;
+  }
+
+  function promoteToNearestActiveBannerSurface(el) {
+    let current = el;
+    let depth = 0;
+
+    while (current && current !== document.body && current !== document.documentElement && depth < MAX_ANCESTOR_DEPTH) {
+      const buttonData = findButtons(current);
+      if (isActiveBanner(current, buttonData)) {
+        return {
+          element: current,
+          selector: describeElement(current),
+          score: scoreBannerCandidate(current),
+        };
+      }
+      current = current.parentElement;
+      depth += 1;
+    }
+
+    return null;
+  }
+
+  function findPreferredActiveBannerDescendant(el) {
+    if (!el || !el.querySelectorAll) return null;
+
+    let best = null;
+    let bestScore = Number.NEGATIVE_INFINITY;
+
+    for (const descendant of el.querySelectorAll(CANDIDATE_CONTAINER_SELECTOR)) {
+      if (!descendant || descendant === el || !isElementVisible(descendant)) continue;
+
+      const buttonData = findButtons(descendant);
+      if (!isActiveBanner(descendant, buttonData)) continue;
+
+      const score = scoreBannerCandidate(descendant);
+      if (isBetterBannerCandidate(descendant, score, best, bestScore)) {
+        best = descendant;
+        bestScore = score;
+      }
+    }
+
+    return best
+      ? {
+          element: best,
+          selector: describeElement(best),
+          score: bestScore,
+        }
+      : null;
   }
 
   function findBanner() {
@@ -900,7 +1109,7 @@
 
       while (current && current !== document.body && current !== document.documentElement && depth < MAX_ANCESTOR_DEPTH) {
         const score = scoreBannerCandidate(current);
-        if (score > bestScore) {
+        if (isBetterBannerCandidate(current, score, best, bestScore)) {
           bestScore = score;
           best = current;
         }
@@ -909,7 +1118,19 @@
       }
     }
 
-    if (!best || bestScore < 6) return null;
+    if (!best) return null;
+
+    const preferredDescendant = findPreferredActiveBannerDescendant(best);
+    if (preferredDescendant && preferredDescendant.score >= 6) {
+      return preferredDescendant;
+    }
+
+    const promoted = promoteToNearestActiveBannerSurface(best);
+    if (promoted && promoted.score >= 6) {
+      return promoted;
+    }
+
+    if (bestScore < 6) return null;
 
     return {
       element: best,

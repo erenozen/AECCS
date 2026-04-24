@@ -34,8 +34,11 @@ CONSENT_ACTION_VOCABULARY: dict[str, dict[str, list[str]]] = {
     "accept": {
         "exact": [
             "Accept",
+            "I Accept",
             "Accept All",
             "Accept Cookies",
+            "I Accept Cookies",
+            "I Accept All Cookies",
             "Allow All",
             "Allow All Cookies",
             "Agree",
@@ -395,6 +398,7 @@ CONSENT_ACTION_VOCABULARY: dict[str, dict[str, list[str]]] = {
             "Privacy Settings",
             "Privacy Choices",
             "View Options",
+            "Show Purposes",
             "View Cookie Options",
             "View Preferences",
             "More Options",
@@ -592,6 +596,7 @@ CONSENT_ACTION_VOCABULARY: dict[str, dict[str, list[str]]] = {
             "privacy settings",
             "privacy choices",
             "view options",
+            "show purposes",
             "view preferences",
             "more options",
             "manage preferences",

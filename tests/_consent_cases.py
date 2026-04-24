@@ -2,6 +2,8 @@ from __future__ import annotations
 
 
 CONSENT_ACTION_CASES: list[tuple[str, str, str]] = [
+    ("English first-person accept", "I Accept", "accept"),
+    ("English first-person accept cookies", "I Accept Cookies", "accept"),
     ("English accept continue", "Accept and continue", "accept"),
     ("English reject optional", "Reject Optional Cookies", "reject"),
     ("English reject essential", "Essential cookies only", "reject"),

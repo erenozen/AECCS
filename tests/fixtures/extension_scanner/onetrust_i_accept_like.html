@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OneTrust I Accept Banner</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: #f8fafc;
+    }
+
+    main {
+      padding: 2rem;
+    }
+
+    #onetrust-banner-sdk {
+      position: fixed;
+      inset: auto 0 0 0;
+      background: #ffffff;
+      border-top: 1px solid #d1d5db;
+      box-shadow: 0 -12px 30px rgba(15, 23, 42, 0.12);
+      z-index: 9999;
+    }
+
+    .ot-sdk-container {
+      display: flex;
+      gap: 2rem;
+      padding: 1.5rem 2rem;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    #onetrust-group-container {
+      max-width: 48rem;
+    }
+
+    #onetrust-button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-width: 12rem;
+    }
+
+    #onetrust-button-group button {
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #onetrust-accept-btn-handler,
+    #onetrust-reject-all-handler {
+      background: #111827;
+      color: #ffffff;
+      border: 0;
+    }
+
+    #onetrust-pc-btn-handler {
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>NBA Playoffs</h1>
+    <p>Fixture page modelling a OneTrust banner that uses first-person accept wording.</p>
+  </main>
+
+  <div id="onetrust-consent-sdk">
+    <div
+      id="onetrust-banner-sdk"
+      class="otFlat ot-iab-2 bottom vertical-align-content"
+      tabindex="0"
+      role="region"
+      aria-label="Cookie banner"
+    >
+      <div class="ot-sdk-container" role="dialog" aria-label="We Care About Your Privacy">
+        <div id="onetrust-group-container">
+          <h2 id="onetrust-policy-title">We Care About Your Privacy</h2>
+          <div id="onetrust-policy-text">
+            We and our partners store and access personal data on your device.
+            Selecting I Accept enables tracking technologies to support the purposes shown below.
+          </div>
+          <div class="ot-dpd-container">
+            <h3 class="ot-dpd-title">We and our partners process data to provide:</h3>
+            <p class="ot-dpd-desc">
+              Store and/or access information on a device. Use precise geolocation data.
+              <button class="ot-link-btn onetrust-vendors-list-handler" type="button">
+                List of Partners (vendors)
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <div id="onetrust-button-group-parent" class="has-reject-all-button">
+          <div id="onetrust-button-group">
+            <button id="onetrust-accept-btn-handler" type="button">I Accept</button>
+            <button id="onetrust-reject-all-handler" type="button">Reject All</button>
+            <button
+              id="onetrust-pc-btn-handler"
+              type="button"
+              aria-label="Show Purposes, Opens the preference center dialog"
+            >
+              Show Purposes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

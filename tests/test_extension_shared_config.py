@@ -30,6 +30,8 @@ def test_shared_python_consent_classifier_covers_production_labels(
 @pytest.mark.parametrize(
     ("label", "expected"),
     [
+        ("I Accept", "accept"),
+        ("I Accept Cookies", "accept"),
         ("Accept and continue", "accept"),
         ("Reject Optional Cookies", "reject"),
         ("Manage Preferences", "settings"),

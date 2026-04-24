@@ -49,9 +49,10 @@ The pipeline now separates demonstration data, earlier real-study artifacts, and
 
 The `extension/` folder contains a lightweight Chrome/Firefox browser extension that turns AECCS into a local, user-initiated cookie-consent auditor for the currently loaded page.
 
-- **Session-limited local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling, and no persistent storage
+- **Session-limited local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling, and no per-site audit history
 - **No blocking and no auto-clicking** — the extension does not try to change consent state or fix a site for the user
 - **Current-state and post-click analysis** — if a banner is visible, AECCS captures a baseline GDPR audit and can keep watching that consent flow locally for the current tab session; if the banner is already gone, it can still audit the currently loaded consent state when there is meaningful cookie/CMP evidence
+- **Optional browsing-setup profile** — users can save their declared browser protections locally so AECCS can explain how blockers or consent tools may affect the observed results
 - **Live cookie/tracker evidence** — reads current cookies, classifies trackers, and highlights third-party and tracker-heavy pages
 - **Consent dark-pattern analysis** — detects CMPs, missing reject paths, multi-layer rejection, asymmetric buttons, hidden reject, preselected checkboxes, confusing language, forced action, and transparency signals
 - **Accept vs Reject UX comparison** — renders the visible accept/reject path so users can see unequal effort directly

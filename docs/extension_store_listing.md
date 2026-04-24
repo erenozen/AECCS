@@ -19,6 +19,7 @@ It audits the page you are currently visiting and highlights:
 - accept vs reject UX comparison using the controls that are actually visible on the page
 - post-interaction cookie outcomes after observed Accept All, Reject All, or Essential Only flows
 - study-backed privacy-tool guidance tied to the issues found on the current site
+- an optional locally saved browsing-setup profile so AECCS can explain how blockers or consent tools may affect the measured result
 
 AECCS is grounded in the completed 1000-site combined study snapshot (`combined-1000`, generated March 6, 2026). The extension uses that completed combined snapshot, not the older smaller run, as its frozen study baseline. The extension keeps that study context static and local, so it can stay lightweight while still surfacing:
 
@@ -27,6 +28,8 @@ AECCS is grounded in the completed 1000-site combined study snapshot (`combined-
 - government/public-sector coverage
 - post-DMA 2026 snapshot context
 - reproducible open-pipeline provenance
+
+The only persistent data is the user's optional browsing-setup declaration stored locally in the browser; AECCS does not store site-specific audit history or transmit browsing data off-device.
 
 Project repo / methodology reference: https://github.com/erenozen/AECCS
 Privacy policy: https://erenozen.github.io/AECCS/privacy-policy.html
