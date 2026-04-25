@@ -654,6 +654,13 @@
           yields a local post-interaction honesty check: the extension can show whether a visible reject path actually
           reduced tracker exposure in the observed session.
         </p>
+        <p>
+          Because the extension observes the user's live browser rather than replaying the controlled crawler, its
+          findings may differ from the frozen 1,000-site results. Browser cookie settings, installed PETs, prior
+          consent choices, location, profile state, and current site changes can all reduce or change the evidence
+          visible at runtime. These differences are expected and useful: the extension reports current-session evidence,
+          while the study reports a controlled point-in-time corpus measurement.
+        </p>
 
         <div class="table-wrap">
           <table>
@@ -1084,6 +1091,15 @@
           intent, visual salience, or every multilingual banner variant. Headless and automated browsing can trigger
           different behavior than a residential user's browser, and a single frozen run cannot capture long-term changes
           in CMP configuration, tracker lists, or site availability.
+        </p>
+        <p>
+          Manual verification can therefore disagree with the study without making either observation meaningless. A
+          manual spot check occurs in a particular browser, network, region, consent history, date, and privacy
+          configuration, while AECCS reports a frozen March 2026 measurement under a controlled crawler protocol. To
+          directly challenge a site-level finding, a reproduction should match the URL, date window, fresh-profile state,
+          location assumptions, browser configuration, consent interaction state, and tracker-classification definition
+          used by the frozen dataset. Otherwise, the mismatch is best treated as evidence of environmental or temporal
+          variation, which is itself an important property of consent measurement.
         </p>
         <div class="note">
           Provenance caveat: the frozen aggregate metadata reports <span class="code">proxy_used: null</span>. This
