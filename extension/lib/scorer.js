@@ -3,9 +3,9 @@
  *
  * Six criteria, weighted 0-100 each, producing an overall score + letter grade.
  *
- *   1. No pre-consent trackers       (0.25)
+ *   1. No pre-consent trackers       (0.30)
  *   2. Reject option available        (0.20)
- *   3. Equal accept/reject effort     (0.15)
+ *   3. Equal accept/reject effort     (0.10)
  *   4. No dark patterns               (0.15)
  *   5. Post-reject compliance         (0.15)
  *   6. Transparent information        (0.10)
@@ -13,6 +13,13 @@
 
 const Scorer = (() => {
   "use strict";
+
+  const STATE_OUTCOME_WEIGHTS = AECCS.STATE_OUTCOME_WEIGHTS || {
+    low_tracker_load: 0.45,
+    low_third_party_load: 0.25,
+    low_total_cookie_load: 0.15,
+    claimed_action_honesty: 0.15,
+  };
 
   function _grade(score) {
     for (const { threshold, grade } of AECCS.GRADES) {
@@ -111,8 +118,9 @@ const Scorer = (() => {
   }
 
   // ── Criterion 5: Post-reject compliance (weight 0.15) ───────────────────
-  // Passive extension mode does not click banners, so this criterion stays at
-  // zero unless a future verified post-reject dataset is explicitly attached.
+  // The baseline banner audit does not auto-click banners. When no verified
+  // post-reject evidence is attached, this criterion is treated as not
+  // applicable rather than a hard zero.
 
   function _scoreVerifiedPostRejectCompliance(postRejectData) {
     if (!postRejectData || postRejectData.verified !== true) {
@@ -141,7 +149,11 @@ const Scorer = (() => {
 
   function _scorePostRejectCompliance(consentScan) {
     if (!consentScan || consentScan.error) {
-      return { score: 0, details: "Consent scan unavailable" };
+      return { score: null, details: "Not available without a verified consent scan" };
+    }
+
+    if (!consentScan.bannerFound) {
+      return { score: null, details: "Not available without a visible consent banner" };
     }
 
     const verifiedScore = _scoreVerifiedPostRejectCompliance(consentScan.postRejectData);
@@ -149,7 +161,11 @@ const Scorer = (() => {
       return verifiedScore;
     }
 
-    return { score: 0, details: "No post-reject data available" };
+    if (!consentScan.hasRejectButton && !(consentScan.hasSettingsButton && consentScan.rejectClicksRequired < 999)) {
+      return { score: 0, details: "No reject option available" };
+    }
+
+    return { score: null, details: "Not available in baseline audit (no verified post-reject data)" };
   }
 
   // ── Criterion 6: Transparent information (weight 0.10) ──────────────────
@@ -187,22 +203,150 @@ const Scorer = (() => {
       transparent_information:    _scoreTransparentInformation(consentScan),
     };
 
+    let totalWeight = 0;
     let overall = 0;
     for (const [key, { score }] of Object.entries(criteria)) {
+      if (typeof score !== "number") {
+        continue;
+      }
       const weight = AECCS.COMPLIANCE_WEIGHTS[key] || 0;
+      totalWeight += weight;
       overall += score * weight;
+    }
+
+    if (totalWeight > 0 && totalWeight !== 1) {
+      overall = overall / totalWeight;
     }
 
     overall = Math.round(overall * 10) / 10;
 
     return {
+      kind: "gdpr_compliance",
+      label: "GDPR Compliance Score",
       overall_score: overall,
       grade: _grade(overall),
       criteria,
     };
   }
 
-  return { computeComplianceScore };
+  function _scoreTrackerLoad(trackerCount) {
+    const count = Number(trackerCount || 0);
+    if (count === 0) return { score: 100, details: "No trackers detected" };
+    if (count <= 2) return { score: 60, details: `${count} trackers detected` };
+    if (count <= 5) return { score: 30, details: `${count} trackers detected` };
+    if (count <= 10) return { score: 10, details: `${count} trackers detected` };
+    return { score: 0, details: `${count} trackers detected` };
+  }
+
+  function _scoreThirdPartyLoad(thirdPartyCount) {
+    const count = Number(thirdPartyCount || 0);
+    if (count === 0) return { score: 100, details: "No third-party cookies detected" };
+    if (count <= 2) return { score: 60, details: `${count} third-party cookies detected` };
+    if (count <= 5) return { score: 30, details: `${count} third-party cookies detected` };
+    if (count <= 10) return { score: 10, details: `${count} third-party cookies detected` };
+    return { score: 0, details: `${count} third-party cookies detected` };
+  }
+
+  function _scoreTotalCookieLoad(totalCookies) {
+    const count = Number(totalCookies || 0);
+    if (count <= 2) return { score: 100, details: `${count} cookies currently loaded` };
+    if (count <= 5) return { score: 80, details: `${count} cookies currently loaded` };
+    if (count <= 10) return { score: 50, details: `${count} cookies currently loaded` };
+    if (count <= 20) return { score: 20, details: `${count} cookies currently loaded` };
+    return { score: 0, details: `${count} cookies currently loaded` };
+  }
+
+  function getInteractionActionType(interactionAudit) {
+    return interactionAudit?.action?.type || "unknown";
+  }
+
+  function _scoreClaimedActionHonesty(siteSnapshot, interactionAudit) {
+    const actionType = getInteractionActionType(interactionAudit);
+    if (actionType === "accept") {
+      return { score: null, details: "Not applicable for accept actions" };
+    }
+    if (actionType === "unknown" || actionType === "dismiss" || !interactionAudit?.action) {
+      return { score: null, details: "No observed reject/essential action" };
+    }
+
+    const trackerCount = Number(siteSnapshot?.trackerCount || 0);
+    const totalCookies = Number(siteSnapshot?.totalCookies || 0);
+    const categoryCounts = siteSnapshot?.categoryCounts || {};
+    const baseline = interactionAudit?.baseline || null;
+    const delta = interactionAudit?.delta || null;
+    const nonEssentialCount = (
+      Number(categoryCounts.Analytics || 0) +
+      Number(categoryCounts.Advertising || 0) +
+      Number(categoryCounts.Social || 0) +
+      Number(categoryCounts.Fingerprinting || 0)
+    );
+
+    if (trackerCount > 0) {
+      return { score: 0, details: "Trackers remained after reject/essential action" };
+    }
+
+    if (delta && Array.isArray(delta.newTrackers) && delta.newTrackers.length > 0) {
+      return { score: 0, details: "New trackers appeared after reject/essential action" };
+    }
+
+    if (
+      baseline &&
+      Number(siteSnapshot?.thirdPartyCount || 0) > Number(baseline.thirdPartyCount || 0)
+    ) {
+      return { score: 0, details: "Third-party cookie load increased after reject/essential action" };
+    }
+
+    if (nonEssentialCount === 0 && totalCookies === 0) {
+      return { score: 100, details: "No non-essential cookies remained after reject/essential action" };
+    }
+
+    if (
+      nonEssentialCount === 0 &&
+      trackerCount === 0 &&
+      (Number(categoryCounts.Functional || 0) > 0 || Number(categoryCounts.Unknown || 0) > 0)
+    ) {
+      return { score: 60, details: "Only functional or unknown cookies remained after reject/essential action" };
+    }
+
+    return { score: 20, details: "Non-essential cookies remained after reject/essential action" };
+  }
+
+  function computeStateOutcomeScore(siteSnapshot, interactionAudit = null) {
+    const criteria = {
+      low_tracker_load: _scoreTrackerLoad(siteSnapshot?.trackerCount || 0),
+      low_third_party_load: _scoreThirdPartyLoad(siteSnapshot?.thirdPartyCount || 0),
+      low_total_cookie_load: _scoreTotalCookieLoad(siteSnapshot?.totalCookies || 0),
+      claimed_action_honesty: _scoreClaimedActionHonesty(siteSnapshot, interactionAudit),
+    };
+
+    let totalWeight = 0;
+    let overall = 0;
+
+    for (const [key, value] of Object.entries(criteria)) {
+      if (typeof value.score !== "number") {
+        continue;
+      }
+      const weight = STATE_OUTCOME_WEIGHTS[key] || 0;
+      totalWeight += weight;
+      overall += value.score * weight;
+    }
+
+    if (totalWeight > 0 && totalWeight !== 1) {
+      overall = overall / totalWeight;
+    }
+
+    overall = Math.round(overall * 10) / 10;
+
+    return {
+      kind: "state_outcome",
+      label: "Post-Interaction State Score",
+      overall_score: overall,
+      grade: _grade(overall),
+      criteria,
+    };
+  }
+
+  return { computeComplianceScore, computeStateOutcomeScore };
 })();
 
 if (typeof globalThis !== "undefined") {

@@ -4,9 +4,9 @@ GDPR compliance scoring.
 Computes a 0-100 compliance score for each website based on six weighted
 criteria defined in ``config.COMPLIANCE_WEIGHTS``:
 
-1. no_pre_consent_trackers (0.25)
+1. no_pre_consent_trackers (0.30)
 2. reject_option_available (0.20)
-3. equal_accept_reject_effort (0.15)
+3. equal_accept_reject_effort (0.10)
 4. no_dark_patterns (0.15)
 5. post_reject_compliance (0.15)
 6. transparent_information (0.10)
@@ -30,38 +30,10 @@ from config import (
     get_dataset_layout,
     unwrap_payload,
 )
-
-# Grade thresholds
-_GRADES = [
-    (90, "A"),
-    (75, "B"),
-    (60, "C"),
-    (40, "D"),
-    (0, "F"),
-]
-
-# Privacy-policy link keywords (multilingual)
-_PRIVACY_LINK_KEYWORDS = [
-    "privacy policy", "privacy notice", "data protection",
-    "datenschutz", "datenschutzerklaerung", "datenschutzerklärung",
-    "politique de confidentialité", "politique de confidentialite",
-    "privacybeleid", "privacyverklaring",
-    "politica de privacidad", "política de privacidad",
-    "informativa sulla privacy",
-    "gizlilik politikası", "gizlilik politikasi",
-]
-
-# Purpose keywords for transparency check
-_PURPOSE_KEYWORDS = [
-    "analytics", "advertising", "personalization", "marketing",
-    "functional", "preferences", "statistics", "targeting",
-    "analyse", "werbung", "personalisierung",
-    "analytique", "publicité", "personnalisation",
-]
-
+from shared_constants import GRADE_THRESHOLDS, PRIVACY_LINK_KEYWORDS, PURPOSE_KEYWORDS, VENDOR_KEYWORDS
 
 def _score_grade(score: float) -> str:
-    for threshold, grade in _GRADES:
+    for threshold, grade in GRADE_THRESHOLDS:
         if score >= threshold:
             return grade
     return "F"
@@ -90,7 +62,7 @@ def _count_pre_consent_trackers(
 
 def _score_no_pre_consent_trackers(
     site_data: dict, classified_cookies: list[dict]
-) -> tuple[int, str]:
+) -> tuple[int | None, str]:
     """Criterion 1: No pre-consent trackers."""
     n = _count_pre_consent_trackers(site_data, classified_cookies)
     if n == 0:
@@ -105,7 +77,7 @@ def _score_no_pre_consent_trackers(
         return 0, f"{n} pre-consent trackers found"
 
 
-def _score_reject_option(site_data: dict) -> tuple[int, str]:
+def _score_reject_option(site_data: dict) -> tuple[int | None, str]:
     """Criterion 2: Reject option available."""
     banner = site_data.get("consent_banner") or {}
     if not banner.get("found"):
@@ -119,7 +91,7 @@ def _score_reject_option(site_data: dict) -> tuple[int, str]:
     return 0, "No reject option available"
 
 
-def _score_equal_effort(site_data: dict) -> tuple[int, str]:
+def _score_equal_effort(site_data: dict) -> tuple[int | None, str]:
     """Criterion 3: Equal accept/reject effort."""
     banner = site_data.get("consent_banner") or {}
     a = banner.get("accept_clicks_required", 999)
@@ -139,7 +111,7 @@ def _score_equal_effort(site_data: dict) -> tuple[int, str]:
         return 20, f"Reject requires {diff} extra clicks ({a} vs {r})"
 
 
-def _score_no_dark_patterns(dark_pattern_data: dict) -> tuple[int, str]:
+def _score_no_dark_patterns(dark_pattern_data: dict) -> tuple[int | None, str]:
     """Criterion 4: No dark patterns."""
     count = dark_pattern_data.get("dark_pattern_count", 0)
     detected = dark_pattern_data.get("dark_patterns_detected", [])
@@ -156,18 +128,25 @@ def _score_no_dark_patterns(dark_pattern_data: dict) -> tuple[int, str]:
 
 def _score_post_reject_compliance(
     site_data: dict, classified_cookies: list[dict]
-) -> tuple[int, str]:
+) -> tuple[int | None, str]:
     """Criterion 5: Post-reject compliance."""
     banner = site_data.get("consent_banner") or {}
     post_reject = site_data.get("post_consent_reject")
     post_accept = site_data.get("post_consent_accept")
     pre = site_data.get("pre_consent") or {}
 
-    if not banner.get("has_reject_button", False):
+    if not banner.get("found", False):
+        return None, "Not available without a visible consent banner"
+
+    has_reject_path = banner.get("has_reject_button", False) or (
+        banner.get("reject_clicks_required", 999) < 999
+    )
+
+    if not has_reject_path:
         return 0, "No reject option available"
 
     if not post_reject or not isinstance(post_reject, dict):
-        return 0, "No post-reject data available"
+        return None, "Not available in baseline audit (no verified post-reject data)"
 
     if not post_reject.get("reject_successful", False) and not post_reject.get("reject_button_found", False):
         return 0, "Reject was not successful"
@@ -199,7 +178,7 @@ def _score_post_reject_compliance(
     return 50, "Partial compliance after rejection"
 
 
-def _score_transparent_information(site_data: dict) -> tuple[int, str]:
+def _score_transparent_information(site_data: dict) -> tuple[int | None, str]:
     """Criterion 6: Transparent information."""
     banner = site_data.get("consent_banner") or {}
     text = (banner.get("text_content") or "").lower()
@@ -212,14 +191,13 @@ def _score_transparent_information(site_data: dict) -> tuple[int, str]:
     details = []
 
     # Mentions specific purposes?
-    purpose_found = any(kw in text for kw in _PURPOSE_KEYWORDS)
+    purpose_found = any(kw in text for kw in PURPOSE_KEYWORDS)
     if purpose_found:
         score += 30
         details.append("mentions purposes")
 
     # Mentions vendor names?
-    vendor_keywords = ["google", "facebook", "meta", "analytics", "advertisement"]
-    vendor_found = any(kw in text for kw in vendor_keywords)
+    vendor_found = any(kw in text for kw in VENDOR_KEYWORDS)
     if vendor_found:
         score += 30
         details.append("mentions vendors")
@@ -227,7 +205,7 @@ def _score_transparent_information(site_data: dict) -> tuple[int, str]:
     # Privacy policy link?
     has_pp_link = False
     if html:
-        for kw in _PRIVACY_LINK_KEYWORDS:
+        for kw in PRIVACY_LINK_KEYWORDS:
             if kw in html:
                 has_pp_link = True
                 break
@@ -272,18 +250,25 @@ def compute_compliance_score(
 
     criterion_scores = {}
     overall = 0.0
+    total_weight = 0.0
 
     for criterion_name, func in criteria_funcs.items():
         raw_score, details = func()
         weight = COMPLIANCE_WEIGHTS.get(criterion_name, 0.0)
-        weighted = raw_score * weight
-        overall += weighted
+        weighted = None
+        if isinstance(raw_score, (int, float)):
+            weighted = raw_score * weight
+            overall += weighted
+            total_weight += weight
         criterion_scores[criterion_name] = {
             "score": raw_score,
             "weight": weight,
-            "weighted_score": round(weighted, 2),
+            "weighted_score": round(weighted, 2) if weighted is not None else None,
             "details": details,
         }
+
+    if total_weight > 0 and total_weight != 1.0:
+        overall = overall / total_weight
 
     overall = round(overall, 2)
 

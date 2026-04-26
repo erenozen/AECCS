@@ -2,11 +2,11 @@
 
 ## Release Baseline
 
-- Release target: `1.0.0` if no more code changes are made before submission
+- Release target: `1.0.2`
 - Publisher identity: personal publisher account, using AECCS as the product brand
 - Release model: listed add-on / public extension on both Firefox AMO and Chrome Web Store
 - Product posture:
-  - passive local auditor
+  - local, user-initiated, session-limited consent auditor
   - no blocking
   - no auto-clicking
   - no remote scan
@@ -21,7 +21,7 @@
 
 ## Freeze The Release Candidate
 
-1. Use the current extension behavior and current permission set as the first public release.
+1. Use the current extension behavior and current permission set for the `1.0.2` store update.
 2. If code changes after this point, bump `extension/manifest.json` before packaging.
 3. Submit both stores from the same commit and the same packaged extension contents.
 
@@ -39,7 +39,7 @@
 ## Build Submission Artifacts
 
 1. Run:
-   - `python scripts/package_extension_release.py --version 1.0.0`
+   - `python scripts/package_extension_release.py --version 1.0.2`
 2. Confirm this generates into `dist/extension-release/`:
    - Chrome upload ZIP
    - Firefox upload ZIP
@@ -64,7 +64,7 @@
 
 ## Submit Firefox First
 
-1. Open AMO Developer Hub and create a **listed add-on** submission.
+1. Open the existing AECCS listing in AMO Developer Hub and create a new listed version.
 2. Upload the Firefox ZIP from `dist/extension-release/`.
 3. If source code is requested, answer **Yes** and upload the reviewer/source ZIP.
 4. Fill the listing using `docs/extension_store_listing_firefox.md`.
@@ -73,12 +73,12 @@
 7. Do not mark the add-on experimental unless reduced visibility is intentional.
 8. Be ready for reviewer questions about:
    - why `cookies`, `activeTab`, `scripting`, and `<all_urls>` are needed
-   - generated static assets `study-snapshot.js` and `tracker-index.js`
+   - generated static assets `shared-config.js`, `study-snapshot.js`, and `tracker-index.js`
    - local-only privacy posture with no data transmission
 
 ## Submit Chrome Immediately After
 
-1. Open the Chrome Web Store Developer Dashboard and choose **Add new item**.
+1. Open the existing AECCS item in the Chrome Web Store Developer Dashboard.
 2. Upload the Chrome ZIP from `dist/extension-release/`.
 3. Fill the listing using `docs/extension_store_listing_chrome.md`.
 4. In the Privacy tab, use these exact justifications:

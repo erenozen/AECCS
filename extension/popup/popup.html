@@ -10,12 +10,12 @@
     <!-- Header -->
     <header class="header">
       <div class="header-title">
-        <svg class="logo" width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <svg class="logo" width="20" height="20" viewBox="0 1 24 24.5" fill="none">
           <path d="M12 2L3 7v6c0 5.25 3.83 10.15 9 11.25C17.17 23.15 21 18.25 21 13V7l-9-5z"
-                fill="#6366f1" opacity="0.2"/>
+                class="logo-fill"/>
           <path d="M12 2L3 7v6c0 5.25 3.83 10.15 9 11.25C17.17 23.15 21 18.25 21 13V7l-9-5z"
-                stroke="#6366f1" stroke-width="2" fill="none"/>
-          <path d="M9 12l2 2 4-4" stroke="#6366f1" stroke-width="2" stroke-linecap="round"
+                class="logo-stroke" stroke-width="2" fill="none"/>
+          <path d="M9 12l2 2 4-4" class="logo-stroke" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round"/>
         </svg>
         <span>AECCS Compliance Checker</span>
@@ -33,6 +33,15 @@
     <div id="errorState" class="error-state hidden">
       <span class="error-icon">!</span>
       <span id="errorMsg">An error occurred.</span>
+    </div>
+
+    <!-- Disabled / not-applicable state -->
+    <div id="disabledState" class="disabled-state hidden">
+      <span class="disabled-icon">i</span>
+      <div class="disabled-copy">
+        <div id="disabledTitle" class="disabled-title">Evaluation unavailable on this page</div>
+        <div id="disabledMsg" class="disabled-msg">AECCS did not detect an active cookie banner or a meaningful post-interaction consent state, so this website was not evaluated.</div>
+      </div>
     </div>
 
     <!-- Results -->
@@ -54,7 +63,29 @@
         </div>
         <div class="score-info">
           <div class="score-value"><span id="scoreValue">-</span><span class="score-max">/100</span></div>
-          <div class="score-label">GDPR Compliance Score</div>
+          <div class="score-label" id="scoreLabel">GDPR Compliance Score</div>
+          <div class="score-context hidden" id="scoreContext"></div>
+        </div>
+      </section>
+
+      <section class="section score-context-panel">
+        <div class="analysis-completeness hidden" id="analysisCompleteness"></div>
+        <div class="protection-caveat hidden" id="protectionCaveat">
+          <div class="protection-caveat-title">Measured in your current browsing setup</div>
+          <div class="protection-caveat-text" id="protectionCaveatText"></div>
+        </div>
+      </section>
+
+      <section class="section secondary-score hidden" id="baselineScoreSection">
+        <h2 class="section-title">Baseline Banner Score</h2>
+        <div class="secondary-score-card">
+          <div class="secondary-grade-badge" id="baselineGradeBadge">
+            <span class="secondary-grade-letter" id="baselineGradeLetter">-</span>
+          </div>
+          <div class="secondary-score-info">
+            <div class="secondary-score-value"><span id="baselineScoreValue">-</span><span class="score-max">/100</span></div>
+            <div class="score-label" id="baselineScoreLabel">GDPR Compliance Score</div>
+          </div>
         </div>
       </section>
 
@@ -77,6 +108,16 @@
         <h2 class="section-title">Consent Banner Analysis</h2>
         <div id="consentInfo"></div>
         <div id="cmpInfo" class="hidden"></div>
+      </section>
+
+      <section class="section hidden" id="interactionSection">
+        <h2 class="section-title">Guided Compare</h2>
+        <div id="compareFlow"></div>
+        <div class="compare-actions">
+          <button id="recheckButton" class="compare-action compare-action-primary" type="button">Re-check now</button>
+          <button id="startOverButton" class="compare-action compare-action-secondary" type="button">Start over</button>
+        </div>
+        <div id="interactionInfo"></div>
       </section>
 
       <!-- Accept vs Reject UX Comparison (unique to AECCS) -->
@@ -103,11 +144,65 @@
       </section>
 
       <!-- PET Recommendations (unique to AECCS) -->
-      <section class="section" id="petSection">
-        <h2 class="section-title">Recommended Privacy Tools</h2>
-        <div class="pet-subtitle" id="petSubtitle">Guidance combines this page's live findings with the AECCS 1000-site combined study (861 successful crawls, March 6, 2026)</div>
-        <div id="petList"></div>
-      </section>
+      <details class="section study-insights pet-recommendations hidden" id="petSection">
+        <summary class="study-insights-toggle">
+          <span>Recommended Privacy Tools</span>
+          <span class="study-insights-meta">Study-backed guidance</span>
+        </summary>
+        <div id="petContent" class="study-insights-content">
+          <div class="pet-subtitle" id="petSubtitle"></div>
+          <div id="petList"></div>
+        </div>
+      </details>
+
+      <details class="section browsing-setup" id="browsingSetupSection">
+        <summary class="study-insights-toggle">
+          <span>Browsing Setup</span>
+          <span class="study-insights-meta" id="browsingSetupSummary">No protections declared</span>
+        </summary>
+        <div class="study-insights-content">
+          <div class="setup-subtitle">
+            Tell AECCS which browser protections you use so it can explain how your current setup may affect what this audit observes.
+          </div>
+
+          <label class="setup-field" for="browserProtectionSelect">
+            <span class="setup-label">Browser protection</span>
+            <select id="browserProtectionSelect" class="setup-select">
+              <option value="none">None declared</option>
+              <option value="firefox_etp_standard">Firefox ETP Standard</option>
+              <option value="firefox_etp_strict">Firefox ETP Strict</option>
+              <option value="brave_shields">Brave Shields</option>
+            </select>
+          </label>
+
+          <div class="setup-field">
+            <div class="setup-label">Extra tools</div>
+            <div class="setup-checkbox-grid">
+              <label class="setup-checkbox">
+                <input type="checkbox" name="extraTool" value="ublock_origin">
+                <span>uBlock Origin</span>
+              </label>
+              <label class="setup-checkbox">
+                <input type="checkbox" name="extraTool" value="privacy_badger">
+                <span>Privacy Badger</span>
+              </label>
+              <label class="setup-checkbox">
+                <input type="checkbox" name="extraTool" value="consent_o_matic">
+                <span>Consent-O-Matic</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setup-status" id="browsingSetupStatus">
+            Saved locally on this browser only. AECCS does not sync this profile or attach it to site history.
+          </div>
+
+          <details class="protection-explainer" id="protectionExplainer">
+            <summary class="protection-explainer-toggle">How this can affect results</summary>
+            <div class="protection-explainer-content" id="protectionExplainerContent"></div>
+          </details>
+        </div>
+      </details>
 
       <details class="section study-insights hidden" id="studyInsightsSection">
         <summary class="study-insights-toggle">
@@ -121,12 +216,13 @@
 
     <!-- Footer -->
     <footer class="footer" id="footerNote">
-      AECCS &mdash; Passive local audit &middot; 1000-site combined study snapshot &middot; March 6, 2026
+      AECCS &mdash; Session-limited local consent audit &middot; 1000-site combined study snapshot &middot; March 6, 2026
     </footer>
   </div>
 
   <script src="../lib/browser-polyfill.js"></script>
   <script src="../lib/study-snapshot.js"></script>
+  <script src="../lib/shared-config.js"></script>
   <script src="../lib/tracker-data.js"></script>
   <script src="popup.js"></script>
 </body>

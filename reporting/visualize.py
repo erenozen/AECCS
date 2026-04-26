@@ -672,23 +672,37 @@ def plot_summary_dashboard(
     fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle("GDPR Cookie Consent Compliance: Key Findings", fontsize=14, fontweight="bold")
 
-    # ── Subplot 1: Grade distribution pie ─────────────────────────────
+    # ── Subplot 1: Grade distribution ─────────────────────────────────
     ax1 = axes[0, 0]
     gd = metrics.get("compliance_scores", {}).get("grade_distribution", {})
     if gd:
-        labels = list(gd.keys())
-        # Values may be int or dict with "count" key
-        sizes = []
-        for v in gd.values():
-            sizes.append(v["count"] if isinstance(v, dict) else int(v))
+        grade_order = [g for g in ["A", "B", "C", "D", "F"] if g in gd]
+        counts = [
+            gd[g]["count"] if isinstance(gd[g], dict) else int(gd[g])
+            for g in grade_order
+        ]
+        percentages = [
+            gd[g].get("percentage", 0) if isinstance(gd[g], dict) else 0
+            for g in grade_order
+        ]
         grade_colors = {"A": "#059669", "B": "#34D399", "C": "#D97706", "D": "#F59E0B", "F": "#DC2626"}
-        colors = [grade_colors.get(g, "#6B7280") for g in labels]
-        non_zero = [(l, s, c) for l, s, c in zip(labels, sizes, colors) if s > 0]
-        if non_zero:
-            ax1.pie([x[1] for x in non_zero],
-                    labels=[f"{x[0]} ({x[1]})" for x in non_zero],
-                    colors=[x[2] for x in non_zero],
-                    autopct="%1.0f%%", startangle=90, textprops={"fontsize": 8})
+        colors = [grade_colors.get(g, "#6B7280") for g in grade_order]
+        bars = ax1.barh(grade_order, counts, color=colors, height=0.62)
+        max_count = max(counts) if counts else 1
+        ax1.set_xlim(0, max_count * 1.18)
+        ax1.invert_yaxis()
+        ax1.set_xlabel("Sites", fontsize=8)
+        ax1.grid(axis="x", alpha=0.18, linewidth=0.6)
+        ax1.spines[["top", "right"]].set_visible(False)
+        for bar, grade, count, pct in zip(bars, grade_order, counts, percentages):
+            label = f"{grade}: {count} ({pct:.1f}%)"
+            ax1.text(
+                bar.get_width() + max_count * 0.018,
+                bar.get_y() + bar.get_height() / 2,
+                label,
+                va="center",
+                fontsize=8,
+            )
     ax1.set_title("Compliance Grade Distribution", fontsize=10)
 
     # ── Subplot 2: Pre-consent violation donut ────────────────────────

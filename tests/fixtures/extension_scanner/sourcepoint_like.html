@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sourcepoint-like Consent Banner</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: #f4f6f8;
+    }
+
+    main {
+      padding: 2rem;
+    }
+
+    #sp_message_container_1 {
+      position: fixed;
+      inset: auto 1rem 1rem 1rem;
+      max-width: 44rem;
+      background: #ffffff;
+      border: 1px solid #d0d7de;
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+      padding: 1.25rem;
+      z-index: 9999;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .primary {
+      background: #0f62fe;
+      color: #ffffff;
+    }
+
+    .secondary {
+      background: #eef2ff;
+      color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>News Homepage</h1>
+    <p>This fixture models a Sourcepoint-style consent banner in the main document.</p>
+  </main>
+
+  <div
+    id="sp_message_container_1"
+    class="message sp_choice_type_11"
+    role="dialog"
+    aria-modal="true"
+    data-cmp-vendor="sourcepoint"
+    data-host="privacy-mgmt"
+  >
+    <h2>We value your privacy</h2>
+    <p>
+      We and our partners use cookies to store and access information on your device.
+      You can accept all cookies, keep essential cookies only, or view options.
+    </p>
+    <div class="actions">
+      <button type="button" class="primary">Accept all</button>
+      <button type="button" class="secondary">Essential cookies only</button>
+      <button type="button" class="secondary">View options</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -15,114 +15,171 @@
 (() => {
   "use strict";
 
+  const ROOT = typeof globalThis !== "undefined" ? globalThis : self;
+  const SCANNER_INIT_ERROR_KEY = "_AECCSConsentScannerInitError";
+  const SCANNER_INIT_STAGE_KEY = "_AECCSConsentScannerInitStage";
+
   // Guard against duplicate injection (scripting.executeScript re-runs the
   // file even if it was already loaded).  Without this check, each injection
   // would register an additional runtime.onMessage listener.
-  if (globalThis._AECCSConsentScannerLoaded) return;
-  globalThis._AECCSConsentScannerLoaded = true;
-
-  // ── Dark-pattern keyword lists (from detector.py lines 38-80) ────────────
-
-  const GUILT_TRIP_PHRASES = [
-    "keep the site free", "support our journalist", "help us improve",
-    "you'll miss out", "you will miss out", "miss personalized",
-    "enjoy a better experience", "support free journalism",
-    "we need your support", "without your support",
-    "fund our work", "keep this site running",
-    "best experience", "optimal experience",
-    "unterstützen sie uns", "helfen sie uns", "kostenlos halten",
-    "bessere erfahrung", "optimale erfahrung",
-  ];
-
-  const DOUBLE_NEGATIVE_PATTERNS = [
-    /don'?t\s+(not|reject|refuse|decline)/i,
-    /nicht\s+(ablehnen|verweigern)/i,
-    /ne\s+pas\s+(refuser|rejeter)/i,
-    /I\s+do\s+not\s+want\s+to\s+not/i,
-  ];
-
-  const AMBIGUOUS_BUTTON_TEXTS = new Set([
-    "ok", "okay", "continue", "got it", "i understand", "understood",
-    "close", "dismiss", "later", "not now", "remind me later",
-    "weiter", "verstanden", "schliessen", "schließen",
-    "continuer", "compris", "j'ai compris", "fermer",
-    "doorgaan", "begrepen", "sluiten",
-  ]);
-
-  const NECESSARY_KEYWORDS = [
-    "necessary", "essential", "required", "strictly necessary",
-    "erforderlich", "notwendig", "unbedingt erforderlich",
-    "nécessaire", "strictement nécessaire",
-    "noodzakelijk", "strikt noodzakelijk",
-    "necesario", "estrictamente necesario",
-    "necessario", "strettamente necessario",
-    "gerekli", "zorunlu",
-  ];
-
-  // Port of scraper/crawler.py _SETTINGS_KEYWORDS
-  const SETTINGS_KEYWORDS = [
-    "settings",
-    "preferences",
-    "manage",
-    "customize",
-    "customise",
-    "more options",
-    "cookie settings",
-    "cookie preferences",
-    "einstellungen",
-    "paramètres",
-    "parametres",
-    "gérer",
-    "gerer",
-    "instellingen",
-    "opciones",
-    "configurar",
-    "impostazioni",
-    "ayarlar",
-    "secenekleri yonetin",
-    "secenekleri yonet",
-    "tercihleri yonetin",
-    "tercihleri yonet",
-    "cerez tercihleri",
-    "gizlilik tercihleri",
-    "izin secenekleri",
-    "secenekler",
-  ];
-
-  const CONSENT_TEXT_RE = /cookie|cookies|consent|gdpr|privacy|data protection|datenschutz|cerez|gizlilik/i;
-  const ATTR_HINT_RE = /cookie|consent|gdpr|privacy|cmp|tcf|onetrust|didomi|trustarc|cookiebot/i;
-  const ACTIONABLE_SELECTOR = [
-    "button",
-    "a",
-    "[role='button']",
-    "input[type='submit']",
-    "input[type='button']",
-    "a.btn",
-    "a[class*='btn']",
-    "a[class*='button']",
-  ].join(", ");
-  const CANDIDATE_CONTAINER_SELECTOR = "div, section, aside, form, dialog";
-  const MAX_ANCESTOR_DEPTH = 6;
-  const DEFAULT_SCAN_ATTEMPTS = 4;
-  const DEFAULT_SCAN_DELAY_MS = 160;
-  const MAX_PRESENTATION_DESCENDANTS = 32;
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  function normalizeText(value) {
-    return String(value || "")
-      .replace(/[\u2018\u2019]/g, "'")
-      .replace(/[\u201C\u201D]/g, "\"")
-      .replace(/\s+/g, " ")
-      .trim();
+  if (ROOT.AECCSConsentScanner) {
+    ROOT._AECCSConsentScannerLoaded = true;
+    ROOT[SCANNER_INIT_STAGE_KEY] = "ready";
+    ROOT[SCANNER_INIT_ERROR_KEY] = null;
+    return;
   }
 
-  function normalizeForMatch(value) {
-    return normalizeText(value)
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
+  // Older failed loads may have set the flag before initialization completed.
+  // Clear the stale flag so reinjection can recover cleanly.
+  if (ROOT._AECCSConsentScannerLoaded && !ROOT.AECCSConsentScanner) {
+    delete ROOT._AECCSConsentScannerLoaded;
   }
+
+  let scannerInitStage = "boot";
+  function setInitStage(stage) {
+    scannerInitStage = stage;
+    ROOT[SCANNER_INIT_STAGE_KEY] = stage;
+  }
+
+  function failInit(err) {
+    ROOT[SCANNER_INIT_ERROR_KEY] = err && err.message ? err.message : String(err);
+    ROOT[SCANNER_INIT_STAGE_KEY] = scannerInitStage;
+    delete ROOT._AECCSConsentScannerLoaded;
+    delete ROOT.AECCSConsentScanner;
+  }
+
+  function requireRuntimeObject(runtime, key) {
+    const value = runtime && runtime[key];
+    if (!value || typeof value !== "object") {
+      throw new Error(`AECCS runtime missing ${key}`);
+    }
+    return value;
+  }
+
+  function requireRuntimeArray(runtime, key) {
+    const value = runtime && runtime[key];
+    if (!Array.isArray(value)) {
+      throw new Error(`AECCS runtime missing ${key}`);
+    }
+    return value;
+  }
+
+  try {
+    setInitStage("runtime");
+
+    const AECCS_RUNTIME = ROOT.AECCS;
+    if (!AECCS_RUNTIME || typeof AECCS_RUNTIME !== "object") {
+      throw new Error("AECCS runtime unavailable. Load lib/tracker-data.js before content/consent-scanner.js.");
+    }
+
+    const CONSENT_VOCABULARY = requireRuntimeObject(AECCS_RUNTIME, "CONSENT_VOCABULARY");
+    const CMP_SIGNATURES = requireRuntimeObject(AECCS_RUNTIME, "CMP_SIGNATURES");
+    const BANNER_SELECTORS = requireRuntimeArray(AECCS_RUNTIME, "BANNER_SELECTORS");
+    const DISMISS_BUTTON_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "DISMISS_BUTTON_KEYWORDS");
+    const NECESSARY_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "NECESSARY_KEYWORDS");
+    const BANNER_TEXT_KEYWORDS_RAW = requireRuntimeArray(AECCS_RUNTIME, "BANNER_TEXT_KEYWORDS");
+    const BANNER_TEXT_PHRASES_RAW = requireRuntimeArray(AECCS_RUNTIME, "BANNER_TEXT_PHRASES");
+    const BANNER_ATTR_HINTS_RAW = requireRuntimeArray(AECCS_RUNTIME, "BANNER_ATTR_HINTS");
+    const GUILT_TRIP_PHRASES_RAW = requireRuntimeArray(AECCS_RUNTIME, "GUILT_TRIP_PHRASES");
+    const DOUBLE_NEGATIVE_PATTERNS = requireRuntimeArray(AECCS_RUNTIME, "DOUBLE_NEGATIVE_PATTERNS");
+    const PURPOSE_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "PURPOSE_KEYWORDS");
+    const VENDOR_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "VENDOR_KEYWORDS");
+    const PRIVACY_LINK_KEYWORDS = requireRuntimeArray(AECCS_RUNTIME, "PRIVACY_LINK_KEYWORDS");
+
+    const ACTIONABLE_SELECTOR = [
+      "button",
+      "a",
+      "[role='button']",
+      "input[type='submit']",
+      "input[type='button']",
+      "a.btn",
+      "a[class*='btn']",
+      "a[class*='button']",
+    ].join(", ");
+    const CANDIDATE_CONTAINER_SELECTOR = "div, section, aside, form, dialog";
+    const MAX_ANCESTOR_DEPTH = 6;
+    const DEFAULT_SCAN_ATTEMPTS = 4;
+    const DEFAULT_SCAN_DELAY_MS = 160;
+    const MAX_PRESENTATION_DESCENDANTS = 32;
+    const INTERACTION_SESSION_TIMEOUT_MS = 120000;
+    const INTERACTION_PENDING_WINDOW_MS = 2500;
+
+    let interactionSession = null;
+    let interactionWatcherCleanup = null;
+    let interactionTimeoutId = null;
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function normalizeText(value) {
+      return String(value || "")
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, "\"")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function normalizeForMatch(value) {
+      return normalizeText(value)
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+    }
+
+    function buildNormalizedMatcher(entries) {
+      const exact = new Set((entries?.exact || []).map(normalizeForMatch).filter(Boolean));
+      const contains = (entries?.contains || []).map(normalizeForMatch).filter(Boolean);
+      return { exact, contains };
+    }
+
+    function matchesAction(text, matcher, { exactOnly = false } = {}) {
+      if (!text || !matcher) return false;
+      if (matcher.exact.has(text)) return true;
+      if (exactOnly) return false;
+      return matcher.contains.some(term => text.includes(term));
+    }
+
+    const ACCEPT_BUTTON_MATCHER = buildNormalizedMatcher(CONSENT_VOCABULARY.accept);
+    const REJECT_BUTTON_MATCHER = buildNormalizedMatcher(CONSENT_VOCABULARY.reject);
+    const SETTINGS_BUTTON_MATCHER = buildNormalizedMatcher(CONSENT_VOCABULARY.settings);
+    const DISMISS_BUTTON_TEXTS = new Set(DISMISS_BUTTON_KEYWORDS.map(normalizeForMatch).filter(Boolean));
+    const NECESSARY_LABEL_KEYWORDS = NECESSARY_KEYWORDS.map(normalizeForMatch).filter(Boolean);
+    const BANNER_TEXT_KEYWORDS = BANNER_TEXT_KEYWORDS_RAW.map(normalizeForMatch).filter(Boolean);
+    const BANNER_TEXT_PHRASES = BANNER_TEXT_PHRASES_RAW.map(normalizeForMatch).filter(Boolean);
+    const BANNER_ATTR_HINTS = BANNER_ATTR_HINTS_RAW.map(normalizeForMatch).filter(Boolean);
+    const GUILT_TRIP_PHRASES = GUILT_TRIP_PHRASES_RAW.map(normalizeForMatch).filter(Boolean);
+    const SETTINGS_CONFIRM_TEXTS = new Set([
+      "confirm choices",
+      "save choices",
+      "apply choices",
+      "confirm selection",
+      "confirm selections",
+      "save preferences",
+      "apply preferences",
+      "save settings",
+      "apply settings",
+      "secimleri onayla",
+      "seçimleri onayla",
+    ].map(normalizeForMatch).filter(Boolean));
+    const SETTINGS_PREFERENCE_SELECTOR = [
+      ".fc-preference-consent",
+      ".atp-vendor",
+      ".atp-purpose",
+      "input[type='checkbox']",
+      "[role='checkbox']",
+      "[role='switch']",
+    ].join(", ");
+    const FUNDING_CHOICES_SURFACE_HINTS = [
+      "fc-consent-root",
+      "fc-dialog-container",
+      "fc-choice-dialog",
+      "fc-dialog",
+      "fc-footer-buttons",
+      "fc-confirm-choices",
+      "fc-preference-consent",
+      "fc-vendor-preferences",
+      "sp_choice_type",
+      "fundingchoices",
+    ].map(normalizeForMatch).filter(Boolean);
 
   function parsePx(value) {
     if (!value) return 0;
@@ -236,38 +293,33 @@
     return options[0];
   }
 
-  const ACCEPT_BUTTON_KEYWORDS = AECCS.CONSENT_BUTTON_KEYWORDS.accept
-    .map(normalizeForMatch)
-    .filter(Boolean);
-  const REJECT_BUTTON_KEYWORDS = AECCS.CONSENT_BUTTON_KEYWORDS.reject
-    .map(normalizeForMatch)
-    .filter(Boolean);
-  const SETTINGS_BUTTON_KEYWORDS = SETTINGS_KEYWORDS
-    .map(normalizeForMatch)
-    .filter(Boolean);
-  const ALL_CONSENT_ACTION_KEYWORDS = Array.from(new Set([
-    ...ACCEPT_BUTTON_KEYWORDS,
-    ...REJECT_BUTTON_KEYWORDS,
-    ...SETTINGS_BUTTON_KEYWORDS,
-  ]));
-
-  function hasKeywordMatch(text, keywords, { exactOnly = false } = {}) {
-    if (!text) return false;
-    if (keywords.includes(text)) return true;
-    if (exactOnly) return false;
-    return keywords.some(kw => text.includes(kw));
-  }
-
   function classifyButtonText(text) {
     const normalized = normalizeForMatch(text);
     if (!normalized) return "unknown";
 
-    if (hasKeywordMatch(normalized, REJECT_BUTTON_KEYWORDS, { exactOnly: true })) return "reject";
-    if (hasKeywordMatch(normalized, ACCEPT_BUTTON_KEYWORDS, { exactOnly: true })) return "accept";
-    if (hasKeywordMatch(normalized, REJECT_BUTTON_KEYWORDS)) return "reject";
-    if (hasKeywordMatch(normalized, ACCEPT_BUTTON_KEYWORDS)) return "accept";
-    if (hasKeywordMatch(normalized, SETTINGS_BUTTON_KEYWORDS)) return "settings";
+    if (matchesAction(normalized, REJECT_BUTTON_MATCHER, { exactOnly: true })) return "reject";
+    if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER, { exactOnly: true })) return "accept";
+    if (matchesAction(normalized, SETTINGS_BUTTON_MATCHER, { exactOnly: true })) return "settings";
+    if (matchesAction(normalized, REJECT_BUTTON_MATCHER)) return "reject";
+    if (matchesAction(normalized, ACCEPT_BUTTON_MATCHER)) return "accept";
+    if (matchesAction(normalized, SETTINGS_BUTTON_MATCHER)) return "settings";
     return "unknown";
+  }
+
+  function classifyInteractionAction(text) {
+    const normalized = normalizeForMatch(text);
+    if (!normalized) return "unknown";
+    if (DISMISS_BUTTON_TEXTS.has(normalized)) return "dismiss";
+    if (SETTINGS_CONFIRM_TEXTS.has(normalized)) return "confirm";
+
+    const type = classifyButtonText(text);
+    if (type === "reject") {
+      if (NECESSARY_LABEL_KEYWORDS.some(term => normalized.includes(term))) {
+        return "essential";
+      }
+      return "reject";
+    }
+    return type;
   }
 
   function describeElement(el) {
@@ -296,11 +348,191 @@
     ].join(" "));
   }
 
-  function hasConsentLikeText(text) {
+  function hasBannerLikeText(text) {
     const normalized = normalizeForMatch(text);
     if (!normalized) return false;
-    if (CONSENT_TEXT_RE.test(normalized)) return true;
-    return hasKeywordMatch(normalized, ALL_CONSENT_ACTION_KEYWORDS);
+    if (BANNER_TEXT_KEYWORDS.some(term => normalized.includes(term))) return true;
+    if (BANNER_TEXT_PHRASES.some(phrase => normalized.includes(phrase))) return true;
+    return false;
+  }
+
+  function hasBannerLikeAttributes(attrs) {
+    const normalized = normalizeForMatch(attrs);
+    if (!normalized) return false;
+    return BANNER_ATTR_HINTS.some(hint => normalized.includes(hint));
+  }
+
+  const bannerCandidateProfileCache = new WeakMap();
+  const focusedConsentDescendantCache = new WeakMap();
+
+  function countHintMatches(value, hints) {
+    const normalized = normalizeForMatch(value);
+    if (!normalized) return 0;
+    let matches = 0;
+    for (const hint of hints) {
+      if (normalized.includes(hint)) matches += 1;
+    }
+    return matches;
+  }
+
+  function hasFundingChoicesSurfaceHint(attrs) {
+    return countHintMatches(attrs, FUNDING_CHOICES_SURFACE_HINTS) > 0;
+  }
+
+  function countVisibleConsentActions(summary) {
+    if (!summary) return 0;
+    return (
+      Number(summary.acceptCount || 0) +
+      Number(summary.rejectCount || 0) +
+      Number(summary.settingsCount || 0)
+    );
+  }
+
+  function hasFocusedConsentDescendant(el) {
+    if (!el || !el.querySelectorAll) return false;
+    if (focusedConsentDescendantCache.has(el)) {
+      return focusedConsentDescendantCache.get(el);
+    }
+
+    const rootRect = el.getBoundingClientRect();
+    const rootArea = getRectArea(rootRect);
+    if (rootArea <= 0) {
+      focusedConsentDescendantCache.set(el, false);
+      return false;
+    }
+
+    let found = false;
+
+    for (const descendant of el.querySelectorAll(CANDIDATE_CONTAINER_SELECTOR)) {
+      if (!descendant || descendant === el || !isElementVisible(descendant)) continue;
+
+      const rect = descendant.getBoundingClientRect();
+      const area = getRectArea(rect);
+      if (area <= 0 || area >= rootArea) continue;
+
+      const relativeArea = area / rootArea;
+      if (relativeArea < 0.015 || relativeArea > 0.9) continue;
+
+      const attrs = elementAttributeHaystack(descendant);
+      const summary = summarizeButtons(descendant, { includeHidden: false });
+      const visibleActionCount = countVisibleConsentActions(summary);
+      const dialogLike = attrs.includes("dialog") || descendant.getAttribute("aria-modal") === "true";
+
+      if ((visibleActionCount >= 2 || dialogLike || hasFundingChoicesSurfaceHint(attrs)) && relativeArea < 0.85) {
+        found = true;
+        break;
+      }
+    }
+
+    focusedConsentDescendantCache.set(el, found);
+    return found;
+  }
+
+  function getBannerCandidateProfile(el) {
+    if (!el) return null;
+    if (bannerCandidateProfileCache.has(el)) {
+      return bannerCandidateProfileCache.get(el);
+    }
+
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    const text = getElementText(el);
+    const matchText = normalizeForMatch(text);
+    const attrs = elementAttributeHaystack(el);
+    const summary = summarizeButtons(el, { includeHidden: false });
+    const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
+    const areaRatio = getRectArea(rect) / viewportArea;
+    const visibleActionCount = countVisibleConsentActions(summary);
+    const fixedLike = style.position === "fixed" || style.position === "sticky";
+    const dialogLike = attrs.includes("dialog") || el.getAttribute("aria-modal") === "true";
+    const edgeAnchored = rect.top < 160 || rect.bottom > (window.innerHeight - 160);
+    const fullScreenLike = rect.width >= window.innerWidth * 0.92 && rect.height >= window.innerHeight * 0.92;
+    const fundingChoicesHintCount = countHintMatches(attrs, FUNDING_CHOICES_SURFACE_HINTS);
+    const hasNestedConsentSurface = (areaRatio > 0.8 || fullScreenLike)
+      ? hasFocusedConsentDescendant(el)
+      : false;
+
+    const profile = {
+      rect,
+      style,
+      text,
+      matchText,
+      attrs,
+      summary,
+      areaRatio,
+      visibleActionCount,
+      fixedLike,
+      dialogLike,
+      edgeAnchored,
+      fullScreenLike,
+      fundingChoicesHintCount,
+      hasNestedConsentSurface,
+    };
+
+    bannerCandidateProfileCache.set(el, profile);
+    return profile;
+  }
+
+  function findDismissButton(root, { visibleOnly = false } = {}) {
+    if (!root) return null;
+
+    for (const el of collectActionableElements(root, { includeHidden: !visibleOnly })) {
+      const text = normalizeForMatch(getElementLabel(el));
+      if (!text || !DISMISS_BUTTON_TEXTS.has(text)) continue;
+      if (visibleOnly && !isElementVisible(el)) continue;
+      return {
+        element: el,
+        text: getElementLabel(el),
+      };
+    }
+
+    return null;
+  }
+
+  function isStrongBannerSurface(el) {
+    if (!el || !isElementVisible(el)) return false;
+
+    const rect = el.getBoundingClientRect();
+    const area = getRectArea(rect);
+    if (area <= 0) return false;
+
+    const style = getComputedStyle(el);
+    const attrs = elementAttributeHaystack(el);
+    const flags = getVisualStyleFlags(style);
+    const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
+    const areaRatio = area / viewportArea;
+
+    const fixedLike = style.position === "fixed" || style.position === "sticky";
+    const dialogLike = attrs.includes("dialog") || el.getAttribute("aria-modal") === "true";
+    const edgeAnchored = rect.top < 160 || rect.bottom > (window.innerHeight - 160);
+    const largeEnough = areaRatio >= 0.015 ||
+      rect.height >= 90 ||
+      (rect.width >= window.innerWidth * 0.4 && rect.height >= 56);
+
+    return hasMeaningfulPaint(flags) && largeEnough && (fixedLike || dialogLike || edgeAnchored);
+  }
+
+  function isActiveBanner(bannerEl, buttonData) {
+    if (!bannerEl || !isStrongBannerSurface(bannerEl)) return false;
+
+    const hasVisibleConsentAction = Boolean(
+      buttonData && (buttonData.hasAcceptButton || buttonData.hasRejectButton || buttonData.hasSettingsButton)
+    );
+    const visibleConsentActionCount = [
+      Boolean(buttonData && buttonData.hasAcceptButton),
+      Boolean(buttonData && buttonData.hasRejectButton),
+      Boolean(buttonData && buttonData.hasSettingsButton),
+    ].filter(Boolean).length;
+    const dismissButton = findDismissButton(bannerEl, { visibleOnly: true });
+    const hasBannerEvidence = hasBannerLikeText(getElementText(bannerEl)) ||
+      hasBannerLikeAttributes(elementAttributeHaystack(bannerEl)) ||
+      Boolean(dismissButton) ||
+      visibleConsentActionCount >= 2;
+    if (!hasBannerEvidence) return false;
+
+    if (hasVisibleConsentAction) return true;
+
+    return Boolean(dismissButton);
   }
 
   function collectActionableElements(root, { includeHidden = false } = {}) {
@@ -669,7 +901,7 @@
 
     const searchText = scriptSrcs.join(" ") + " " + idAndClassTokens.join(" ");
 
-    for (const [cmpName, signatures] of Object.entries(AECCS.CMP_SIGNATURES)) {
+    for (const [cmpName, signatures] of Object.entries(CMP_SIGNATURES)) {
       for (const sig of signatures) {
         if (searchText.includes(sig.toLowerCase())) {
           return cmpName;
@@ -690,13 +922,13 @@
       candidates.add(el);
     };
 
-    for (const selector of AECCS.BANNER_SELECTORS) {
+    for (const selector of BANNER_SELECTORS) {
       try {
         const elements = document.querySelectorAll(selector);
         for (const el of elements) {
           const text = getElementText(el);
           const attrs = elementAttributeHaystack(el);
-          if (hasConsentLikeText(text) || ATTR_HINT_RE.test(attrs)) {
+          if (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs) || hasFundingChoicesSurfaceHint(attrs)) {
             maybeAdd(el);
           }
         }
@@ -717,9 +949,12 @@
       const fixedLike = style.position === "fixed" || style.position === "sticky";
       const dialogLike = attrs.includes("dialog") || el.getAttribute("aria-modal") === "true";
       const edgeAnchored = rect.top < 160 || rect.bottom > (window.innerHeight - 160);
-      const actionable = summary.acceptCount > 0 || summary.rejectCount > 0 || summary.settingsCount > 0;
+      const actionable = countVisibleConsentActions(summary) > 0;
 
-      if ((fixedLike || dialogLike || edgeAnchored) && (hasConsentLikeText(text) || ATTR_HINT_RE.test(attrs) || actionable)) {
+      if (
+        (fixedLike || dialogLike || edgeAnchored) &&
+        (hasBannerLikeText(text) || hasBannerLikeAttributes(attrs) || hasFundingChoicesSurfaceHint(attrs) || actionable)
+      ) {
         maybeAdd(el);
       }
     }
@@ -744,31 +979,36 @@
   function scoreBannerCandidate(el) {
     if (!el || !isElementVisible(el)) return Number.NEGATIVE_INFINITY;
 
-    const rect = el.getBoundingClientRect();
-    const style = getComputedStyle(el);
-    const text = getElementText(el);
-    const matchText = normalizeForMatch(text);
-    const attrs = elementAttributeHaystack(el);
-    const summary = summarizeButtons(el, { includeHidden: false });
+    const profile = getBannerCandidateProfile(el);
+    const { text, matchText, attrs, summary } = profile;
+    const hasBannerTextEvidence = hasBannerLikeText(text) || BANNER_TEXT_KEYWORDS.some(term => matchText.includes(term));
+    const hasBannerAttributeEvidence = hasBannerLikeAttributes(attrs) || profile.fundingChoicesHintCount > 0;
 
     let score = 0;
 
-    if (hasConsentLikeText(text)) score += 5;
-    if (CONSENT_TEXT_RE.test(matchText)) score += 3;
-    if (ATTR_HINT_RE.test(attrs)) score += 3;
+    if (hasBannerLikeText(text)) score += 5;
+    if (BANNER_TEXT_KEYWORDS.some(term => matchText.includes(term))) score += 3;
+    if (hasBannerLikeAttributes(attrs)) score += 3;
+    if (profile.fundingChoicesHintCount > 0) score += Math.min(5, profile.fundingChoicesHintCount + 1);
 
     if (summary.acceptCount > 0) score += 7;
     if (summary.rejectCount > 0) score += 7;
     if (summary.settingsCount > 0) score += 4;
+    if (profile.visibleActionCount >= 2) score += 2;
 
-    if (style.position === "fixed" || style.position === "sticky") score += 4;
-    if (attrs.includes("dialog") || el.getAttribute("aria-modal") === "true") score += 3;
+    if (profile.fixedLike) score += 4;
+    if (profile.dialogLike) score += 3;
 
-    const viewportArea = Math.max(1, window.innerWidth * window.innerHeight);
-    const areaRatio = (rect.width * rect.height) / viewportArea;
+    const areaRatio = profile.areaRatio;
     if (areaRatio >= 0.03 && areaRatio <= 0.95) score += 2;
     if (areaRatio > 0.95) score -= 4;
-    if (rect.top < 140 || rect.bottom > (window.innerHeight - 140)) score += 2;
+    if (profile.edgeAnchored) score += 2;
+    if (profile.fullScreenLike && profile.visibleActionCount > 0) score -= 2;
+    if (profile.hasNestedConsentSurface) score -= 6;
+    if (profile.dialogLike && areaRatio <= 0.8 && profile.visibleActionCount > 0) score += 2;
+    if (!profile.fixedLike && !profile.dialogLike && !profile.edgeAnchored && profile.visibleActionCount > 0) score -= 6;
+    if (areaRatio < 0.02 && profile.visibleActionCount > 0) score -= 4;
+    if (!hasBannerTextEvidence && !hasBannerAttributeEvidence && profile.visibleActionCount > 0) score -= 3;
 
     if (text.length > 80) score += 1;
     if (text.length > 4000) score -= 3;
@@ -776,6 +1016,84 @@
     if (el.querySelector("a[href*='privacy'], a[href*='cookie']")) score += 1;
 
     return score;
+  }
+
+  function isBetterBannerCandidate(candidate, candidateScore, current, currentScore) {
+    if (!current) return true;
+    if (candidateScore !== currentScore) return candidateScore > currentScore;
+
+    const candidateProfile = getBannerCandidateProfile(candidate);
+    const currentProfile = getBannerCandidateProfile(current);
+
+    if (candidateProfile.hasNestedConsentSurface !== currentProfile.hasNestedConsentSurface) {
+      return !candidateProfile.hasNestedConsentSurface;
+    }
+
+    if (candidateProfile.visibleActionCount !== currentProfile.visibleActionCount) {
+      return candidateProfile.visibleActionCount > currentProfile.visibleActionCount;
+    }
+
+    if (candidateProfile.dialogLike !== currentProfile.dialogLike) {
+      return candidateProfile.dialogLike;
+    }
+
+    if (candidateProfile.fundingChoicesHintCount !== currentProfile.fundingChoicesHintCount) {
+      return candidateProfile.fundingChoicesHintCount > currentProfile.fundingChoicesHintCount;
+    }
+
+    if (candidateProfile.fullScreenLike !== currentProfile.fullScreenLike) {
+      return !candidateProfile.fullScreenLike;
+    }
+
+    return false;
+  }
+
+  function promoteToNearestActiveBannerSurface(el) {
+    let current = el;
+    let depth = 0;
+
+    while (current && current !== document.body && current !== document.documentElement && depth < MAX_ANCESTOR_DEPTH) {
+      const buttonData = findButtons(current);
+      if (isActiveBanner(current, buttonData)) {
+        return {
+          element: current,
+          selector: describeElement(current),
+          score: scoreBannerCandidate(current),
+        };
+      }
+      current = current.parentElement;
+      depth += 1;
+    }
+
+    return null;
+  }
+
+  function findPreferredActiveBannerDescendant(el) {
+    if (!el || !el.querySelectorAll) return null;
+
+    let best = null;
+    let bestScore = Number.NEGATIVE_INFINITY;
+
+    for (const descendant of el.querySelectorAll(CANDIDATE_CONTAINER_SELECTOR)) {
+      if (!descendant || descendant === el || !isElementVisible(descendant)) continue;
+
+      const buttonData = findButtons(descendant);
+      if (!isActiveBanner(descendant, buttonData)) continue;
+
+      const score = scoreBannerCandidate(descendant);
+      if (isBetterBannerCandidate(descendant, score, best, bestScore)) {
+        best = descendant;
+        bestScore = score;
+      }
+    }
+
+    return best
+      ? {
+          element: best,
+          selector: describeElement(best),
+          score: bestScore,
+        }
+      : null;
   }
 
   function findBanner() {
@@ -791,7 +1109,7 @@
 
       while (current && current !== document.body && current !== document.documentElement && depth < MAX_ANCESTOR_DEPTH) {
         const score = scoreBannerCandidate(current);
-        if (score > bestScore) {
+        if (isBetterBannerCandidate(current, score, best, bestScore)) {
           bestScore = score;
           best = current;
         }
@@ -800,7 +1118,19 @@
       }
     }
 
-    if (!best || bestScore < 6) return null;
+    if (!best) return null;
+
+    const preferredDescendant = findPreferredActiveBannerDescendant(best);
+    if (preferredDescendant && preferredDescendant.score >= 6) {
+      return preferredDescendant;
+    }
+
+    const promoted = promoteToNearestActiveBannerSurface(best);
+    if (promoted && promoted.score >= 6) {
+      return promoted;
+    }
+
+    if (bestScore < 6) return null;
 
     return {
       element: best,
@@ -875,6 +1205,647 @@
     return result;
   }
 
+  function cloneForTransport(value) {
+    if (value == null) return value;
+    if (typeof structuredClone === "function") {
+      try {
+        return structuredClone(value);
+      } catch (_) {
+        // Fall through to JSON clone.
+      }
+    }
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function buildInteractionAction(type, text, observed, timestamp) {
+    return {
+      type,
+      text: text || null,
+      observed: Boolean(observed),
+      observedAt: timestamp || new Date().toISOString(),
+    };
+  }
+
+  function normalizeInteractionSessionPayload(payload = {}) {
+    const cloned = cloneForTransport(payload) || {};
+    return {
+      status: cloned.status || "armed",
+      watching: Boolean(cloned.watching),
+      action: cloned.action || null,
+      baseline: cloned.baseline || null,
+      current: cloned.current || null,
+      delta: cloned.delta || null,
+      honesty: cloned.honesty || { verdict: "unknown", findings: [] },
+      frameId: cloned.frameId ?? null,
+      pageKey: cloned.pageKey || null,
+      pendingAction: cloned.pendingAction || null,
+      pendingInferredAction: cloned.pendingInferredAction || null,
+      settingsSnapshot: cloned.settingsSnapshot || null,
+      confirmSource: cloned.confirmSource || null,
+      armedAt: cloned.armedAt || null,
+      observedAt: cloned.observedAt || cloned.action?.observedAt || null,
+      updatedAt: cloned.updatedAt || new Date().toISOString(),
+      stopReason: cloned.stopReason || null,
+      timeoutMs: Number(cloned.timeoutMs) > 0 ? Number(cloned.timeoutMs) : INTERACTION_SESSION_TIMEOUT_MS,
+      rootElement: null,
+      bannerSelector: null,
+      notified: Boolean(cloned.notified),
+      notificationInFlight: false,
+    };
+  }
+
+  function hasFreshPendingAction() {
+    if (!interactionSession?.pendingAction?.startedAt) return false;
+    const startedAt = Date.parse(interactionSession.pendingAction.startedAt) || 0;
+    if (!startedAt) return false;
+    return (Date.now() - startedAt) <= INTERACTION_PENDING_WINDOW_MS;
+  }
+
+  function hasFreshPendingInferredAction() {
+    if (!interactionSession?.pendingInferredAction?.startedAt) return false;
+    const startedAt = Date.parse(interactionSession.pendingInferredAction.startedAt) || 0;
+    if (!startedAt) return false;
+    return (Date.now() - startedAt) <= INTERACTION_PENDING_WINDOW_MS;
+  }
+
+  function setPendingInteractionAction(actionEl, type) {
+    if (!interactionSession || !actionEl || !type || type === "unknown" || type === "settings") {
+      return false;
+    }
+
+    const timestamp = new Date().toISOString();
+    interactionSession.pendingAction = {
+      type,
+      text: getElementLabel(actionEl) || null,
+      startedAt: timestamp,
+    };
+    interactionSession.updatedAt = timestamp;
+    return true;
+  }
+
+  function readBooleanAttribute(el, attributeName) {
+    if (!el || !el.getAttribute) return null;
+    const value = el.getAttribute(attributeName);
+    if (value == null) return null;
+    const normalized = String(value).trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+    return null;
+  }
+
+  function isFundingChoicesPreferenceControl(el) {
+    if (!el || !el.classList) return false;
+    return el.classList.contains("fc-preference-consent") ||
+      el.classList.contains("atp-vendor") ||
+      el.classList.contains("atp-purpose");
+  }
+
+  function readPreferenceControlState(control) {
+    if (!control || !control.isConnected) return null;
+
+    if ("checked" in control && typeof control.checked === "boolean") {
+      return control.checked;
+    }
+
+    const ariaChecked = readBooleanAttribute(control, "aria-checked");
+    if (ariaChecked != null) return ariaChecked;
+
+    const ariaPressed = readBooleanAttribute(control, "aria-pressed");
+    if (ariaPressed != null) return ariaPressed;
+
+    return null;
+  }
+
+  function isPreferenceContainerVisible(control) {
+    if (!control || !control.isConnected) return false;
+    const container = control.closest(".fc-preference-slider-container, .fc-preference-container, label, li");
+    if (container) return isElementVisible(container);
+    return isElementVisible(control);
+  }
+
+  function hasKnownSettingsControls(root) {
+    if (!root || !root.querySelector) return false;
+    return Boolean(
+      root.querySelector(".fc-confirm-choices") ||
+      root.querySelector(SETTINGS_PREFERENCE_SELECTOR)
+    );
+  }
+
+  function resolveSettingsSurface(actionEl = null) {
+    if (!interactionSession) return null;
+
+    const refreshedRoot = refreshTrackedBannerRoot();
+    if (refreshedRoot && hasKnownSettingsControls(refreshedRoot)) {
+      return refreshedRoot;
+    }
+
+    let current = actionEl;
+    let depth = 0;
+    while (current && depth < MAX_ANCESTOR_DEPTH) {
+      if (current.matches && current.matches(CANDIDATE_CONTAINER_SELECTOR) && hasKnownSettingsControls(current)) {
+        interactionSession.rootElement = current;
+        interactionSession.bannerSelector = describeElement(current);
+        return current;
+      }
+      current = current.parentElement;
+      depth += 1;
+    }
+
+    return interactionSession.rootElement || null;
+  }
+
+  function inferActionTypeFromSettingsSnapshot(snapshot) {
+    if (!snapshot || Number(snapshot.total || 0) === 0) return "unknown";
+    if (Number(snapshot.enabledCount || 0) === 0) return "essential";
+    if (Number(snapshot.disabledCount || 0) === 0) return "accept";
+    return "unknown";
+  }
+
+  function captureSettingsPreferenceSnapshot(actionEl = null) {
+    if (!interactionSession) return null;
+
+    const root = resolveSettingsSurface(actionEl);
+    if (!root || !root.querySelectorAll) return null;
+
+    const controls = Array.from(root.querySelectorAll(SETTINGS_PREFERENCE_SELECTOR))
+      .filter(control => control && control.isConnected)
+      .filter(control => isFundingChoicesPreferenceControl(control) || isPreferenceContainerVisible(control));
+
+    let enabledCount = 0;
+    let disabledCount = 0;
+    let total = 0;
+
+    for (const control of controls) {
+      const state = readPreferenceControlState(control);
+      if (state == null) continue;
+      total += 1;
+      if (state) enabledCount += 1;
+      else disabledCount += 1;
+    }
+
+    const snapshot = {
+      total,
+      enabledCount,
+      disabledCount,
+      inferredType: inferActionTypeFromSettingsSnapshot({ total, enabledCount, disabledCount }),
+      capturedAt: new Date().toISOString(),
+      source: root.querySelector(".fc-confirm-choices") ? "funding_choices" : "generic_settings",
+    };
+
+    interactionSession.settingsSnapshot = snapshot;
+    interactionSession.updatedAt = snapshot.capturedAt;
+    return snapshot;
+  }
+
+  function setPendingInferredInteractionAction(actionEl, snapshot) {
+    if (!interactionSession || !actionEl) return null;
+
+    const timestamp = new Date().toISOString();
+    const pending = {
+      type: snapshot?.inferredType || "unknown",
+      text: getElementLabel(actionEl) || null,
+      startedAt: timestamp,
+      snapshot: snapshot || null,
+    };
+
+    interactionSession.confirmSource = pending.text;
+    interactionSession.pendingInferredAction = pending;
+    interactionSession.updatedAt = timestamp;
+    return pending;
+  }
+
+  function finalizeInteractionAction(action, observed, stopReason) {
+    if (!interactionSession || !action || !action.type) return false;
+
+    const timestamp = action.observedAt || new Date().toISOString();
+    interactionSession.status = "observed";
+    interactionSession.action = buildInteractionAction(
+      action.type,
+      action.text,
+      observed,
+      timestamp
+    );
+    interactionSession.observedAt = timestamp;
+    interactionSession.updatedAt = timestamp;
+    interactionSession.pendingAction = null;
+    interactionSession.pendingInferredAction = null;
+    interactionSession.honesty = { verdict: "unknown", findings: [] };
+    stopInteractionWatcher(stopReason);
+    void notifyBackgroundOfObservedInteraction();
+    return true;
+  }
+
+  function promotePendingInteractionAction(stopReason = "pending_action_promoted") {
+    if (!interactionSession || interactionSession.action) {
+      return false;
+    }
+
+    if (hasFreshPendingInferredAction()) {
+      const pendingInferred = interactionSession.pendingInferredAction;
+      if (pendingInferred?.type) {
+        return finalizeInteractionAction(
+          {
+            type: pendingInferred.type,
+            text: pendingInferred.text,
+            observedAt: pendingInferred.startedAt,
+          },
+          false,
+          stopReason
+        );
+      }
+    }
+
+    if (!hasFreshPendingAction()) {
+      return false;
+    }
+
+    const pending = interactionSession.pendingAction;
+    if (!pending?.type) return false;
+
+    return finalizeInteractionAction(
+      {
+        type: pending.type,
+        text: pending.text,
+        observedAt: pending.startedAt,
+      },
+      false,
+      stopReason
+    );
+  }
+
+  function isActivationKey(event) {
+    const key = String(event?.key || "");
+    return key === "Enter" || key === " " || key === "Spacebar";
+  }
+
+  function clearInteractionTimeout() {
+    if (interactionTimeoutId) {
+      clearTimeout(interactionTimeoutId);
+      interactionTimeoutId = null;
+    }
+  }
+
+  function stopInteractionWatcher(reason = null) {
+    clearInteractionTimeout();
+    if (interactionWatcherCleanup) {
+      interactionWatcherCleanup();
+      interactionWatcherCleanup = null;
+    }
+    if (interactionSession) {
+      interactionSession.watching = false;
+      interactionSession.stopReason = reason || interactionSession.stopReason || null;
+      interactionSession.updatedAt = new Date().toISOString();
+      interactionSession.rootElement = null;
+    }
+  }
+
+  function clearInteractionAuditSession() {
+    stopInteractionWatcher("cleared");
+    interactionSession = null;
+    return null;
+  }
+
+  function getInteractionAuditSession() {
+    if (!interactionSession) return null;
+
+    return cloneForTransport({
+      status: interactionSession.status,
+      watching: Boolean(interactionSession.watching),
+      action: interactionSession.action || null,
+      baseline: interactionSession.baseline || null,
+      current: interactionSession.current || null,
+      delta: interactionSession.delta || null,
+      honesty: interactionSession.honesty || { verdict: "unknown", findings: [] },
+      frameId: interactionSession.frameId ?? null,
+      pageKey: interactionSession.pageKey || null,
+      pendingAction: interactionSession.pendingAction || null,
+      pendingInferredAction: interactionSession.pendingInferredAction || null,
+      settingsSnapshot: interactionSession.settingsSnapshot || null,
+      confirmSource: interactionSession.confirmSource || null,
+      armedAt: interactionSession.armedAt || null,
+      observedAt: interactionSession.observedAt || null,
+      updatedAt: interactionSession.updatedAt || null,
+      stopReason: interactionSession.stopReason || null,
+    });
+  }
+
+  function scheduleInteractionTimeout() {
+    clearInteractionTimeout();
+    if (!interactionSession || !interactionSession.watching) return;
+
+    interactionTimeoutId = setTimeout(() => {
+      if (!interactionSession) return;
+      if (!interactionSession.action) {
+        clearInteractionAuditSession();
+        return;
+      }
+      stopInteractionWatcher("timeout");
+    }, interactionSession.timeoutMs || INTERACTION_SESSION_TIMEOUT_MS);
+  }
+
+  function refreshTrackedBannerRoot() {
+    if (!interactionSession) return null;
+
+    const bannerMatch = findBanner();
+    if (bannerMatch?.element) {
+      interactionSession.rootElement = bannerMatch.element;
+      interactionSession.bannerSelector = bannerMatch.selector;
+      return bannerMatch.element;
+    }
+
+    return interactionSession.rootElement || null;
+  }
+
+  function isWithinTrackedConsentFlow(actionable) {
+    if (!interactionSession || !actionable) return false;
+
+    const rootElement = interactionSession.rootElement;
+    if (rootElement && rootElement.contains(actionable)) {
+      return true;
+    }
+
+    const refreshedRoot = refreshTrackedBannerRoot();
+    if (refreshedRoot && refreshedRoot.contains(actionable)) {
+      return true;
+    }
+
+    let current = actionable.parentElement;
+    let depth = 0;
+    while (current && depth < MAX_ANCESTOR_DEPTH) {
+      if (
+        isStrongBannerSurface(current) &&
+        (
+          hasBannerLikeText(getElementText(current)) ||
+          hasBannerLikeAttributes(elementAttributeHaystack(current)) ||
+          hasKnownSettingsControls(current)
+        )
+      ) {
+        interactionSession.rootElement = current;
+        interactionSession.bannerSelector = describeElement(current);
+        return true;
+      }
+      current = current.parentElement;
+      depth += 1;
+    }
+
+    return false;
+  }
+
+  async function notifyBackgroundOfObservedInteraction() {
+    if (
+      !interactionSession ||
+      interactionSession.notified ||
+      interactionSession.notificationInFlight ||
+      typeof browser === "undefined" ||
+      !browser.runtime ||
+      typeof browser.runtime.sendMessage !== "function"
+    ) {
+      return;
+    }
+
+    interactionSession.notificationInFlight = true;
+
+    try {
+      await browser.runtime.sendMessage({
+        action: "consentInteractionObserved",
+        session: getInteractionAuditSession(),
+      });
+      interactionSession.notified = true;
+    } catch (_) {
+      interactionSession.notified = false;
+    } finally {
+      interactionSession.notificationInFlight = false;
+    }
+  }
+
+  function observeFinalInteractionAction(actionEl, type) {
+    if (!interactionSession || !actionEl || !type || type === "unknown" || type === "settings") {
+      return;
+    }
+
+    finalizeInteractionAction(
+      {
+        type,
+        text: getElementLabel(actionEl) || null,
+        observedAt: new Date().toISOString(),
+      },
+      true,
+      "final_action_observed"
+    );
+  }
+
+  function armInteractionAuditSession(options = {}) {
+    if (interactionSession && interactionSession.watching && !interactionSession.action) {
+      return getInteractionAuditSession();
+    }
+
+    const bannerMatch = findBanner();
+    const bannerEl = bannerMatch ? bannerMatch.element : null;
+    const buttonData = findButtons(bannerEl);
+    if (!isActiveBanner(bannerEl, buttonData)) {
+      return getInteractionAuditSession();
+    }
+
+    clearInteractionAuditSession();
+
+    interactionSession = {
+      status: "armed",
+      watching: true,
+      action: null,
+      baseline: cloneForTransport(options.baseline || null),
+      current: null,
+      delta: null,
+      honesty: { verdict: "unknown", findings: [] },
+      frameId: options.frameId ?? null,
+      pageKey: options.pageKey || null,
+      pendingAction: null,
+      pendingInferredAction: null,
+      settingsSnapshot: null,
+      confirmSource: null,
+      armedAt: new Date().toISOString(),
+      observedAt: null,
+      updatedAt: new Date().toISOString(),
+      timeoutMs: Number(options.inactivityMs) > 0 ? Number(options.inactivityMs) : INTERACTION_SESSION_TIMEOUT_MS,
+      rootElement: bannerEl,
+      bannerSelector: bannerMatch?.selector || null,
+      stopReason: null,
+      notified: false,
+      notificationInFlight: false,
+    };
+
+    const trackInteractionEvent = event => {
+      if (!interactionSession || interactionSession.status === "completed") return null;
+
+      const actionable = event.target && event.target.closest ? event.target.closest(ACTIONABLE_SELECTOR) : null;
+      if (!actionable || !isWithinTrackedConsentFlow(actionable)) return null;
+
+      const actionText = getElementLabel(actionable);
+      const actionType = classifyInteractionAction(actionText);
+      if (actionType === "unknown") return null;
+
+      interactionSession.updatedAt = new Date().toISOString();
+      scheduleInteractionTimeout();
+
+      return { actionable, actionType, actionText };
+    };
+
+    const onPointerDown = event => {
+      const tracked = trackInteractionEvent(event);
+      if (!tracked || tracked.actionType === "settings") return;
+      if (tracked.actionType === "confirm") {
+        const snapshot = captureSettingsPreferenceSnapshot(tracked.actionable);
+        setPendingInferredInteractionAction(tracked.actionable, snapshot);
+        return;
+      }
+      setPendingInteractionAction(tracked.actionable, tracked.actionType);
+    };
+
+    const onKeyDown = event => {
+      if (!isActivationKey(event)) return;
+      const tracked = trackInteractionEvent(event);
+      if (!tracked || tracked.actionType === "settings") return;
+      if (tracked.actionType === "confirm") {
+        const snapshot = captureSettingsPreferenceSnapshot(tracked.actionable);
+        setPendingInferredInteractionAction(tracked.actionable, snapshot);
+        return;
+      }
+      setPendingInteractionAction(tracked.actionable, tracked.actionType);
+    };
+
+    const onClick = event => {
+      const tracked = trackInteractionEvent(event);
+      if (!tracked) return;
+
+      if (tracked.actionType === "settings") {
+        refreshTrackedBannerRoot();
+        return;
+      }
+
+      if (tracked.actionType === "confirm") {
+        const snapshot = captureSettingsPreferenceSnapshot(tracked.actionable);
+        const pending = setPendingInferredInteractionAction(tracked.actionable, snapshot);
+        finalizeInteractionAction(
+          {
+            type: pending?.type || "unknown",
+            text: pending?.text || tracked.actionText || null,
+            observedAt: new Date().toISOString(),
+          },
+          true,
+          snapshot?.inferredType === "unknown" ? "settings_confirm_observed_unknown" : "settings_confirm_observed"
+        );
+        return;
+      }
+
+      setPendingInteractionAction(tracked.actionable, tracked.actionType);
+      observeFinalInteractionAction(tracked.actionable, tracked.actionType);
+    };
+
+    const onPageHide = () => {
+      if (!interactionSession) return;
+      if (interactionSession.action) {
+        if (!interactionSession.notified) {
+          void notifyBackgroundOfObservedInteraction();
+        }
+        stopInteractionWatcher(interactionSession.action.observed ? "pagehide_after_action" : "pagehide_after_inferred");
+        return;
+      }
+      if (promotePendingInteractionAction("pagehide_inferred")) {
+        return;
+      }
+      clearInteractionAuditSession();
+    };
+
+    const onBeforeUnload = () => {
+      if (!interactionSession) return;
+      if (!interactionSession.action) {
+        promotePendingInteractionAction("beforeunload_inferred");
+      } else if (!interactionSession.notified) {
+        void notifyBackgroundOfObservedInteraction();
+      }
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown, true);
+    document.addEventListener("click", onClick, true);
+    window.addEventListener("pagehide", onPageHide, true);
+    window.addEventListener("beforeunload", onBeforeUnload, true);
+
+    interactionWatcherCleanup = () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("click", onClick, true);
+      window.removeEventListener("pagehide", onPageHide, true);
+      window.removeEventListener("beforeunload", onBeforeUnload, true);
+    };
+
+    scheduleInteractionTimeout();
+    return getInteractionAuditSession();
+  }
+
+  function syncInteractionAuditSession(outcome) {
+    if (!outcome || typeof outcome !== "object") {
+      return getInteractionAuditSession();
+    }
+
+    stopInteractionWatcher("synced_session");
+    interactionSession = normalizeInteractionSessionPayload(outcome);
+    interactionSession.watching = false;
+    interactionSession.stopReason = outcome.stopReason || "synced_session";
+    interactionSession.notified = true;
+    interactionSession.notificationInFlight = false;
+    return getInteractionAuditSession();
+  }
+
+  function storeInteractionOutcome(outcome) {
+    const now = new Date().toISOString();
+    if (!interactionSession) {
+      interactionSession = {
+        status: "completed",
+        watching: false,
+        action: cloneForTransport(outcome?.action || null),
+        baseline: cloneForTransport(outcome?.baseline || null),
+        current: cloneForTransport(outcome?.current || null),
+        delta: cloneForTransport(outcome?.delta || null),
+        honesty: cloneForTransport(outcome?.honesty || { verdict: "unknown", findings: [] }),
+        frameId: outcome?.frameId ?? null,
+        pageKey: outcome?.pageKey || null,
+        pendingAction: null,
+        pendingInferredAction: null,
+        settingsSnapshot: null,
+        confirmSource: null,
+        armedAt: null,
+        observedAt: outcome?.action?.observedAt || null,
+        updatedAt: now,
+        timeoutMs: INTERACTION_SESSION_TIMEOUT_MS,
+        rootElement: null,
+        bannerSelector: null,
+        stopReason: "stored_outcome",
+        notified: true,
+        notificationInFlight: false,
+      };
+      return getInteractionAuditSession();
+    }
+
+    interactionSession.status = outcome?.status || "completed";
+    interactionSession.watching = false;
+    interactionSession.action = cloneForTransport(outcome?.action || interactionSession.action || null);
+    interactionSession.baseline = cloneForTransport(outcome?.baseline || interactionSession.baseline || null);
+    interactionSession.current = cloneForTransport(outcome?.current || null);
+    interactionSession.delta = cloneForTransport(outcome?.delta || null);
+    interactionSession.honesty = cloneForTransport(outcome?.honesty || { verdict: "unknown", findings: [] });
+    interactionSession.pageKey = outcome?.pageKey || interactionSession.pageKey || null;
+    interactionSession.pendingAction = null;
+    interactionSession.pendingInferredAction = null;
+    interactionSession.settingsSnapshot = null;
+    interactionSession.confirmSource = null;
+    interactionSession.updatedAt = now;
+    interactionSession.stopReason = "stored_outcome";
+    interactionSession.notified = true;
+    interactionSession.notificationInFlight = false;
+    stopInteractionWatcher("stored_outcome");
+    return getInteractionAuditSession();
+  }
+
   // ── Dark Pattern: Pre-selected Checkboxes ────────────────────────────────
   // Port of detector.py detect_preselected_checkboxes (lines 333-368)
 
@@ -898,7 +1869,8 @@
         labelText = cb.parentElement.textContent.trim().toLowerCase();
       }
 
-      const isNecessary = NECESSARY_KEYWORDS.some(kw => labelText.includes(kw));
+      const normalizedLabel = normalizeForMatch(labelText);
+      const isNecessary = NECESSARY_LABEL_KEYWORDS.some(kw => normalizedLabel.includes(kw));
       if (!isNecessary) preselected++;
     }
 
@@ -1050,11 +2022,11 @@
     const result = { detected: false, suspiciousPhrases: [] };
     if (!bannerEl) return result;
 
-    const text = (bannerEl.innerText || bannerEl.textContent || "").toLowerCase();
+    const text = normalizeForMatch(bannerEl.innerText || bannerEl.textContent || "");
     const phrases = [];
 
     for (const phrase of GUILT_TRIP_PHRASES) {
-      if (text.includes(phrase.toLowerCase())) {
+      if (text.includes(phrase)) {
         phrases.push(`guilt-trip: '${phrase}'`);
       }
     }
@@ -1066,8 +2038,8 @@
 
     const buttons = bannerEl.querySelectorAll("button, a, input");
     for (const btn of buttons) {
-      const btnText = getElementLabel(btn).toLowerCase();
-      if (AMBIGUOUS_BUTTON_TEXTS.has(btnText)) {
+      const btnText = getElementLabel(btn);
+      if (DISMISS_BUTTON_TEXTS.has(normalizeForMatch(btnText))) {
         phrases.push(`ambiguous-button: '${btnText}'`);
       }
     }
@@ -1127,15 +2099,15 @@
 
     const text = (bannerEl.innerText || bannerEl.textContent || "").toLowerCase();
 
-    result.mentionsPurposes = AECCS.PURPOSE_KEYWORDS.some(kw => text.includes(kw));
-    result.mentionsVendors = AECCS.VENDOR_KEYWORDS.some(kw => text.includes(kw));
+    result.mentionsPurposes = PURPOSE_KEYWORDS.some(kw => text.includes(kw));
+    result.mentionsVendors = VENDOR_KEYWORDS.some(kw => text.includes(kw));
 
     // Check for privacy policy links via DOM traversal rather than innerHTML.
     const links = bannerEl.querySelectorAll("a[href]");
     result.hasPrivacyPolicyLink = Array.from(links).some(a => {
       const href = (a.href || "").toLowerCase();
       const linkText = (a.textContent || "").toLowerCase();
-      return AECCS.PRIVACY_LINK_KEYWORDS.some(kw => href.includes(kw) || linkText.includes(kw));
+      return PRIVACY_LINK_KEYWORDS.some(kw => href.includes(kw) || linkText.includes(kw));
     });
 
     if (text.length > 0) {
@@ -1209,10 +2181,13 @@
 
   function scanPageOnce() {
     const cmpDetected = detectCMP();
-    const bannerMatch = findBanner();
-    const bannerEl = bannerMatch ? bannerMatch.element : null;
-    const bannerFound = bannerEl !== null;
-    const buttonData = findButtons(bannerEl);
+    const candidateBannerMatch = findBanner();
+    const candidateBannerEl = candidateBannerMatch ? candidateBannerMatch.element : null;
+    const candidateButtonData = findButtons(candidateBannerEl);
+    const bannerFound = isActiveBanner(candidateBannerEl, candidateButtonData);
+    const bannerMatch = bannerFound ? candidateBannerMatch : null;
+    const bannerEl = bannerFound ? candidateBannerEl : null;
+    const buttonData = bannerFound ? candidateButtonData : findButtons(null);
     const {
       acceptButton,
       rejectButton,
@@ -1331,21 +2306,34 @@
 
   // ── Runtime wiring ───────────────────────────────────────────────────────
 
-  if (typeof globalThis !== "undefined") {
-    globalThis.AECCSConsentScanner = {
+    setInitStage("wiring");
+    ROOT.AECCSConsentScanner = {
       scanPage: scanPageOnce,
       scanPageWithRetries,
+      scoreResult: scanResultQuality,
+      armInteractionAuditSession,
+      getInteractionAuditSession,
+      syncInteractionAuditSession,
+      storeInteractionOutcome,
+      clearInteractionAuditSession,
     };
-  }
 
-  if (typeof browser !== "undefined" && browser.runtime && browser.runtime.onMessage) {
-    browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    ROOT._AECCSConsentScannerLoaded = true;
+    ROOT[SCANNER_INIT_STAGE_KEY] = "ready";
+    ROOT[SCANNER_INIT_ERROR_KEY] = null;
+
+    if (typeof browser !== "undefined" && browser.runtime && browser.runtime.onMessage) {
+      browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       if (msg.action === "scanConsent") {
         scanPageWithRetries()
           .then(result => sendResponse(result))
           .catch(err => sendResponse({ error: err.message }));
         return true;
       }
-    });
+      });
+    }
+  } catch (err) {
+    failInit(err);
+    throw err;
   }
 })();

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Eksisozluk Settings Interaction Banner</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f7;
+      font-family: sans-serif;
+      color: #111827;
+    }
+
+    main {
+      min-height: 120vh;
+      padding: 2rem;
+    }
+
+    .consent-modal,
+    .settings-modal {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 720px;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 18px 60px rgba(15, 23, 42, 0.24);
+      z-index: 9999;
+    }
+
+    .consent-modal {
+      bottom: 24px;
+      padding: 28px;
+    }
+
+    .settings-modal {
+      top: 48px;
+      bottom: 48px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .settings-modal[hidden] {
+      display: none;
+    }
+
+    .consent-modal h2,
+    .settings-modal h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+
+    .consent-modal p,
+    .settings-modal p {
+      margin: 0 0 14px;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .consent-actions,
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .settings-actions {
+      padding: 20px 28px 28px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    button {
+      min-width: 220px;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .manage-btn,
+    .secondary {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .accept-btn,
+    .primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .back-btn {
+      min-width: 0;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #111827;
+      font-size: 16px;
+    }
+
+    .settings-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 20px 28px;
+    }
+
+    .fc-preference-container {
+      margin-bottom: 18px;
+      padding: 18px;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      background: #ffffff;
+    }
+
+    .fc-preference-slider-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    .toggle-copy strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .toggle-copy span {
+      font-size: 15px;
+      color: #4b5563;
+      line-height: 1.45;
+    }
+
+    .toggle-input {
+      width: 56px;
+      height: 32px;
+      accent-color: #2563eb;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ekşi sözlük fixture</h1>
+    <p>This page models a Funding Choices style settings flow for consent testing.</p>
+  </main>
+
+  <section id="eksi-consent-banner" class="consent-modal" role="dialog" aria-modal="true">
+    <h2>eksisozluk.com size daha iyi reklam deneyimi sunabilmek için izninizi istiyor</h2>
+    <p>
+      Kişiselleştirilmiş reklam ve içerik, reklam ve içerik ölçümü, hedef kitle araştırması
+      ve hizmetlerin geliştirilmesi için izninizi yönetebilirsiniz.
+    </p>
+    <div class="consent-actions">
+      <button type="button" id="manage-choices" class="manage-btn">Seçenekleri yönetin</button>
+      <button type="button" id="allow-all" class="accept-btn">İzin ver</button>
+    </div>
+  </section>
+
+  <section id="eksi-settings-modal" class="settings-modal" role="dialog" aria-modal="true" hidden>
+    <div class="settings-header">
+      <button type="button" class="back-btn" id="back-to-banner">←</button>
+      <h2>Veri tercihleri</h2>
+    </div>
+    <div class="settings-body">
+      <article class="fc-preference-container">
+        <div class="toggle-copy">
+          <strong>Bilgileri bir cihazda depolamak</strong>
+          <span>Çerezler ve benzer tanımlayıcılar ile cihazınıza erişim sağlanabilir.</span>
+        </div>
+        <div class="fc-preference-slider-container">
+          <span>İzin</span>
+          <input
+            id="pref-storage"
+            class="toggle-input fc-preference-consent atp-vendor"
+            type="checkbox"
+            role="button"
+            checked
+            aria-pressed="true"
+            aria-checked="true"
+          >
+        </div>
+      </article>
+
+      <article class="fc-preference-container">
+        <div class="toggle-copy">
+          <strong>Kişiselleştirilmiş reklam ve içerik</strong>
+          <span>Davranışsal reklam ve içerik kişiselleştirme için veriler kullanılabilir.</span>
+        </div>
+        <div class="fc-preference-slider-container">
+          <span>İzin</span>
+          <input
+            id="pref-ads"
+            class="toggle-input fc-preference-consent atp-vendor"
+            type="checkbox"
+            role="button"
+            checked
+            aria-pressed="true"
+            aria-checked="true"
+          >
+        </div>
+      </article>
+
+      <article class="fc-preference-container">
+        <div class="toggle-copy">
+          <strong>İçerik performansını ölçmek</strong>
+          <span>İçeriğin nasıl kullanıldığı ve ne kadar etkili olduğu ölçülebilir.</span>
+        </div>
+        <div class="fc-preference-slider-container">
+          <span>İzin</span>
+          <input
+            id="pref-measurement"
+            class="toggle-input fc-preference-consent atp-vendor"
+            type="checkbox"
+            role="button"
+            checked
+            aria-pressed="true"
+            aria-checked="true"
+          >
+        </div>
+      </article>
+    </div>
+
+    <div class="settings-actions">
+      <button type="button" id="accept-all-settings" class="secondary fc-vendor-preferences-accept-all">Tümünü kabul et</button>
+      <button type="button" id="confirm-choices" class="primary fc-confirm-choices">Seçimleri onayla</button>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const banner = document.getElementById("eksi-consent-banner");
+      const settings = document.getElementById("eksi-settings-modal");
+      const controls = Array.from(document.querySelectorAll(".fc-preference-consent"));
+
+      function syncControl(control, enabled) {
+        control.checked = !!enabled;
+        control.setAttribute("aria-pressed", enabled ? "true" : "false");
+        control.setAttribute("aria-checked", enabled ? "true" : "false");
+      }
+
+      function setAllPreferences(enabled) {
+        controls.forEach(control => syncControl(control, enabled));
+      }
+
+      function setPreferenceStates(states) {
+        controls.forEach((control, index) => {
+          const next = Array.isArray(states) && index < states.length ? !!states[index] : control.checked;
+          syncControl(control, next);
+        });
+      }
+
+      function getSnapshot() {
+        const enabledCount = controls.filter(control => control.checked).length;
+        return {
+          total: controls.length,
+          enabledCount,
+          disabledCount: controls.length - enabledCount,
+        };
+      }
+
+      function showSettings() {
+        settings.hidden = false;
+      }
+
+      function hideSettings() {
+        settings.hidden = true;
+      }
+
+      function applyCurrentSelection() {
+        const snapshot = getSnapshot();
+        document.cookie = "cmp_saved=1; path=/";
+        if (snapshot.enabledCount === 0) {
+          document.cookie = "consent_mode=essential; path=/";
+        } else if (snapshot.disabledCount === 0) {
+          document.cookie = "consent_mode=accept; path=/";
+          document.cookie = "ad_targeting=1; path=/";
+        } else {
+          document.cookie = "consent_mode=mixed; path=/";
+        }
+        banner.remove();
+        settings.remove();
+      }
+
+      controls.forEach(control => {
+        control.addEventListener("click", event => {
+          event.preventDefault();
+          syncControl(control, !control.checked);
+        });
+        control.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+            event.preventDefault();
+            syncControl(control, !control.checked);
+          }
+        });
+      });
+
+      document.getElementById("manage-choices").addEventListener("click", showSettings);
+      document.getElementById("back-to-banner").addEventListener("click", hideSettings);
+      document.getElementById("allow-all").addEventListener("click", () => {
+        setAllPreferences(true);
+        applyCurrentSelection();
+      });
+      document.getElementById("accept-all-settings").addEventListener("click", () => {
+        setAllPreferences(true);
+      });
+      document.getElementById("confirm-choices").addEventListener("click", applyCurrentSelection);
+
+      setAllPreferences(true);
+      window.__eksiSettings = {
+        setAllPreferences,
+        setPreferenceStates,
+        getSnapshot,
+      };
+    })();
+  </script>
+</body>
+</html>

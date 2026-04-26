@@ -6,7 +6,7 @@ AECCS Cookie Compliance Checker
 
 ## Summary
 
-Passive, research-grounded GDPR cookie-consent auditor for the current website.
+Local, user-initiated GDPR cookie-consent auditor with session-limited post-interaction analysis for the current website.
 
 ## Description
 
@@ -20,14 +20,17 @@ The add-on audits the page you are currently visiting and highlights:
 - asymmetric buttons, hidden reject paths, preselected checkboxes, confusing language, forced action, and transparency signals
 - accept vs reject UX comparison using the controls that are actually visible on the page
 - study-backed privacy-tool guidance tied to the issues found on the current site
+- session-limited before/after consent-state comparisons when the user opens AECCS before interacting with the banner
+- an optional locally saved browsing-setup profile so the popup can explain how blockers or consent tools may affect the measured result
 
-AECCS is grounded in the completed 1000-site combined study snapshot (`combined-1000`, generated March 6, 2026). That study context is bundled statically inside the extension and used only as frozen local reference data. The add-on does not auto-click consent banners, does not block requests, and does not send browsing data to external services.
+AECCS is grounded in the completed 1000-site combined study snapshot (`combined-1000`, generated March 6, 2026). That study context is bundled statically inside the extension and used only as frozen local reference data. The add-on does not auto-click consent banners, does not block requests, does not log page-wide clicks, and does not send browsing data to external services. The only persistent data is the user's optional browsing-setup declaration stored locally in the browser; AECCS does not store site-specific audit history.
 
 ## AMO Reviewer-Friendly Notes
 
-- The add-on is passive and on-demand: it runs only when the user opens the popup.
-- The generated static assets `extension/lib/study-snapshot.js` and `extension/lib/tracker-index.js` are local artifacts built from repository data and filter lists, not remote code.
+- The add-on is user-initiated and session-limited: analysis starts only when the user opens the popup, and any consent watch is limited to the tracked banner flow for the current tab session.
+- The generated static assets `extension/lib/shared-config.js`, `extension/lib/study-snapshot.js`, and `extension/lib/tracker-index.js` are local artifacts built from repository data and filter lists, not remote code.
 - Runtime behavior is local-only: no analytics, telemetry, remote requests, or external service integrations.
+- One optional local preference object may be stored so the popup can remember the user's declared browsing setup and explain how protections can affect measured results.
 
 ## Public URLs
 

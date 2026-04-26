@@ -47,17 +47,21 @@ The pipeline now separates demonstration data, earlier real-study artifacts, and
 
 ## Browser Extension
 
-The `extension/` folder contains a lightweight Chrome/Firefox browser extension that turns AECCS into a passive, local cookie-consent auditor for the currently loaded page.
+The `extension/` folder contains a lightweight Chrome/Firefox browser extension that turns AECCS into a local, user-initiated cookie-consent auditor for the currently loaded page.
 
-- **Passive local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling
+- **Session-limited local audit** — inspects the current page only; no remote scan, no extra network requests, no background crawling, and no per-site audit history
 - **No blocking and no auto-clicking** — the extension does not try to change consent state or fix a site for the user
+- **Current-state and post-click analysis** — if a banner is visible, AECCS captures a baseline GDPR audit and can keep watching that consent flow locally for the current tab session; if the banner is already gone, it can still audit the currently loaded consent state when there is meaningful cookie/CMP evidence
+- **Optional browsing-setup profile** — users can save their declared browser protections locally so AECCS can explain how blockers or consent tools may affect the observed results
 - **Live cookie/tracker evidence** — reads current cookies, classifies trackers, and highlights third-party and tracker-heavy pages
 - **Consent dark-pattern analysis** — detects CMPs, missing reject paths, multi-layer rejection, asymmetric buttons, hidden reject, preselected checkboxes, confusing language, forced action, and transparency signals
 - **Accept vs Reject UX comparison** — renders the visible accept/reject path so users can see unequal effort directly
+- **Post-interaction honesty checks** — compares before/after cookie state for observed Reject All, Essential Only, and Accept All flows without auto-clicking or sending data off-device
 - **Study-backed PET guidance** — recommends relevant privacy tools based on live findings, then grounds those suggestions in the completed 1000-site combined AECCS study
 
 The extension’s static study context is generated from `data/real_combined/processed/` and frozen into small runtime assets:
 
+- `extension/lib/shared-config.js` — generated shared scanner/classifier config sourced from Python truth
 - `extension/lib/study-snapshot.js` — combined-study metadata, PET study results, and CMP study results
 - `extension/lib/tracker-index.js` — compact precompiled tracker index for lightweight cookie classification
 
@@ -105,7 +109,8 @@ AECCS/
 │   ├── content/
 │   │   └── consent-scanner.js         # Live DOM consent and dark-pattern scan
 │   ├── lib/
-│   │   ├── tracker-data.js            # Ported constants and study metadata
+│   │   ├── shared-config.js           # Generated Python-owned shared constants
+│   │   ├── tracker-data.js            # Extension assembly layer + study metadata
 │   │   ├── study-snapshot.js          # Generated 1000-site combined-study snapshot
 │   │   ├── tracker-index.js           # Precompiled tracker Bloom filters
 │   │   ├── classifier.js              # Cookie classification logic
@@ -126,6 +131,7 @@ AECCS/
 │
 ├── scripts/
 │   ├── __init__.py
+│   ├── build_extension_shared_config.py  # Generate shared extension config
 │   ├── build_extension_study_snapshot.py  # Generate extension study snapshot
 │   ├── build_extension_tracker_index.py   # Generate compact tracker index
 │   ├── package_extension_release.py       # Build Chrome/Firefox/reviewer release archives
@@ -321,14 +327,16 @@ Scores each site from 0 to 100 based on 6 weighted GDPR compliance criteria:
 
 | Criterion | Weight | Description |
 |-----------|--------|-------------|
-| No pre-consent trackers | 25% | No tracking before user consent |
+| No pre-consent trackers | 30% | No tracking before user consent |
 | Reject option available | 20% | Easy-to-find reject/decline button |
-| Equal accept/reject effort | 15% | Same number of clicks to accept or reject |
+| Equal accept/reject effort | 10% | Same number of clicks to accept or reject |
 | No dark patterns | 15% | No deceptive UI elements |
-| Post-reject compliance | 15% | Trackers actually stop after rejection |
+| Post-reject compliance | 15% | Trackers actually stop after rejection when verified post-reject evidence exists |
 | Transparent information | 10% | Clear privacy/cookie information |
 
 Grades: A (90–100), B (75–89), C (60–74), D (40–59), F (0–39).
+
+When a criterion cannot be verified in the current evidence context, AECCS treats it as `n/a` and redistributes its weight across the remaining scored criteria instead of forcing an automatic zero.
 
 ```bash
 # Score all classified sites

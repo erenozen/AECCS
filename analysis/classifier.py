@@ -33,76 +33,12 @@ from config import (
     get_dataset_layout,
     TLD_EXTRACT,
 )
+from shared_constants import FALLBACK_TRACKERS, compile_cookie_heuristics
 
-# ── Fallback tracker map (used when filter list downloads fail) ───────────────
-
-FALLBACK_TRACKERS: dict[str, dict[str, str]] = {
-    # Advertising
-    "doubleclick.net": {"vendor": "Google", "category": "Advertising"},
-    "googlesyndication.com": {"vendor": "Google", "category": "Advertising"},
-    "googleadservices.com": {"vendor": "Google", "category": "Advertising"},
-    "googleads.g.doubleclick.net": {"vendor": "Google", "category": "Advertising"},
-    "adnxs.com": {"vendor": "Xandr/Microsoft", "category": "Advertising"},
-    "criteo.com": {"vendor": "Criteo", "category": "Advertising"},
-    "criteo.net": {"vendor": "Criteo", "category": "Advertising"},
-    "amazon-adsystem.com": {"vendor": "Amazon", "category": "Advertising"},
-    "adsrvr.org": {"vendor": "The Trade Desk", "category": "Advertising"},
-    "rubiconproject.com": {"vendor": "Rubicon Project", "category": "Advertising"},
-    "pubmatic.com": {"vendor": "PubMatic", "category": "Advertising"},
-    "casalemedia.com": {"vendor": "Casale Media", "category": "Advertising"},
-    "openx.net": {"vendor": "OpenX", "category": "Advertising"},
-    "taboola.com": {"vendor": "Taboola", "category": "Advertising"},
-    "outbrain.com": {"vendor": "Outbrain", "category": "Advertising"},
-    # Analytics
-    "google-analytics.com": {"vendor": "Google", "category": "Analytics"},
-    "googletagmanager.com": {"vendor": "Google", "category": "Analytics"},
-    "hotjar.com": {"vendor": "Hotjar", "category": "Analytics"},
-    "hotjar.io": {"vendor": "Hotjar", "category": "Analytics"},
-    "mouseflow.com": {"vendor": "Mouseflow", "category": "Analytics"},
-    "newrelic.com": {"vendor": "New Relic", "category": "Analytics"},
-    "segment.io": {"vendor": "Segment", "category": "Analytics"},
-    "segment.com": {"vendor": "Segment", "category": "Analytics"},
-    "amplitude.com": {"vendor": "Amplitude", "category": "Analytics"},
-    "mixpanel.com": {"vendor": "Mixpanel", "category": "Analytics"},
-    "clarity.ms": {"vendor": "Microsoft", "category": "Analytics"},
-    "scorecardresearch.com": {"vendor": "comScore", "category": "Analytics"},
-    "chartbeat.com": {"vendor": "Chartbeat", "category": "Analytics"},
-    "chartbeat.net": {"vendor": "Chartbeat", "category": "Analytics"},
-    # Social
-    "facebook.net": {"vendor": "Meta", "category": "Social"},
-    "facebook.com": {"vendor": "Meta", "category": "Social"},
-    "fbcdn.net": {"vendor": "Meta", "category": "Social"},
-    "connect.facebook.net": {"vendor": "Meta", "category": "Social"},
-    "twitter.com": {"vendor": "X/Twitter", "category": "Social"},
-    "platform.twitter.com": {"vendor": "X/Twitter", "category": "Social"},
-    "linkedin.com": {"vendor": "LinkedIn", "category": "Social"},
-    "snap.licdn.com": {"vendor": "LinkedIn", "category": "Social"},
-    "tiktok.com": {"vendor": "TikTok", "category": "Social"},
-    # Fingerprinting / Tracking
-    "demdex.net": {"vendor": "Adobe", "category": "Fingerprinting"},
-    "omtrdc.net": {"vendor": "Adobe", "category": "Fingerprinting"},
-    "krxd.net": {"vendor": "Salesforce/Krux", "category": "Fingerprinting"},
-    "bluekai.com": {"vendor": "Oracle", "category": "Fingerprinting"},
-    "exelator.com": {"vendor": "Nielsen", "category": "Fingerprinting"},
-    "quantserve.com": {"vendor": "Quantcast", "category": "Fingerprinting"},
-}
+# Shared fallback tracker map (used when filter list downloads fail)
 
 # Heuristic cookie-name patterns: (regex, vendor, category)
-_COOKIE_HEURISTICS: list[tuple[re.Pattern, str, str]] = [
-    (re.compile(r"^_ga$|^_ga_", re.I), "Google", "Analytics"),
-    (re.compile(r"^_gid$", re.I), "Google", "Analytics"),
-    (re.compile(r"^_gat", re.I), "Google", "Analytics"),
-    (re.compile(r"^__utm", re.I), "Google", "Analytics"),
-    (re.compile(r"_fbp|_fbc|fbp", re.I), "Meta", "Social"),
-    (re.compile(r"^_hjid|^_hj", re.I), "Hotjar", "Analytics"),
-    (re.compile(r"^_tt_", re.I), "TikTok", "Social"),
-    (re.compile(r"^li_|^bcookie|^lidc", re.I), "LinkedIn", "Social"),
-    (re.compile(r"^IDE$|^test_cookie$|^DSID$", re.I), "Google", "Advertising"),
-    (re.compile(r"^NID$|^APISID$|^SAPISID$|^SID$|^SSID$|^HSID$", re.I), "Google", "Functional"),
-    (re.compile(r"^_pin_|^_pinterest_", re.I), "Pinterest", "Social"),
-    (re.compile(r"^amp_", re.I), "Amplitude", "Analytics"),
-    (re.compile(r"^mp_", re.I), "Mixpanel", "Analytics"),
-]
+_COOKIE_HEURISTICS: list[tuple[re.Pattern, str, str]] = compile_cookie_heuristics()
 
 # ── Filter list URLs ──────────────────────────────────────────────────────────
 

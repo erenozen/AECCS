@@ -15,6 +15,8 @@ from pathlib import Path
 
 import tldextract
 
+from shared_constants import CMP_SIGNATURES, COMPLIANCE_WEIGHTS, CONSENT_BUTTON_KEYWORDS
+
 # ── Project Paths ──────────────────────────────────────────────────────────────
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -263,64 +265,8 @@ REQUEST_DELAY_RANGE: tuple[float, float] = (2.0, 5.0)
 # Playwright page-load timeout in milliseconds
 PAGE_LOAD_TIMEOUT: int = 30_000
 
-# ── Consent Button Keywords (multilingual) ────────────────────────────────────
-
-CONSENT_BUTTON_KEYWORDS: dict[str, list[str]] = {
-    "accept": [
-        # English
-        "Accept", "Accept All", "Accept Cookies", "I Agree", "Allow All",
-        # German
-        "Akzeptieren", "Alle akzeptieren", "Zustimmen", "Alle Cookies akzeptieren",
-        # French
-        "Accepter", "Tout accepter", "J'accepte", "Accepter tout",
-        # Dutch
-        "Accepteren", "Alle accepteren", "Alle cookies accepteren",
-        # Spanish
-        "Aceptar", "Aceptar todo", "Aceptar todas",
-        # Italian
-        "Accetta", "Accetta tutto", "Accetta tutti",
-        # Turkish
-        "Kabul Et", "Tümünü Kabul Et",
-    ],
-    "reject": [
-        # English
-        "Reject", "Reject All", "Decline", "Deny", "Refuse All",
-        # German
-        "Ablehnen", "Alle ablehnen",
-        # French
-        "Refuser", "Tout refuser",
-        # Dutch
-        "Weigeren", "Alle weigeren",
-        # Spanish
-        "Rechazar", "Rechazar todo", "Rechazar todas",
-        # Italian
-        "Rifiuta", "Rifiuta tutto", "Rifiuta tutti",
-        # Turkish
-        "Reddet", "Tümünü Reddet",
-    ],
-}
-
-# ── CMP Detection Signatures ──────────────────────────────────────────────────
-
-CMP_SIGNATURES: dict[str, list[str]] = {
-    "OneTrust": ["onetrust", "optanon", "cookie-consent-banner"],
-    "Cookiebot": ["cookiebot", "CookieConsent", "Cybot"],
-    "Quantcast": ["quantcast", "__cmpLocator", "cmp2.js"],
-    "TrustArc": ["trustarc", "truste", "consent-manager"],
-    "Didomi": ["didomi"],
-    "Usercentrics": ["usercentrics"],
-}
-
-# ── GDPR Compliance Scoring Weights ───────────────────────────────────────────
-
-COMPLIANCE_WEIGHTS: dict[str, float] = {
-    "no_pre_consent_trackers": 0.25,
-    "reject_option_available": 0.20,
-    "equal_accept_reject_effort": 0.15,
-    "no_dark_patterns": 0.15,
-    "post_reject_compliance": 0.15,
-    "transparent_information": 0.10,
-}
+# ── Shared Consent / Scoring Constants ────────────────────────────────────────
+# Re-exported from shared_constants.py for backward compatibility.
 
 # ── PET Configurations ────────────────────────────────────────────────────────
 

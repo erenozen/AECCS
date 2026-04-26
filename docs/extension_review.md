@@ -212,4 +212,4 @@ Covered baseline scenarios:
 
 ## Bottom Line
 
-`extension/` is a self-contained MV3 browser extension that turns the AECCS research pipeline into an on-demand, single-tab audit tool. Its strengths are direct portability of the core heuristics, a clear runtime split between popup/background/content responsibilities, and a useful UI layer for dark-pattern explanations and PET guidance. Its biggest limitation is that it should be treated as a local approximation of the Python pipeline, not a drop-in replacement for the full crawler-based study.
+`extension/` is a self-contained MV3 browser extension that turns the AECCS research pipeline into a local, user-initiated, session-limited audit tool. Its strengths are direct portability of the core heuristics, a clear runtime split between popup/background/content responsibilities, and a useful UI layer for dark-pattern explanations, before/after consent-state comparisons, and PET guidance. Its biggest limitation is that it should be treated as a local approximation of the Python pipeline, not a drop-in replacement for the full crawler-based study.

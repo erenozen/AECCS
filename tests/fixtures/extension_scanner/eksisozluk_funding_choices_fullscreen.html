@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>ekşi sözlük fullscreen Funding Choices fixture</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Open Sans", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #edf0f3;
+      color: #202124;
+      overflow: hidden;
+    }
+
+    main {
+      min-height: 100vh;
+      padding: 32px 48px;
+    }
+
+    .fc-consent-root {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      background: rgba(15, 23, 42, 0.38);
+    }
+
+    .fc-dialog-container.fc-fullscreen {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .fc-choice-dialog.fc-dialog {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      background: #ffffff;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .fc-dialog-scrollable-content {
+      flex: 1 1 auto;
+      overflow: auto;
+      padding: 42px 48px 24px;
+    }
+
+    .fc-dialog-restricted-content {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .fc-header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .fc-header-logo {
+      display: inline-block;
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1;
+      color: #7fbe49;
+    }
+
+    .fc-header-logo strong {
+      color: #202124;
+      font-weight: 700;
+    }
+
+    .fc-body h1 {
+      margin: 0 0 18px;
+      font-size: 24px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .fc-body p {
+      margin: 0 0 18px;
+      font-size: 15px;
+      line-height: 1.65;
+      color: #4b5563;
+    }
+
+    .fc-choice-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin: 22px auto 28px;
+      padding: 0;
+      list-style: none;
+      color: #5f6368;
+      font-size: 15px;
+    }
+
+    .fc-choice-stack li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 260px;
+    }
+
+    .fc-stack-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #dbeafe;
+      flex: 0 0 auto;
+    }
+
+    .fc-faq-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 920px;
+      margin: 0 auto 20px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #2563eb;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .fc-faq-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid #d1d5db;
+      color: #6b7280;
+    }
+
+    .fc-faq-contents {
+      display: none !important;
+    }
+
+    .fc-footer {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 24px;
+    }
+
+    .fc-footer-buttons-container {
+      flex: 0 0 auto;
+      padding: 0 48px 32px;
+    }
+
+    .fc-footer-buttons-divider {
+      height: 1px;
+      max-width: 920px;
+      margin: 0 auto 20px;
+      background: #d1d5db;
+    }
+
+    .fc-footer-buttons {
+      display: flex;
+      gap: 18px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .fc-button {
+      flex: 1 1 0;
+      min-height: 56px;
+      border: 0;
+      border-radius: 999px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .fc-primary-button {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .fc-secondary-button {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .fc-data-preferences-dialog,
+    .fc-vendor-preferences-dialog {
+      display: none !important;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+    }
+
+    .fc-data-preferences-dialog .fc-dialog-content,
+    .fc-vendor-preferences-dialog .fc-dialog-content {
+      padding: 28px 32px;
+    }
+
+    .fc-preference-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .fc-preference-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    .fc-preference-consent {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ekşi sözlük fixture</h1>
+    <p>This fixture mirrors the real fullscreen Funding Choices layout from the saved page.</p>
+  </main>
+
+  <div class="fc-consent-root sp_choice_type_11" data-google-query-id="fixture-query-id">
+    <div class="fc-dialog-container fc-fullscreen">
+      <div class="fc-choice-dialog fc-dialog" role="dialog" aria-modal="true" aria-label="Gizlilik tercihleri">
+        <div class="fc-dialog-scrollable-content">
+          <div class="fc-header fc-dialog-restricted-content">
+            <div class="fc-header-logo">eksi<strong>sözlük</strong></div>
+          </div>
+
+          <div class="fc-body fc-dialog-restricted-content">
+            <h1>eksisozluk.com size daha iyi reklam deneyimi sunabilmek için izninizi istiyor:</h1>
+            <ul class="fc-choice-stack">
+              <li><span class="fc-stack-dot"></span><span>Kişiselleştirilmiş reklam ve içerik</span></li>
+              <li><span class="fc-stack-dot"></span><span>Bilgileri bir cihazda depolamak ve/veya onlara cihazdan erişmek</span></li>
+              <li><span class="fc-stack-dot"></span><span>Reklam ve içerik ölçümü</span></li>
+              <li><span class="fc-stack-dot"></span><span>Hedef kitle araştırması ve hizmetlerin geliştirilmesi</span></li>
+            </ul>
+            <p>
+              Kişisel verileriniz işlenir ve cihazınızdaki bilgiler (çerezler, benzersiz tanımlayıcılar ve diğer cihaz
+              verileri) iş ortakları ile paylaşılabilir veya özellikle bu site tarafından kullanılabilir.
+            </p>
+            <p>
+              Bazı tedarikçiler, aşağıdaki seçeneklerinizi yöneterek itiraz edebileceğiniz meşru menfaate dayalı olarak
+              kişisel verilerinizi işleyebilir. Gizlilik ve çerez ayarlarında izni yönetmek veya geri almak için bu
+              sayfanın altındaki ya da site menüsündeki bağlantıyı bulun.
+            </p>
+          </div>
+
+          <button class="fc-faq-header fc-dialog-restricted-content" type="button">
+            <span class="fc-faq-icon">⌄</span>
+            <span class="fc-faq-label">Daha fazla bilgi edinin</span>
+          </button>
+
+          <div class="fc-faq-contents">
+            <p>Hidden FAQ content</p>
+          </div>
+
+          <div class="fc-footer fc-dialog-restricted-content">
+            <p>
+              İş ortaklarının listesi ve diğer bilgiler bu bölümden görülebilir. Bu içerik özellikle uzun tutuldu,
+              çünkü canlı sayfada butonlar büyük bir tam ekran yüzeyin altına yerleşiyor.
+            </p>
+          </div>
+        </div>
+
+        <div class="fc-footer-buttons-container">
+          <div class="fc-footer-buttons-divider"></div>
+          <div class="fc-footer-buttons">
+            <button class="fc-button fc-cta-consent fc-primary-button" type="button" aria-label="İzin ver">
+              İzin ver
+            </button>
+            <button class="fc-button fc-cta-manage-options fc-secondary-button" type="button" aria-label="Seçenekleri yönetin">
+              Seçenekleri yönetin
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fc-dialog fc-data-preferences-dialog" role="dialog" aria-label="Verilerinizi yönetin">
+        <div class="fc-dialog-content">
+          <div class="fc-preference-container">
+            <div>
+              <strong>Bilgileri bir cihazda depolamak ve/veya onlara cihazdan erişmek</strong>
+            </div>
+            <label class="fc-preference-slider-container">
+              <span>İzin</span>
+              <input class="fc-preference-consent atp-vendor" type="checkbox" role="button" checked aria-pressed="true">
+            </label>
+          </div>
+          <div class="fc-footer-buttons">
+            <button class="fc-button fc-vendor-preferences-accept-all fc-secondary-button" type="button">Tümünü kabul et</button>
+            <button class="fc-button fc-confirm-choices fc-primary-button" type="button">Seçimleri onayla</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fc-dialog fc-vendor-preferences-dialog" role="dialog" aria-label="Tedarikçi tercihleri">
+        <div class="fc-dialog-content">
+          <div class="fc-preference-container">
+            <div>
+              <strong>Tedarikçilerimizi onaylama</strong>
+            </div>
+            <label class="fc-preference-slider-container">
+              <span>İzin</span>
+              <input class="fc-preference-consent atp-vendor" type="checkbox" role="button" checked aria-pressed="true">
+            </label>
+          </div>
+          <div class="fc-footer-buttons">
+            <button class="fc-button fc-vendor-preferences-accept-all fc-secondary-button" type="button">Tümünü kabul et</button>
+            <button class="fc-button fc-confirm-choices fc-primary-button" type="button">Seçimleri onayla</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
