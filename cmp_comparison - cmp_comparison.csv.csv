@@ -1,0 +1,8 @@
+source_mode,run_id,cmp_name,site_count,avg_compliance_score,median_compliance_score,pct_with_reject_button,pct_reject_works,avg_tracker_reduction,pct_with_dark_patterns,pet_score,rank
+real_combined,combined-1000,Didomi,49,36.2,29,38.8,12.5,-0.23,63.3,24.9,1
+real_combined,combined-1000,OneTrust,138,35.5,24.5,40.6,6.6,-0.09,69.6,24.1,2
+real_combined,combined-1000,TrustArc,121,28.8,18.5,24,6.7,-0.04,89.3,16.3,3
+real_combined,combined-1000,Cookiebot,91,22.7,18.5,13.2,10,-0.08,93.4,12.1,4
+real_combined,combined-1000,No CMP Detected,555,25.3,24,7,7.1,-0.03,96,11.1,5
+real_combined,combined-1000,Quantcast,28,18.5,13.5,14.3,7.7,-0.03,96.4,10.6,6
+real_combined,combined-1000,Usercentrics,18,20.6,17.5,5.6,5.6,-0.04,94.4,9.1,7
