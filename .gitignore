@@ -29,3 +29,7 @@ reporting/real/*.html
 .DS_Store
 Thumbs.db
 *.ipynb_checkpoints/
+.codex
+docs/final_report_acm_print.html
+docs/final_report_acm.pdf
+

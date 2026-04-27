@@ -334,10 +334,11 @@
         </p>
         <p>
           The novelty is not that AECCS is the first system to detect consent dark patterns or pre-consent tracking.
-          Prior studies established both problems. To our knowledge, AECCS is distinctive in jointly combining dark
-          pattern prevalence, technical pre-consent and post-reject tracking behavior, browser-level PET effectiveness,
-          CMP-level outcomes, differential privacy for aggregate publication, and a deployable local audit extension.
-          This makes the project useful for both empirical privacy measurement and practical user-facing inspection.
+          Prior studies established both problems. Compared with prior work, AECCS emphasizes the measurement-to-tool
+          path: it combines dark-pattern prevalence, technical pre-consent and post-reject tracking behavior,
+          browser-level PET effectiveness, CMP-level outcomes, differential privacy for aggregate publication, and a
+          deployable local audit extension in one course-project system. This makes the project useful for both
+          empirical privacy measurement and practical user-facing inspection.
         </p>
         <h3>Problem Statement and Research Questions</h3>
         <p>
@@ -451,9 +452,10 @@
         <p>
           Enforcement evidence from noyb and GDPR enforcement trackers shows that cookie-banner manipulation is not only
           a usability concern; it is tied to active regulatory scrutiny <a href="#ref-noyb">[12]</a>,
-          <a href="#ref-noyb-conde">[13]</a>, <a href="#ref-cms">[14]</a>. AECCS complements this evidence by measuring
-          deployed behavior and by giving users a local way to inspect whether a page's consent interface matches its
-          tracking behavior.
+          <a href="#ref-noyb-conde">[13]</a>, <a href="#ref-cms">[14]</a>, and CNIL guidance on cookies and tracking
+          devices frames the technical expectations regulators apply <a href="#ref-cnil">[15]</a>. AECCS complements this
+          evidence by measuring deployed behavior and by giving users a local way to inspect whether a page's consent
+          interface matches its tracking behavior.
         </p>
       </section>
 
@@ -657,11 +659,11 @@
         </div>
 
         <p>
-          The extension is also available through public browser stores:
+          The extension is published on both major browser stores &mdash;
           <a href="https://addons.mozilla.org/en-US/firefox/addon/aeccs-compliance-checker/">Firefox Add-ons</a>
           and
-          <a href="https://chromewebstore.google.com/detail/aeccs-cookie-compliance-c/okhdacpjnjndimbchldhncajnmhbpkha">Chrome Web Store</a>.
-          These listings make the research artifact usable outside the offline evaluation pipeline while preserving the
+          <a href="https://chromewebstore.google.com/detail/aeccs-cookie-compliance-c/okhdacpjnjndimbchldhncajnmhbpkha">Chrome Web Store</a>
+          &mdash; so the research artifact is usable outside the offline evaluation pipeline while preserving the
           extension's local-only audit model.
         </p>
 
@@ -750,7 +752,8 @@
           The frozen combined dataset contains 1,000 attempted crawls, 861 successful crawls, and 139 failures. Among
           successful crawls, 595 sites showed a detected consent banner and 266 did not. The findings show that banners
           are common but rarely sufficient: pre-consent tracking, missing reject paths, and weak post-reject behavior
-          remain widespread.
+          remain widespread. Unless otherwise stated, compliance scores use 861 successful crawls; banner-interface
+          statistics use 595 banner sites; and aggregate dark-pattern detector prevalence uses 1,000 processed outputs.
         </p>
 
         <div class="table-wrap">
@@ -774,7 +777,7 @@
                 <td>1,000 attempted sites</td>
               </tr>
               <tr>
-                <td>Pre-consent tracker violations</td>
+                <td>Pre-consent tracker presence</td>
                 <td class="metric">753 (87.5%)</td>
                 <td>861 successful crawls</td>
               </tr>
@@ -812,7 +815,7 @@
         <p>
           AECCS found pre-consent trackers on 753 of 861 successful crawls, or 87.5%. The mean successful site exposed
           6.6 tracker cookies before any consent interaction, with a median of 5. Travel, employment, and news had the
-          highest violation rates: 96.3%, 93.7%, and 91.9%, respectively. Government sites had the lowest category
+          highest pre-consent tracker rates: 96.3%, 93.7%, and 91.9%, respectively. Government sites had the lowest category
           rate, but still showed pre-consent trackers on 75.3% of successful crawls.
         </p>
         <p>
@@ -821,8 +824,8 @@
         </p>
 
         <div class="figure">
-          <img src="../reporting/real_combined/figures/violation_rates_by_category.png" alt="Violation rates by website category">
-          <div class="caption">Figure 3: Pre-consent tracking violation rates by category.</div>
+          <img src="../reporting/real_combined/figures/violation_rates_by_category.png" alt="Pre-consent tracker rates by website category">
+          <div class="caption">Figure 3: Pre-consent tracker rates by category.</div>
         </div>
 
         <h3>5.2 Tracker Ecosystem</h3>
@@ -933,15 +936,17 @@
         <h3>5.6 Browser PET Effectiveness</h3>
         <p>
           PET evaluation attempted 7,000 measurements: 1,000 sites times seven browser configurations. Of these, 6,210
-          rows succeeded. The top browser-level tools by tracker-domain reduction were Brave Shields at 22.8%, uBlock
-          Origin at 22.4%, and Privacy Badger at 21.0%. Consent-O-Matic did not behave like a network blocker; its
-          value is consent-flow automation, and in this dataset it did not reduce tracker-domain exposure relative to
-          baseline.
+          rows succeeded. Of those 6,210 successful rows, 5,313 come from the six PET tools shown in Table 12 and the
+          remaining 897 come from the baseline configuration, which Table 12 omits because it is the no-PET reference
+          rather than a PET tool. The top browser-level tools by tracker-domain reduction were Brave Shields at 22.8%,
+          uBlock Origin at 22.4%, and Privacy Badger at 21.0%. Consent-O-Matic did not behave like a network blocker;
+          its value is consent-flow automation, and in this dataset it did not reduce tracker-domain exposure relative
+          to baseline.
         </p>
         <p>
           This answers RQ4. Browser-side defenses help when consent systems fail, but the result is mitigation rather
-          than compliance: users should not need a blocker to obtain the baseline protection that lawful consent should
-          already provide.
+          than compliance: users should not need a blocker to obtain the baseline protection that GDPR-oriented consent
+          should already provide.
         </p>
 
         <div class="table-wrap">
@@ -986,17 +991,17 @@
               </tr>
               <tr>
                 <td>5</td>
-                <td>Consent-O-Matic</td>
-                <td>896</td>
-                <td>-11.2%</td>
-                <td>-11.9%</td>
-              </tr>
-              <tr>
-                <td>6</td>
                 <td>Firefox ETP Standard</td>
                 <td>890</td>
                 <td>-2.2%</td>
                 <td>-16.4%</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>Consent-O-Matic</td>
+                <td>896</td>
+                <td>-11.2%</td>
+                <td>-11.9%</td>
               </tr>
             </tbody>
           </table>
@@ -1132,7 +1137,9 @@
           Provenance caveat: the frozen aggregate metadata reports <span class="code">proxy_used: null</span>. This
           report therefore avoids claiming verified VPN/proxy provenance for the combined run. EU-oriented site
           selection and GDPR-triggering methodology remain central, but the final text should not overstate proxy
-          evidence unless external run documentation is added.
+          evidence unless external run documentation is added. More broadly, the study evaluates GDPR-oriented consent
+          indicators but does not prove that each site was serving an EU-specific consent experience, since banners can
+          vary by user location.
         </div>
         <p>
           The report uses frozen March 2026 scores, rather than recomputing with later April scoring-code revisions.
@@ -1144,6 +1151,8 @@
       <section id="implementation">
         <h2>7. Implementation and Reproducibility</h2>
         <p>
+          The full source code, generated assets, and frozen study outputs are released at
+          <a href="https://github.com/erenozen/AECCS">https://github.com/erenozen/AECCS</a>.
           The repository is organized around a reproducible pipeline. The README documents installation, Playwright
           browser setup, source modes, and the unified runner. The key implementation modules are:
           <span class="code">scraper/crawler.py</span> for data collection,
