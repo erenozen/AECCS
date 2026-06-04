@@ -168,6 +168,11 @@ def _is_better_frame_scan(candidate: dict, current: dict | None) -> bool:
 
 
 def _mount_popup_shell(page) -> None:
+    # The score gauge sweep + count-up animate on requestAnimationFrame, so
+    # emulate the OS "reduce motion" preference to render the final score state
+    # synchronously and keep these assertions deterministic (this also exercises
+    # the reduced-motion code path in popup.js).
+    page.emulate_media(reduced_motion="reduce")
     page.set_content(
         """
         <!DOCTYPE html>
@@ -215,7 +220,13 @@ def _mount_popup_shell(page) -> None:
                 </div>
               </div>
               <section class="score-card">
-                <div id="gradeBadge" class="grade-badge">
+                <div id="gradeBadge" class="grade-badge gauge">
+                  <svg class="gauge-ring" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+                    <circle class="gauge-track" cx="18" cy="18" r="15.9155"></circle>
+                    <circle class="gauge-arc" cx="18" cy="18" r="15.9155"
+                            stroke-dasharray="100 100" stroke-dashoffset="100"
+                            transform="rotate(-90 18 18)"></circle>
+                  </svg>
                   <span id="gradeLetter" class="grade-letter"></span>
                 </div>
                 <div class="score-info">
@@ -234,7 +245,13 @@ def _mount_popup_shell(page) -> None:
             <section id="baselineScoreSection" class="section secondary-score hidden">
               <h2 class="section-title">Baseline Banner Score</h2>
               <div class="secondary-score-card">
-                <div id="baselineGradeBadge" class="secondary-grade-badge">
+                <div id="baselineGradeBadge" class="secondary-grade-badge gauge">
+                  <svg class="gauge-ring" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+                    <circle class="gauge-track" cx="18" cy="18" r="15.9155"></circle>
+                    <circle class="gauge-arc" cx="18" cy="18" r="15.9155"
+                            stroke-dasharray="100 100" stroke-dashoffset="100"
+                            transform="rotate(-90 18 18)"></circle>
+                  </svg>
                   <span id="baselineGradeLetter" class="secondary-grade-letter"></span>
                 </div>
                 <div class="secondary-score-info">

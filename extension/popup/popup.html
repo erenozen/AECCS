@@ -83,7 +83,13 @@
 
       <!-- Score badge -->
       <section class="score-card">
-        <div class="grade-badge" id="gradeBadge">
+        <div class="grade-badge gauge" id="gradeBadge">
+          <svg class="gauge-ring" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+            <circle class="gauge-track" cx="18" cy="18" r="15.9155"></circle>
+            <circle class="gauge-arc" cx="18" cy="18" r="15.9155"
+                    stroke-dasharray="100 100" stroke-dashoffset="100"
+                    transform="rotate(-90 18 18)"></circle>
+          </svg>
           <span class="grade-letter" id="gradeLetter">-</span>
         </div>
         <div class="score-info">
@@ -104,7 +110,13 @@
       <section class="section secondary-score hidden" id="baselineScoreSection">
         <h2 class="section-title">Baseline Banner Score</h2>
         <div class="secondary-score-card">
-          <div class="secondary-grade-badge" id="baselineGradeBadge">
+          <div class="secondary-grade-badge gauge" id="baselineGradeBadge">
+            <svg class="gauge-ring" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+              <circle class="gauge-track" cx="18" cy="18" r="15.9155"></circle>
+              <circle class="gauge-arc" cx="18" cy="18" r="15.9155"
+                      stroke-dasharray="100 100" stroke-dashoffset="100"
+                      transform="rotate(-90 18 18)"></circle>
+            </svg>
             <span class="secondary-grade-letter" id="baselineGradeLetter">-</span>
           </div>
           <div class="secondary-score-info">

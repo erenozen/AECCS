@@ -424,19 +424,54 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+/* ── Score Gauge (radial SVG ring shared by main + baseline scores) ───────────
+   The badge is a square box that centers the grade letter while an inline SVG
+   ring fills behind it. The progress arc fills proportionally to the score and
+   is colored by grade via `currentColor` (set on the badge from popup.js); the
+   count-up + arc sweep are driven by requestAnimationFrame in popup.js. */
+
+.gauge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
 .grade-badge {
   width: 56px;
   height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 3px solid currentColor;
+}
+
+.gauge-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gauge-track,
+.gauge-arc {
+  fill: none;
+  stroke-width: 3;
+}
+
+.gauge-track {
+  stroke: var(--border);
+}
+
+.gauge-arc {
+  stroke: currentColor;
+  stroke-linecap: round;
+}
+
+.grade-letter,
+.secondary-grade-letter {
+  position: relative;
+  z-index: 1;
 }
 
 .grade-letter {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   line-height: 1;
 }
@@ -522,16 +557,10 @@ body {
 .secondary-grade-badge {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid currentColor;
-  flex-shrink: 0;
 }
 
 .secondary-grade-letter {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -1390,3 +1419,15 @@ body::-webkit-scrollbar { width: 6px; }
 body::-webkit-scrollbar-track { background: var(--bg); }
 body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 body::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* ── Reduced motion ──────────────────────────────────────────────────────────
+   The score gauge sweep + count-up are JS-driven and skipped in popup.js when
+   reduced motion is requested; these rules drop the remaining CSS transitions
+   so nothing animates when the user opts out. */
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-bar-segment,
+  .progress-fill {
+    transition: none;
+  }
+}

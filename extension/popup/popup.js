@@ -39,6 +39,15 @@
     F: "var(--red)",
   };
 
+  // Score gauge geometry/animation. The SVG ring (popup.html) uses r≈15.9155 so
+  // the arc circumference is ~100 user units, letting stroke-dashoffset map 1:1
+  // to "percent remaining". The sweep + count-up run on requestAnimationFrame.
+  const GAUGE_CIRCUMFERENCE = 100;
+  const GAUGE_ANIM_MS = 700;
+  // Tracks the in-flight rAF handle per animated target so re-renders supersede
+  // an earlier sweep instead of leaving two loops fighting over the same node.
+  const gaugeAnimations = new WeakMap();
+
   const CATEGORY_COLORS = {
     Analytics:      "var(--cat-analytics)",
     Advertising:    "var(--cat-advertising)",
@@ -824,13 +833,91 @@
   function renderScoreCard(gradeBadgeEl, gradeLetterEl, scoreValueEl, scoreLabelEl, score) {
     if (!score) return;
     const color = GRADE_COLORS[score.grade] || GRADE_COLORS.F;
+    // Setting `color` on the badge tints both the grade letter and the gauge
+    // arc (which strokes `currentColor`) from one assignment.
     gradeBadgeEl.style.color = color;
-    gradeBadgeEl.style.borderColor = color;
     gradeLetterEl.textContent = score.grade;
-    scoreValueEl.textContent = score.overall_score;
     if (scoreLabelEl) {
       scoreLabelEl.textContent = score.label || "GDPR Compliance Score";
     }
+    const arcEl = gradeBadgeEl.querySelector(".gauge-arc");
+    animateGauge(arcEl, scoreValueEl, score.overall_score);
+  }
+
+  function prefersReducedMotion() {
+    try {
+      return typeof globalThis.matchMedia === "function" &&
+        globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function cancelGaugeAnimation(key) {
+    const handle = gaugeAnimations.get(key);
+    if (handle != null) {
+      if (typeof globalThis.cancelAnimationFrame === "function") {
+        globalThis.cancelAnimationFrame(handle);
+      }
+      gaugeAnimations.delete(key);
+    }
+  }
+
+  // Sweeps the gauge arc and counts the numeric score up from 0 to its final
+  // value over ~700ms (ease-out). Honors prefers-reduced-motion by committing
+  // the final frame synchronously, and always lands on the exact source value
+  // so the rendered number matches the score precisely.
+  function animateGauge(arcEl, valueEl, rawScore) {
+    const finalText = rawScore === null || rawScore === undefined ? "-" : String(rawScore);
+    const numericTarget = Number(rawScore);
+    const hasNumber = Number.isFinite(numericTarget);
+    const fractionTarget = hasNumber ? Math.max(0, Math.min(1, numericTarget / 100)) : 0;
+
+    // Key animations off the count-up element when present (it is unique per
+    // score card) so the main and baseline gauges never cancel each other.
+    const key = valueEl || arcEl;
+    if (!key) return;
+    cancelGaugeAnimation(key);
+
+    const paint = (fraction, numberText) => {
+      if (arcEl) {
+        arcEl.style.strokeDashoffset = String(GAUGE_CIRCUMFERENCE * (1 - fraction));
+      }
+      if (valueEl && numberText !== undefined) {
+        valueEl.textContent = numberText;
+      }
+    };
+    const commitFinal = () => paint(fractionTarget, finalText);
+
+    if (prefersReducedMotion() ||
+        typeof globalThis.requestAnimationFrame !== "function" ||
+        !hasNumber) {
+      commitFinal();
+      return;
+    }
+
+    const now = () => (globalThis.performance && globalThis.performance.now)
+      ? globalThis.performance.now()
+      : Date.now();
+    const start = now();
+
+    paint(0, "0");
+    const step = () => {
+      const t = Math.min(1, (now() - start) / GAUGE_ANIM_MS);
+      const eased = easeOutCubic(t);
+      if (t < 1) {
+        paint(fractionTarget * eased, String(Math.round(numericTarget * eased)));
+        gaugeAnimations.set(key, globalThis.requestAnimationFrame(step));
+      } else {
+        gaugeAnimations.delete(key);
+        commitFinal();
+      }
+    };
+    gaugeAnimations.set(key, globalThis.requestAnimationFrame(step));
   }
 
   function renderBaselineScore(score) {
