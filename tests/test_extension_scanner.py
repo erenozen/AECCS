@@ -194,6 +194,17 @@ def _mount_popup_shell(page) -> None:
               <div id="siteDomain" class="site-domain">—</div>
             </header>
 
+            <section id="onboardingCard" class="onboarding hidden" aria-labelledby="onboardingTitle">
+              <h2 class="onboarding-title" id="onboardingTitle">Welcome to AECCS</h2>
+              <div class="onboarding-lead">AECCS rates a website's cookie-consent banner for GDPR compliance using six weighted criteria.</div>
+              <ul class="onboarding-points">
+                <li>Runs entirely on your device.</li>
+                <li>Audits the active tab only, on demand.</li>
+                <li>Open <strong>About &amp; Methodology</strong> below anytime.</li>
+              </ul>
+              <button id="onboardingDismiss" class="onboarding-button" type="button">Got it</button>
+            </section>
+
             <div id="loading" class="loading">
               <span class="sr-only" role="status" aria-live="polite">Analyzing compliance...</span>
               <div class="skeleton" aria-hidden="true">
@@ -341,6 +352,27 @@ def _mount_popup_shell(page) -> None:
               <div id="studyInsightsContent"></div>
             </details>
             </div>
+            <details id="aboutSection" class="section study-insights about-methodology">
+              <summary class="study-insights-toggle">
+                <span>About &amp; Methodology</span>
+                <span class="study-insights-meta">How AECCS scores this page</span>
+              </summary>
+              <div class="study-insights-content">
+                <div class="insight-intro">AECCS audits the active tab's cookie-consent banner against GDPR.</div>
+                <div class="insight-card">
+                  <div class="insight-card-title">Six weighted criteria</div>
+                  <div id="aboutCriteriaList" class="about-criteria"></div>
+                </div>
+                <div class="insight-card">
+                  <div class="insight-card-title">Study basis</div>
+                  <div id="aboutStudyBasis" class="insight-card-copy"></div>
+                </div>
+                <div class="insight-card-copy about-privacy">
+                  Privacy statement.
+                  <a class="about-privacy-link" href="https://erenozen.github.io/AECCS/privacy-policy.html" target="_blank" rel="noopener noreferrer">Read the privacy policy</a>
+                </div>
+              </div>
+            </details>
             <footer id="footerNote" class="footer"></footer>
           </div>
         </body>
@@ -3257,6 +3289,96 @@ def test_popup_places_browsing_setup_between_pet_tools_and_study_insights() -> N
 
     assert order["petNext"] == "browsingSetupSection"
     assert order["browsingNext"] == "studyInsightsSection"
+
+
+def test_popup_first_run_onboarding_shows_then_stays_dismissed() -> None:
+    popup_result = {
+        "analysisMode": "baseline_banner",
+        "site": "example.com",
+        "url": "https://example.com",
+        "studyMetadata": {"sampleSize": 1000, "successfulCrawls": 861, "snapshotDateLabel": "March 6, 2026"},
+        "score": {"label": "GDPR Compliance Score", "grade": "B", "overall_score": 78, "criteria": {}},
+        "baselineScore": None,
+        "categoryCounts": {},
+        "totalCookies": 0,
+        "thirdPartyCount": 0,
+        "trackerCount": 0,
+        "trackersByVendor": {},
+        "cmpStats": None,
+        "petRecommendations": [],
+        "consentScan": {
+            "cmpDetected": None,
+            "bannerFound": True,
+            "hasAcceptButton": True,
+            "hasRejectButton": True,
+            "hasSettingsButton": False,
+            "acceptButtonText": "Accept",
+            "rejectButtonText": "Reject",
+            "settingsButtonText": None,
+            "acceptClicksRequired": 1,
+            "rejectClicksRequired": 1,
+            "transparency": {},
+            "darkPatterns": {"count": 0, "detected": []},
+            "buttonComparison": None,
+        },
+    }
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+
+        # First run: empty storage means the onboarding card should reveal itself.
+        _boot_popup_with_state(page, responses=[popup_result])
+        page.wait_for_function(
+            """() => !document.getElementById("onboardingCard").classList.contains("hidden")"""
+        )
+        page.locator("#aboutSection > summary").click()
+        first_run = page.evaluate(
+            """() => ({
+                onboardingVisible: !document.getElementById("onboardingCard").classList.contains("hidden"),
+                aboutOpen: document.getElementById("aboutSection").open,
+                criteriaRows: document.querySelectorAll("#aboutCriteriaList .insight-kv").length,
+                topCriterion: document.querySelector("#aboutCriteriaList .insight-kv span")?.textContent,
+                studyBasis: document.getElementById("aboutStudyBasis").textContent,
+            })"""
+        )
+
+        # Dismissing persists the flag and hides the card for the session.
+        page.locator("#onboardingDismiss").click()
+        page.wait_for_function(
+            """() => window.__aeccsPopupStorage.aeccs_onboarded === true"""
+        )
+        dismissed = page.evaluate(
+            """() => ({
+                onboardingHidden: document.getElementById("onboardingCard").classList.contains("hidden"),
+                flag: window.__aeccsPopupStorage.aeccs_onboarded,
+            })"""
+        )
+
+        # Reopen with the flag already stored: the card must stay hidden.
+        _boot_popup_with_state(
+            page,
+            responses=[popup_result],
+            storage_state={"aeccs_onboarded": True},
+        )
+        page.wait_for_function(
+            """() => !document.getElementById("results").classList.contains("hidden")"""
+        )
+        reopened_hidden = page.evaluate(
+            """() => document.getElementById("onboardingCard").classList.contains("hidden")"""
+        )
+
+        browser.close()
+
+    assert first_run["onboardingVisible"] is True
+    assert first_run["aboutOpen"] is True
+    assert first_run["criteriaRows"] == 6
+    # COMPLIANCE_WEIGHTS is rendered weight-descending; no_pre_consent_trackers (0.3) leads.
+    assert first_run["topCriterion"] == "No Pre-Consent Trackers"
+    assert "1000" in first_run["studyBasis"]
+    assert dismissed["onboardingHidden"] is True
+    assert dismissed["flag"] is True
+    assert reopened_hidden is True
 
 
 def test_popup_shows_error_when_background_analyze_never_resolves() -> None:

@@ -16,6 +16,7 @@
     "AECCS did not receive an analysis response in time on this page. Try reopening the popup.";
   const POPUP_ACTION_TIMEOUT_MS = 8000;
   const PROTECTION_PROFILE_STORAGE_KEY = "aeccsUserProtectionProfile";
+  const ONBOARDING_STORAGE_KEY = "aeccs_onboarded";
   const BROWSER_PROTECTION_LABELS = {
     none: "No protections declared",
     firefox_etp_standard: "Firefox ETP Standard",
@@ -88,6 +89,11 @@
   const els = {
     themeToggle:       $("themeToggle"),
     themeToggleLabel:  $("themeToggleLabel"),
+    onboardingCard:    $("onboardingCard"),
+    onboardingDismiss: $("onboardingDismiss"),
+    aboutSection:      $("aboutSection"),
+    aboutCriteriaList: $("aboutCriteriaList"),
+    aboutStudyBasis:   $("aboutStudyBasis"),
     loading:           $("loading"),
     errorState:        $("errorState"),
     errorMsg:          $("errorMsg"),
@@ -368,11 +374,113 @@
     }
   }
 
+  // ── Onboarding & About ──────────────────────────────────────────────────────
+
+  async function initOnboarding() {
+    if (!els.onboardingCard) return;
+    bindOnboardingDismiss();
+    // The card is hidden in markup by default, so returning users never see a
+    // flash; only reveal it once we confirm the onboarded flag is not stored.
+    if (!(await hasCompletedOnboarding())) {
+      els.onboardingCard.classList.remove("hidden");
+    }
+  }
+
+  function bindOnboardingDismiss() {
+    if (!els.onboardingDismiss || els.onboardingDismiss.dataset.bound === "true") return;
+    els.onboardingDismiss.dataset.bound = "true";
+    // A native <button> fires click on Enter/Space, so the card is fully
+    // keyboard-dismissible without extra key handling.
+    els.onboardingDismiss.addEventListener("click", () => {
+      void dismissOnboarding();
+    });
+  }
+
+  async function dismissOnboarding() {
+    if (els.onboardingCard) {
+      els.onboardingCard.classList.add("hidden");
+    }
+    await persistOnboarded();
+  }
+
+  async function hasCompletedOnboarding() {
+    try {
+      if (!browser?.storage?.local?.get) {
+        // Without local storage we cannot remember the choice; avoid nagging.
+        return true;
+      }
+      const payload = await browser.storage.local.get(ONBOARDING_STORAGE_KEY);
+      return payload?.[ONBOARDING_STORAGE_KEY] === true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  async function persistOnboarded() {
+    try {
+      if (browser?.storage?.local?.set) {
+        await browser.storage.local.set({ [ONBOARDING_STORAGE_KEY]: true });
+      }
+    } catch (_) {
+      // The card is already hidden for this session even if persistence fails.
+    }
+  }
+
+  function renderAboutMethodology() {
+    renderAboutCriteria();
+    renderAboutStudyBasis();
+  }
+
+  function renderAboutCriteria() {
+    if (!els.aboutCriteriaList) return;
+    clearNode(els.aboutCriteriaList);
+
+    const weights = globalThis.AECCS?.COMPLIANCE_WEIGHTS || {};
+    const entries = Object.entries(weights)
+      .filter(([, weight]) => typeof weight === "number")
+      .sort((a, b) => b[1] - a[1]);
+
+    if (entries.length === 0) {
+      els.aboutCriteriaList.appendChild(
+        createElement("div", { className: "insight-card-copy", text: "Criteria weights are unavailable." })
+      );
+      return;
+    }
+
+    for (const [key, weight] of entries) {
+      const label = CRITERIA_LABELS[key] || key;
+      els.aboutCriteriaList.appendChild(
+        buildLabeledValueRow("insight-kv", label, `${Math.round(weight * 100)}%`, "strong")
+      );
+    }
+  }
+
+  function renderAboutStudyBasis() {
+    if (!els.aboutStudyBasis) return;
+    const metadata = aboutStudyMetadata();
+    const sampleSize = metadata.sampleSize || 1000;
+    const successfulCrawls = metadata.successfulCrawls || 861;
+    const snapshotDateLabel = metadata.snapshotDateLabel || "March 6, 2026";
+    els.aboutStudyBasis.textContent =
+      `Scores are interpreted against the AECCS ${sampleSize}-site combined study snapshot ` +
+      `(${successfulCrawls} successful crawls, captured ${snapshotDateLabel}).`;
+  }
+
+  function aboutStudyMetadata() {
+    // The study-snapshot bundle is the canonical source; fall back to the
+    // shared-config copy if the snapshot global is unavailable.
+    return globalThis.AECCSStudySnapshot?.metadata ||
+      globalThis.AECCS?.STUDY_METADATA ||
+      {};
+  }
+
   // ── Init ──────────────────────────────────────────────────────────────────
 
   async function init() {
     try {
       await initTheme();
+      renderAboutMethodology();
+      void initOnboarding();
       bindStudyInsights();
       bindPetSection();
       bindPetTooltips();

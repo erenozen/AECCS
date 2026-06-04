@@ -48,6 +48,20 @@
       <div class="site-domain" id="siteDomain">—</div>
     </header>
 
+    <!-- First-run onboarding card (shown once, until "Got it" is pressed) -->
+    <section id="onboardingCard" class="onboarding hidden" aria-labelledby="onboardingTitle">
+      <h2 class="onboarding-title" id="onboardingTitle">Welcome to AECCS</h2>
+      <div class="onboarding-lead">
+        AECCS rates a website's cookie-consent banner for GDPR compliance using six weighted criteria.
+      </div>
+      <ul class="onboarding-points">
+        <li>Runs entirely on your device &mdash; no data leaves your browser, and there is no telemetry.</li>
+        <li>Audits the active tab only, and only when you open this popup.</li>
+        <li>Open <strong>About &amp; Methodology</strong> below anytime to see how the score is built.</li>
+      </ul>
+      <button id="onboardingDismiss" class="onboarding-button" type="button">Got it</button>
+    </section>
+
     <!-- Loading state: content-shaped skeleton placeholders -->
     <div id="loading" class="loading">
       <!-- Status text for assistive tech; the skeleton below is decorative. -->
@@ -276,6 +290,38 @@
       </details>
 
     </div>
+
+    <!-- Persistent About & Methodology (always available, collapsed by default) -->
+    <details class="section study-insights about-methodology" id="aboutSection">
+      <summary class="study-insights-toggle">
+        <span>About &amp; Methodology</span>
+        <span class="study-insights-meta">How AECCS scores this page</span>
+      </summary>
+      <div class="study-insights-content">
+        <div class="insight-intro">
+          AECCS audits the active tab's cookie-consent banner against GDPR using six weighted
+          criteria. It runs locally on demand, sends no data anywhere, and has no telemetry.
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-card-title">Six weighted criteria</div>
+          <div id="aboutCriteriaList" class="about-criteria"></div>
+        </div>
+
+        <div class="insight-card">
+          <div class="insight-card-title">Study basis</div>
+          <div id="aboutStudyBasis" class="insight-card-copy"></div>
+        </div>
+
+        <div class="insight-card-copy about-privacy">
+          Privacy: all analysis happens on your device. AECCS stores only your theme,
+          browsing-setup, and onboarding preferences locally on this browser.
+          <a class="about-privacy-link"
+             href="https://erenozen.github.io/AECCS/privacy-policy.html"
+             target="_blank" rel="noopener noreferrer">Read the privacy policy</a>
+        </div>
+      </div>
+    </details>
 
     <!-- Footer -->
     <footer class="footer" id="footerNote">
