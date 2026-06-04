@@ -34,11 +34,6 @@ FIREFOX_BACKGROUND_SCRIPTS = [
 REVIEWER_SOURCE_FILES = [
     "extension",
     "docs/privacy-policy.html",
-    "docs/extension_store_listing.md",
-    "docs/extension_store_listing_chrome.md",
-    "docs/extension_store_listing_firefox.md",
-    "docs/extension_reviewer_notes.md",
-    "docs/extension_release_checklist.md",
     "scripts/build_extension_shared_config.py",
     "scripts/build_extension_study_snapshot.py",
     "scripts/build_extension_tracker_index.py",

@@ -11,11 +11,6 @@ from scripts.build_extension_shared_config import build_payload, emit_js
 
 ROOT = Path(__file__).resolve().parents[1]
 PRIVACY_POLICY = ROOT / "docs" / "privacy-policy.html"
-STORE_LISTING = ROOT / "docs" / "extension_store_listing.md"
-STORE_LISTING_CHROME = ROOT / "docs" / "extension_store_listing_chrome.md"
-STORE_LISTING_FIREFOX = ROOT / "docs" / "extension_store_listing_firefox.md"
-REVIEWER_NOTES = ROOT / "docs" / "extension_reviewer_notes.md"
-RELEASE_CHECKLIST = ROOT / "docs" / "extension_release_checklist.md"
 PACKAGE_SCRIPT = ROOT / "scripts" / "package_extension_release.py"
 MANIFEST = ROOT / "extension" / "manifest.json"
 POPUP = ROOT / "extension" / "popup" / "popup.js"
@@ -55,48 +50,6 @@ def test_privacy_policy_matches_release_behavior() -> None:
     assert "https://github.com/erenozen/AECCS" in text
     assert "https://github.com/erenozen/AECCS/issues" in text
     assert PUBLIC_PRIVACY_POLICY_URL in text
-
-
-def test_release_docs_cover_store_and_reviewer_workflows() -> None:
-    source_text = STORE_LISTING.read_text(encoding="utf-8")
-    chrome_text = STORE_LISTING_CHROME.read_text(encoding="utf-8")
-    firefox_text = STORE_LISTING_FIREFOX.read_text(encoding="utf-8")
-    reviewer_text = REVIEWER_NOTES.read_text(encoding="utf-8")
-    checklist_text = RELEASE_CHECKLIST.read_text(encoding="utf-8")
-
-    assert "Local, user-initiated GDPR cookie-consent auditor" in source_text
-    assert "post-interaction consent outcomes" in source_text
-
-    assert "Chrome Web Store" in chrome_text
-    assert "Single Purpose" in chrome_text
-    assert "no remote code" in chrome_text.lower()
-    assert "session-limited" in chrome_text.lower()
-    assert PUBLIC_PRIVACY_POLICY_URL in chrome_text
-
-    assert "Firefox Add-ons" in firefox_text
-    assert "session-limited" in firefox_text.lower()
-    assert PUBLIC_PRIVACY_POLICY_URL in firefox_text
-    assert "listed add-on" in checklist_text
-    assert "Submit Firefox First" in checklist_text
-    assert "Submit Chrome Immediately After" in checklist_text
-    assert "440x280" in checklist_text
-    assert "generated static assets" in firefox_text.lower()
-    assert "session-limited consent auditor" in checklist_text.lower()
-
-    assert "`cookies`" in reviewer_text
-    assert "`activeTab`" in reviewer_text
-    assert "`scripting`" in reviewer_text
-    assert "`<all_urls>`" in reviewer_text
-    assert "study-snapshot.js" in reviewer_text
-    assert "shared-config.js" in reviewer_text
-    assert "tracker-index.js" in reviewer_text
-    assert "background.scripts" in reviewer_text
-    assert 'data_collection_permissions.required = ["none"]' in reviewer_text
-    assert PUBLIC_PRIVACY_POLICY_URL in reviewer_text
-
-    assert "deferred publishing" in checklist_text.lower()
-    assert "package_extension_release.py" in checklist_text
-    assert PUBLIC_PRIVACY_POLICY_URL in checklist_text
 
 
 def test_release_packaging_script_builds_expected_archives(tmp_path: Path) -> None:
@@ -147,7 +100,6 @@ def test_release_packaging_script_builds_expected_archives(tmp_path: Path) -> No
         names = set(zf.namelist())
     assert "extension/manifest.json" in names
     assert "docs/privacy-policy.html" in names
-    assert "docs/extension_reviewer_notes.md" in names
     assert "scripts/build_extension_shared_config.py" in names
     assert "scripts/build_extension_study_snapshot.py" in names
     assert "scripts/build_extension_tracker_index.py" in names

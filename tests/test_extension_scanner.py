@@ -27,9 +27,6 @@ POPUP_HTML = ROOT / "extension" / "popup" / "popup.html"
 SERVICE_WORKER = ROOT / "extension" / "background" / "service-worker.js"
 MANIFEST = ROOT / "extension" / "manifest.json"
 README = ROOT / "README.md"
-STORE_LISTING = ROOT / "docs" / "extension_store_listing.md"
-STORE_LISTING_CHROME = ROOT / "docs" / "extension_store_listing_chrome.md"
-STORE_LISTING_FIREFOX = ROOT / "docs" / "extension_store_listing_firefox.md"
 PRIVACY_POLICY = ROOT / "docs" / "privacy-policy.html"
 
 
@@ -4424,34 +4421,21 @@ def test_extension_combined_study_snapshot_matches_authoritative_values() -> Non
     assert result["cmpStats"]["avgScore"] == 36.2
 
 
-def test_extension_copy_uses_session_limited_local_audit_framing() -> None:
-    readme_text = README.read_text(encoding="utf-8")
+def test_extension_copy_uses_local_audit_framing() -> None:
+    readme_text = README.read_text(encoding="utf-8").lower()
     manifest_text = MANIFEST.read_text(encoding="utf-8")
-    listing_text = STORE_LISTING.read_text(encoding="utf-8")
-    chrome_listing_text = STORE_LISTING_CHROME.read_text(encoding="utf-8")
-    firefox_listing_text = STORE_LISTING_FIREFOX.read_text(encoding="utf-8")
-    privacy_policy_text = PRIVACY_POLICY.read_text(encoding="utf-8")
+    privacy_policy_text = PRIVACY_POLICY.read_text(encoding="utf-8").lower()
 
-    assert "local, user-initiated" in readme_text.lower()
-    assert "session-limited local audit" in readme_text.lower()
-    assert "1000-site combined study" in readme_text
-    assert "no blocking" in readme_text.lower()
-    assert "no auto-clicking" in readme_text.lower()
-    assert "study-backed pet guidance" in readme_text.lower()
-    assert "post-interaction" in readme_text.lower()
+    assert "local, user-initiated" in readme_text
+    assert "does not crawl in the background" in readme_text
+    assert "does not auto-click banners" in readme_text
+    assert "does not transmit browsing data" in readme_text
 
     assert "Local, user-initiated GDPR cookie-consent auditor with session-limited post-interaction analysis" in manifest_text
 
-    for text in (listing_text, chrome_listing_text, firefox_listing_text):
-        assert "local, user-initiated gdpr cookie-consent auditor" in text.lower()
-        assert "session-limited" in text.lower()
-        assert "1000-site combined study snapshot" in text
-
-    assert "not an auto-consent clicker" in listing_text.lower()
-    assert "First to detect dark patterns" in listing_text
-    assert "research-grounded browser extension" in privacy_policy_text.lower()
-    assert "session-limited" in privacy_policy_text.lower()
-    assert "page-wide click logging" in privacy_policy_text.lower()
+    assert "research-grounded browser extension" in privacy_policy_text
+    assert "session-limited" in privacy_policy_text
+    assert "page-wide click logging" in privacy_policy_text
 
 
 def test_scorer_distinguishes_direct_and_settings_reject_paths() -> None:

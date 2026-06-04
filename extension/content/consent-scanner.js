@@ -1331,24 +1331,48 @@
     );
   }
 
+  function hasPreferenceControls(root) {
+    return Boolean(root && root.querySelector && root.querySelector(SETTINGS_PREFERENCE_SELECTOR));
+  }
+
   function resolveSettingsSurface(actionEl = null) {
     if (!interactionSession) return null;
 
+    // Prefer a surface that actually contains the preference toggles, so the
+    // snapshot can read their on/off state. A container that only holds the
+    // confirm button (e.g. a footer "actions" row, which matches
+    // hasKnownSettingsControls via .fc-confirm-choices) would yield zero
+    // toggles, so it is only used as a last-resort fallback.
     const refreshedRoot = refreshTrackedBannerRoot();
-    if (refreshedRoot && hasKnownSettingsControls(refreshedRoot)) {
+    if (refreshedRoot && hasPreferenceControls(refreshedRoot)) {
       return refreshedRoot;
     }
 
     let current = actionEl;
     let depth = 0;
+    let fallbackSurface = null;
     while (current && depth < MAX_ANCESTOR_DEPTH) {
       if (current.matches && current.matches(CANDIDATE_CONTAINER_SELECTOR) && hasKnownSettingsControls(current)) {
-        interactionSession.rootElement = current;
-        interactionSession.bannerSelector = describeElement(current);
-        return current;
+        if (hasPreferenceControls(current)) {
+          interactionSession.rootElement = current;
+          interactionSession.bannerSelector = describeElement(current);
+          return current;
+        }
+        if (!fallbackSurface) {
+          fallbackSurface = current;
+        }
       }
       current = current.parentElement;
       depth += 1;
+    }
+
+    const surface = (refreshedRoot && hasKnownSettingsControls(refreshedRoot))
+      ? refreshedRoot
+      : fallbackSurface;
+    if (surface) {
+      interactionSession.rootElement = surface;
+      interactionSession.bannerSelector = describeElement(surface);
+      return surface;
     }
 
     return interactionSession.rootElement || null;

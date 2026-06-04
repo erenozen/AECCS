@@ -910,43 +910,49 @@ async function runConsentScanAcrossReadyFrames(tabId, frameIds) {
         if (b === 0 && a !== 0) return 1;
         return a - b;
       });
-    const frameResults = [];
 
-    for (const frameId of orderedFrameIds) {
-      try {
+    // Scan every ready frame concurrently so total wall-clock tracks the
+    // slowest frame rather than the sum of all frames. Ad-dense pages (e.g.
+    // eksisozluk.com) expose many iframes; walking them one-by-one, each with
+    // its own multi-second ceiling, otherwise exhausts the analyze budget and
+    // surfaces a spurious "analysis timed out" error. Downstream selection is
+    // score-based and order-independent, so concurrency never changes which
+    // frame's banner wins.
+    const settledResults = await Promise.all(
+      orderedFrameIds.map(async frameId => {
         const frameTimeoutMs = frameId === 0
           ? Math.ceil(CONSENT_SCAN_TIMEOUT_MS * 1.5)
           : CONSENT_SCAN_TIMEOUT_MS;
-        const [frameResult] = await executeScriptAcrossSpecificFrames(
-          tabId,
-          [frameId],
-          { func: runScannerInFrame },
-          {
-            ignoreMissingFrames: false,
-            timeoutMs: frameTimeoutMs,
+        try {
+          const [frameResult] = await executeScriptAcrossSpecificFrames(
+            tabId,
+            [frameId],
+            { func: runScannerInFrame },
+            {
+              ignoreMissingFrames: false,
+              timeoutMs: frameTimeoutMs,
+            }
+          );
+          return frameResult || null;
+        } catch (err) {
+          if (isMissingFrameError(err)) {
+            return null;
           }
-        );
-        if (frameResult) {
-          frameResults.push(frameResult);
-        }
-      } catch (err) {
-        if (isMissingFrameError(err)) {
-          continue;
-        }
 
-        frameResults.push({
-          frameId,
-          result: {
-            error: extractScriptErrorMessage(err),
-            timedOut: isTimeoutError(err),
-            scanResult: null,
-            scanScore: -1,
-          },
-        });
-      }
-    }
+          return {
+            frameId,
+            result: {
+              error: extractScriptErrorMessage(err),
+              timedOut: isTimeoutError(err),
+              scanResult: null,
+              scanScore: -1,
+            },
+          };
+        }
+      })
+    );
 
-    return selectBestConsentScanDetailed(frameResults);
+    return selectBestConsentScanDetailed(settledResults.filter(Boolean));
   } catch (err) {
     return { error: `Content script unavailable: ${err.message}` };
   }

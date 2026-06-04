@@ -28,22 +28,30 @@
     consent_o_matic: "Consent-O-Matic",
   };
 
+  // Colors are referenced as CSS custom properties so the light and dark
+  // palettes (defined in popup.css) stay the single source of truth for
+  // inline-styled elements like grade badges, cookie dots, and bars.
   const GRADE_COLORS = {
-    A: "#22c55e",
-    B: "#84cc16",
-    C: "#eab308",
-    D: "#f97316",
-    F: "#ef4444",
+    A: "var(--green)",
+    B: "var(--lime)",
+    C: "var(--yellow)",
+    D: "var(--orange)",
+    F: "var(--red)",
   };
 
   const CATEGORY_COLORS = {
-    Analytics:      "#3b82f6",
-    Advertising:    "#ef4444",
-    Social:         "#06b6d4",
-    Functional:     "#6b7280",
-    Fingerprinting: "#f97316",
-    Unknown:        "#374151",
+    Analytics:      "var(--cat-analytics)",
+    Advertising:    "var(--cat-advertising)",
+    Social:         "var(--cat-social)",
+    Functional:     "var(--cat-functional)",
+    Fingerprinting: "var(--cat-fingerprinting)",
+    Unknown:        "var(--cat-unknown)",
   };
+
+  const THEME_STORAGE_KEY = "aeccs_theme";
+  const THEME_CHOICES = ["system", "light", "dark"];
+  const THEME_LABELS = { system: "System", light: "Light", dark: "Dark" };
+  let currentTheme = "system";
 
   const CRITERIA_LABELS = {
     no_pre_consent_trackers:    "No Pre-Consent Trackers",
@@ -69,6 +77,8 @@
   const $ = id => document.getElementById(id);
 
   const els = {
+    themeToggle:       $("themeToggle"),
+    themeToggleLabel:  $("themeToggleLabel"),
     loading:           $("loading"),
     errorState:        $("errorState"),
     errorMsg:          $("errorMsg"),
@@ -240,10 +250,120 @@
     }
   }
 
+  // ── Theme ───────────────────────────────────────────────────────────────
+
+  function normalizeTheme(value) {
+    return THEME_CHOICES.includes(value) ? value : "system";
+  }
+
+  function nextTheme(theme) {
+    const index = THEME_CHOICES.indexOf(normalizeTheme(theme));
+    return THEME_CHOICES[(index + 1) % THEME_CHOICES.length];
+  }
+
+  function safeLocalStorageGet(key) {
+    try {
+      return globalThis.localStorage?.getItem(key) ?? null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function mirrorThemeToLocalStorage(theme) {
+    // Keep a local-only mirror so theme-init.js can apply the theme before the
+    // first paint on the next open. Never leaves this browser.
+    try {
+      if (!globalThis.localStorage) return;
+      if (theme === "system") {
+        globalThis.localStorage.removeItem(THEME_STORAGE_KEY);
+      } else {
+        globalThis.localStorage.setItem(THEME_STORAGE_KEY, theme);
+      }
+    } catch (_) {
+      // Storage may be unavailable; the canonical value still lives in storage.local.
+    }
+  }
+
+  async function persistTheme(theme) {
+    try {
+      if (browser?.storage?.local?.set) {
+        await browser.storage.local.set({ [THEME_STORAGE_KEY]: theme });
+      }
+    } catch (_) {
+      // Keep the applied theme even if persistence fails.
+    }
+  }
+
+  function applyThemeAttribute(theme) {
+    const root = document.documentElement;
+    if (theme === "light" || theme === "dark") {
+      root.dataset.theme = theme;
+    } else {
+      delete root.dataset.theme;
+    }
+  }
+
+  function updateThemeToggleUi(theme) {
+    if (!els.themeToggle) return;
+    els.themeToggle.dataset.choice = theme;
+    if (els.themeToggleLabel) {
+      els.themeToggleLabel.textContent = THEME_LABELS[theme];
+    }
+    const upcoming = nextTheme(theme);
+    els.themeToggle.setAttribute(
+      "aria-label",
+      `Color theme: ${THEME_LABELS[theme]}. Activate to switch to ${THEME_LABELS[upcoming]}.`
+    );
+  }
+
+  function applyTheme(theme, { persist = false } = {}) {
+    currentTheme = normalizeTheme(theme);
+    applyThemeAttribute(currentTheme);
+    mirrorThemeToLocalStorage(currentTheme);
+    updateThemeToggleUi(currentTheme);
+    if (persist) {
+      void persistTheme(currentTheme);
+    }
+  }
+
+  async function loadTheme() {
+    try {
+      if (browser?.storage?.local?.get) {
+        const payload = await browser.storage.local.get(THEME_STORAGE_KEY);
+        const stored = payload?.[THEME_STORAGE_KEY];
+        if (THEME_CHOICES.includes(stored)) {
+          return stored;
+        }
+      }
+    } catch (_) {
+      // Fall through to the pre-paint mirror / system default.
+    }
+    return normalizeTheme(safeLocalStorageGet(THEME_STORAGE_KEY));
+  }
+
+  function bindThemeToggle() {
+    if (!els.themeToggle) return;
+    // A native <button> is focusable and fires click on Enter/Space, so the
+    // toggle is keyboard-operable without extra key handling.
+    els.themeToggle.addEventListener("click", () => {
+      applyTheme(nextTheme(currentTheme), { persist: true });
+    });
+  }
+
+  async function initTheme() {
+    try {
+      bindThemeToggle();
+      applyTheme(await loadTheme(), { persist: false });
+    } catch (_) {
+      // Theme is non-critical; never block the audit on it.
+    }
+  }
+
   // ── Init ──────────────────────────────────────────────────────────────────
 
   async function init() {
     try {
+      await initTheme();
       bindStudyInsights();
       bindPetSection();
       bindPetTooltips();
@@ -1508,18 +1628,18 @@
   }
 
   function scoreColor(score) {
-    if (score >= 90) return "#22c55e";
-    if (score >= 75) return "#84cc16";
-    if (score >= 60) return "#eab308";
-    if (score >= 40) return "#f97316";
-    return "#ef4444";
+    if (score >= 90) return "var(--green)";
+    if (score >= 75) return "var(--lime)";
+    if (score >= 60) return "var(--yellow)";
+    if (score >= 40) return "var(--orange)";
+    return "var(--red)";
   }
 
   function petStudyColor(value) {
-    if (typeof value !== "number") return "#6b7280";
-    if (value > 0) return "#22c55e";
-    if (value > -10) return "#f59e0b";
-    return "#ef4444";
+    if (typeof value !== "number") return "var(--pet-neutral)";
+    if (value > 0) return "var(--green)";
+    if (value > -10) return "var(--pet-warn)";
+    return "var(--red)";
   }
 
   function studyBadgeLabel(value) {
