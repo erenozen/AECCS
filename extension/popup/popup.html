@@ -48,10 +48,36 @@
       <div class="site-domain" id="siteDomain">—</div>
     </header>
 
-    <!-- Loading state -->
+    <!-- Loading state: content-shaped skeleton placeholders -->
     <div id="loading" class="loading">
-      <div class="spinner"></div>
-      <span>Analyzing compliance...</span>
+      <!-- Status text for assistive tech; the skeleton below is decorative. -->
+      <span class="sr-only" role="status" aria-live="polite">Analyzing compliance...</span>
+      <div class="skeleton" aria-hidden="true">
+        <!-- Score card: circular gauge + value/label lines -->
+        <div class="skeleton-score">
+          <div class="skeleton-block skeleton-circle"></div>
+          <div class="skeleton-lines">
+            <div class="skeleton-block skeleton-line skeleton-line-lg"></div>
+            <div class="skeleton-block skeleton-line skeleton-line-sm"></div>
+          </div>
+        </div>
+        <!-- Cookie breakdown: title + horizontal bar -->
+        <div class="skeleton-section">
+          <div class="skeleton-block skeleton-title"></div>
+          <div class="skeleton-block skeleton-bar"></div>
+        </div>
+        <!-- Section rows: title + content lines -->
+        <div class="skeleton-section">
+          <div class="skeleton-block skeleton-title"></div>
+          <div class="skeleton-block skeleton-line"></div>
+          <div class="skeleton-block skeleton-line skeleton-line-sm"></div>
+        </div>
+        <div class="skeleton-section">
+          <div class="skeleton-block skeleton-title"></div>
+          <div class="skeleton-block skeleton-line"></div>
+          <div class="skeleton-block skeleton-line skeleton-line-sm"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Error state -->

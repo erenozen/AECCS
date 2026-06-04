@@ -195,8 +195,25 @@ def _mount_popup_shell(page) -> None:
             </header>
 
             <div id="loading" class="loading">
-              <div class="spinner"></div>
-              <span>Analyzing compliance...</span>
+              <span class="sr-only" role="status" aria-live="polite">Analyzing compliance...</span>
+              <div class="skeleton" aria-hidden="true">
+                <div class="skeleton-score">
+                  <div class="skeleton-block skeleton-circle"></div>
+                  <div class="skeleton-lines">
+                    <div class="skeleton-block skeleton-line skeleton-line-lg"></div>
+                    <div class="skeleton-block skeleton-line skeleton-line-sm"></div>
+                  </div>
+                </div>
+                <div class="skeleton-section">
+                  <div class="skeleton-block skeleton-title"></div>
+                  <div class="skeleton-block skeleton-bar"></div>
+                </div>
+                <div class="skeleton-section">
+                  <div class="skeleton-block skeleton-title"></div>
+                  <div class="skeleton-block skeleton-line"></div>
+                  <div class="skeleton-block skeleton-line skeleton-line-sm"></div>
+                </div>
+              </div>
             </div>
 
             <div id="errorState" class="error-state hidden">

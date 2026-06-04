@@ -64,6 +64,10 @@
 
   --tooltip-shadow:        rgba(15, 23, 42, 0.14);
   --scrollbar-thumb-hover: #a7b5c8;
+
+  /* Loading skeleton: muted base block + brighter sweep for the shimmer */
+  --skeleton-base:  #dfe8f2;
+  --skeleton-shine: #f2f6fb;
 }
 
 /* ── Dark theme ───────────────────────────────────────────────────────────────
@@ -132,6 +136,9 @@
 
     --tooltip-shadow:        rgba(0, 0, 0, 0.55);
     --scrollbar-thumb-hover: #3a4a63;
+
+    --skeleton-base:  #243143;
+    --skeleton-shine: #33425b;
   }
 }
 
@@ -193,6 +200,9 @@
 
   --tooltip-shadow:        rgba(0, 0, 0, 0.55);
   --scrollbar-thumb-hover: #3a4a63;
+
+  --skeleton-base:  #243143;
+  --skeleton-shine: #33425b;
 }
 
 * {
@@ -301,28 +311,97 @@ body {
   white-space: nowrap;
 }
 
-/* ── Loading ─────────────────────────────────────────────────────────────── */
+/* ── Loading skeleton ────────────────────────────────────────────────────────
+   While the service worker analyzes the tab, #loading shows a content-shaped
+   skeleton that mirrors the results layout (score card, cookie bar, sections)
+   so the popup keeps its shape and avoids a layout jump on swap. The
+   "Analyzing compliance..." status stays available to screen readers via a
+   visually-hidden live region; the skeleton blocks are aria-hidden. */
 
 .loading {
+  background: var(--bg-card);
+}
+
+/* Visually hidden but exposed to assistive tech (live status text). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Score-card-shaped row: circular gauge placeholder + value/label lines. */
+.skeleton-score {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 48px 16px;
-  background: var(--bg-card);
-  color: var(--text-dim);
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
+.skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Section-shaped row: title bar + a couple of content lines / a cookie bar. */
+.skeleton-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.skeleton-block {
+  border-radius: 6px;
+  /* Static muted fill is the reduced-motion / no-animation fallback. */
+  background-color: var(--skeleton-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--skeleton-base) 0%,
+    var(--skeleton-shine) 50%,
+    var(--skeleton-base) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-circle {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton-line {
+  width: 100%;
+  height: 12px;
+}
+
+.skeleton-line-lg { width: 55%; height: 18px; }
+.skeleton-line-sm { width: 38%; }
+.skeleton-title   { width: 32%; height: 10px; }
+
+.skeleton-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 150% 0; }
+  to   { background-position: -150% 0; }
+}
 
 /* ── Error ───────────────────────────────────────────────────────────────── */
 
@@ -1429,5 +1508,11 @@ body::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); 
   .cookie-bar-segment,
   .progress-fill {
     transition: none;
+  }
+
+  /* Drop the shimmer sweep; the skeleton becomes a static muted block. */
+  .skeleton-block {
+    animation: none;
+    background-image: none;
   }
 }
