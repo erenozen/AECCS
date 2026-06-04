@@ -3,16 +3,27 @@
 :root {
   color-scheme: light;
 
-  --page-bg:     #f4f8fc;
-  --bg:          #eef4fb;
-  --bg-card:     #ffffff;
-  --bg-hover:    #e4edf8;
-  --text:        #14233b;
-  --text-dim:    #5f7088;
-  --border:      #d7e1ee;
-  --accent:      #2563eb;
-  --accent-soft: #dbeafe;
-  --accent-panel:#eff6ff;
+  /* ── Palette ────────────────────────────────────────────────────────────────
+     Neutrals: Carbon #0B0C0E · Slate #16181C · Graphite #2C2C2A ·
+               Ash #888780 · Bone #E9E7DF
+     Blues:    #042C53 · #185FA5 · #378ADD · #85B7EB
+     Light mode is a "warm paper" reading of the neutrals (Bone surfaces, Slate
+     text) with the blues as the accent ramp. Compliance grade / consent / error
+     hues stay traffic-light by design so an A-vs-F score and pass/fail icons
+     remain instantly legible; only neutrals and blue accents are re-skinned.
+     Supplementary light-mirror shades (e.g. --text-dim, --bg) are derived from
+     the supplied colors to keep WCAG AA contrast on the lighter surfaces. */
+
+  --page-bg:     #e9e7df;   /* Bone */
+  --bg:          #e4e2d8;   /* recessed inset — darker than cards */
+  --bg-card:     #f4f3ee;   /* light bone — raised cards */
+  --bg-hover:    #dedcd2;
+  --text:        #16181c;   /* Slate */
+  --text-dim:    #5b5a54;   /* darkened Ash, kept >= 4.5:1 on cards */
+  --border:      #d4d2c8;   /* Bone-derived hairline */
+  --accent:      #185fa5;
+  --accent-soft: #d8e6f4;
+  --accent-panel:#e7eff8;
 
   --green:       #22c55e;
   --lime:        #84cc16;
@@ -20,35 +31,35 @@
   --orange:      #f97316;
   --red:         #ef4444;
 
-  --cat-analytics:      #3b82f6;
+  --cat-analytics:      #378add;
   --cat-advertising:    #ef4444;
   --cat-social:         #06b6d4;
-  --cat-functional:     #6b7280;
+  --cat-functional:     #888780;
   --cat-fingerprinting: #f97316;
-  --cat-unknown:        #374151;
+  --cat-unknown:        #2c2c2a;
 
   /* PET effectiveness badge colors (consumed by popup.js inline styles) */
   --pet-warn:    #f59e0b;
-  --pet-neutral: #6b7280;
+  --pet-neutral: #888780;
 
   /* Solid fills paired with #fff/#000 glyph text (kept dark enough for contrast) */
-  --accent-solid:         #2563eb;
+  --accent-solid:         #185fa5;
   --danger-solid:         #ef4444;
   --severity-critical-bg: #dc2626;
   --severity-high-bg:     #f97316;
 
   /* Tinted panels, info accents, and the error state */
-  --panel-border:     #bfdbfe;
-  --info-text:        #1d4ed8;
-  --insight-badge-bg: rgba(37, 99, 235, 0.12);
+  --panel-border:     #bbd3ec;
+  --info-text:        #185fa5;
+  --insight-badge-bg: rgba(24, 95, 165, 0.12);
   --error-bg:         #fef2f2;
   --error-border:     #fecaca;
   --error-text:       #b91c1c;
 
   /* Guided-compare status badges and step states */
-  --status-blue-text:    #1d4ed8;
-  --status-blue-border:  #93c5fd;
-  --status-blue-bg:      #eff6ff;
+  --status-blue-text:    #185fa5;
+  --status-blue-border:  #afcdec;
+  --status-blue-bg:      #e7eff8;
   --status-green-text:   #166534;
   --status-green-border: #86efac;
   --status-green-bg:     #f0fdf4;
@@ -59,15 +70,15 @@
   --status-red-border:   #fca5a5;
   --status-red-bg:       #fef2f2;
   --step-complete-border:    #bbf7d0;
-  --step-current-border:     #bfdbfe;
+  --step-current-border:     #afcdec;
   --step-unavailable-border: #fecaca;
 
-  --tooltip-shadow:        rgba(15, 23, 42, 0.14);
-  --scrollbar-thumb-hover: #a7b5c8;
+  --tooltip-shadow:        rgba(28, 26, 20, 0.16);
+  --scrollbar-thumb-hover: #b9b7ae;
 
   /* Loading skeleton: muted base block + brighter sweep for the shimmer */
-  --skeleton-base:  #dfe8f2;
-  --skeleton-shine: #f2f6fb;
+  --skeleton-base:  #dddbd1;
+  --skeleton-shine: #f1efe8;
 }
 
 /* ── Dark theme ───────────────────────────────────────────────────────────────
@@ -81,16 +92,16 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --page-bg:     #0b1220;
-    --bg:          #131c2b;
-    --bg-card:     #1a2433;
-    --bg-hover:    #243143;
-    --text:        #e7edf5;
-    --text-dim:    #9fb1c6;
-    --border:      #2c3a52;
-    --accent:      #6aa6ff;
-    --accent-soft: #1e3252;
-    --accent-panel:#11233a;
+    --page-bg:     #0b0c0e;   /* Carbon */
+    --bg:          #121317;   /* recessed inset */
+    --bg-card:     #16181c;   /* Slate — raised cards */
+    --bg-hover:    #26282c;
+    --text:        #e9e7df;   /* Bone */
+    --text-dim:    #888780;   /* Ash */
+    --border:      #2c2c2a;   /* Graphite */
+    --accent:      #378add;
+    --accent-soft: #103456;
+    --accent-panel:#0c2238;
 
     --green:       #4ade80;
     --lime:        #a3e635;
@@ -98,29 +109,29 @@
     --orange:      #fb923c;
     --red:         #f87171;
 
-    --cat-analytics:      #60a5fa;
+    --cat-analytics:      #85b7eb;
     --cat-advertising:    #f87171;
     --cat-social:         #22d3ee;
-    --cat-functional:     #9aa6b8;
+    --cat-functional:     #a6a49b;
     --cat-fingerprinting: #fb923c;
-    --cat-unknown:        #6b7a90;
+    --cat-unknown:        #6e6e69;
 
     --pet-warn:    #fbbf24;
-    --pet-neutral: #9aa6b8;
+    --pet-neutral: #a6a49b;
 
     --danger-solid:     #b91c1c;
     --severity-high-bg: #9a3412;
 
-    --panel-border:     #2a4a73;
-    --info-text:        #93c5fd;
-    --insight-badge-bg: rgba(96, 165, 250, 0.16);
+    --panel-border:     #1c4368;
+    --info-text:        #85b7eb;
+    --insight-badge-bg: rgba(55, 138, 221, 0.18);
     --error-bg:         #2a1416;
     --error-border:     #5b2526;
     --error-text:       #fca5a5;
 
-    --status-blue-text:    #93c5fd;
-    --status-blue-border:  #2a4a73;
-    --status-blue-bg:      #16263f;
+    --status-blue-text:    #85b7eb;
+    --status-blue-border:  #1c4368;
+    --status-blue-bg:      #0e2438;
     --status-green-text:   #86efac;
     --status-green-border: #1f5134;
     --status-green-bg:     #0f2a18;
@@ -131,30 +142,30 @@
     --status-red-border:   #7f2a2a;
     --status-red-bg:       #2a1416;
     --step-complete-border:    #1f5134;
-    --step-current-border:     #2a4a73;
+    --step-current-border:     #1c4368;
     --step-unavailable-border: #7f2a2a;
 
-    --tooltip-shadow:        rgba(0, 0, 0, 0.55);
-    --scrollbar-thumb-hover: #3a4a63;
+    --tooltip-shadow:        rgba(0, 0, 0, 0.6);
+    --scrollbar-thumb-hover: #3a3a38;
 
-    --skeleton-base:  #243143;
-    --skeleton-shine: #33425b;
+    --skeleton-base:  #1e2024;
+    --skeleton-shine: #2c2c2a;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --page-bg:     #0b1220;
-  --bg:          #131c2b;
-  --bg-card:     #1a2433;
-  --bg-hover:    #243143;
-  --text:        #e7edf5;
-  --text-dim:    #9fb1c6;
-  --border:      #2c3a52;
-  --accent:      #6aa6ff;
-  --accent-soft: #1e3252;
-  --accent-panel:#11233a;
+  --page-bg:     #0b0c0e;   /* Carbon */
+  --bg:          #121317;   /* recessed inset */
+  --bg-card:     #16181c;   /* Slate — raised cards */
+  --bg-hover:    #26282c;
+  --text:        #e9e7df;   /* Bone */
+  --text-dim:    #888780;   /* Ash */
+  --border:      #2c2c2a;   /* Graphite */
+  --accent:      #378add;
+  --accent-soft: #103456;
+  --accent-panel:#0c2238;
 
   --green:       #4ade80;
   --lime:        #a3e635;
@@ -162,29 +173,29 @@
   --orange:      #fb923c;
   --red:         #f87171;
 
-  --cat-analytics:      #60a5fa;
+  --cat-analytics:      #85b7eb;
   --cat-advertising:    #f87171;
   --cat-social:         #22d3ee;
-  --cat-functional:     #9aa6b8;
+  --cat-functional:     #a6a49b;
   --cat-fingerprinting: #fb923c;
-  --cat-unknown:        #6b7a90;
+  --cat-unknown:        #6e6e69;
 
   --pet-warn:    #fbbf24;
-  --pet-neutral: #9aa6b8;
+  --pet-neutral: #a6a49b;
 
   --danger-solid:     #b91c1c;
   --severity-high-bg: #9a3412;
 
-  --panel-border:     #2a4a73;
-  --info-text:        #93c5fd;
-  --insight-badge-bg: rgba(96, 165, 250, 0.16);
+  --panel-border:     #1c4368;
+  --info-text:        #85b7eb;
+  --insight-badge-bg: rgba(55, 138, 221, 0.18);
   --error-bg:         #2a1416;
   --error-border:     #5b2526;
   --error-text:       #fca5a5;
 
-  --status-blue-text:    #93c5fd;
-  --status-blue-border:  #2a4a73;
-  --status-blue-bg:      #16263f;
+  --status-blue-text:    #85b7eb;
+  --status-blue-border:  #1c4368;
+  --status-blue-bg:      #0e2438;
   --status-green-text:   #86efac;
   --status-green-border: #1f5134;
   --status-green-bg:     #0f2a18;
@@ -195,14 +206,14 @@
   --status-red-border:   #7f2a2a;
   --status-red-bg:       #2a1416;
   --step-complete-border:    #1f5134;
-  --step-current-border:     #2a4a73;
+  --step-current-border:     #1c4368;
   --step-unavailable-border: #7f2a2a;
 
-  --tooltip-shadow:        rgba(0, 0, 0, 0.55);
-  --scrollbar-thumb-hover: #3a4a63;
+  --tooltip-shadow:        rgba(0, 0, 0, 0.6);
+  --scrollbar-thumb-hover: #3a3a38;
 
-  --skeleton-base:  #243143;
-  --skeleton-shine: #33425b;
+  --skeleton-base:  #1e2024;
+  --skeleton-shine: #2c2c2a;
 }
 
 * {

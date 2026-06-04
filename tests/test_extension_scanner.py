@@ -3267,11 +3267,13 @@ def test_popup_shows_disabled_state_when_no_active_banner_is_detected() -> None:
     assert state["title"] == "Evaluation unavailable on this page"
     assert "meaningful post-interaction consent state" in state["message"]
     assert "not evaluated" in state["message"]
-    assert state["bodyBackground"] == "rgb(244, 248, 252)"
-    assert state["disabledBackground"] == "rgb(239, 246, 255)"
-    assert state["disabledBorderColor"] == "rgb(191, 219, 254)"
-    assert state["disabledMessageColor"] == "rgb(95, 112, 136)"
-    assert state["disabledIconBackground"] == "rgb(37, 99, 235)"
+    # Warm-paper light theme: Bone page, blue info panel, darkened-Ash dim text,
+    # #185FA5 solid accent fill on the disabled-state icon.
+    assert state["bodyBackground"] == "rgb(233, 231, 223)"      # --page-bg  #e9e7df Bone
+    assert state["disabledBackground"] == "rgb(231, 239, 248)"  # --accent-panel #e7eff8
+    assert state["disabledBorderColor"] == "rgb(187, 211, 236)" # --panel-border #bbd3ec
+    assert state["disabledMessageColor"] == "rgb(91, 90, 84)"   # --text-dim #5b5a54
+    assert state["disabledIconBackground"] == "rgb(24, 95, 165)" # --accent-solid #185fa5
 
 
 def test_popup_places_browsing_setup_between_pet_tools_and_study_insights() -> None:
@@ -4284,10 +4286,11 @@ def test_popup_renders_updated_study_snapshot_copy_and_pet_cards() -> None:
     assert after_close["petOpen"] is False
     assert after_close["petSubtitle"] == ""
     assert after_close["petList"] == ""
-    assert content["govAlertBackground"] == "rgb(239, 246, 255)"
-    assert content["govNoteColor"] == "rgb(95, 112, 136)"
-    assert content["cmpPanelBackground"] == "rgb(238, 244, 251)"
-    assert content["cmpTitleColor"] == "rgb(37, 99, 235)"
+    # Warm-paper light theme tokens (re-skinned neutrals + blue accent).
+    assert content["govAlertBackground"] == "rgb(231, 239, 248)"  # --accent-panel #e7eff8
+    assert content["govNoteColor"] == "rgb(91, 90, 84)"           # --text-dim #5b5a54
+    assert content["cmpPanelBackground"] == "rgb(228, 226, 216)"  # --bg #e4e2d8
+    assert content["cmpTitleColor"] == "rgb(24, 95, 165)"         # --accent #185fa5
 
 
 def test_popup_pet_tooltip_supports_hover_focus_click_and_escape() -> None:
